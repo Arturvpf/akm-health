@@ -1,5 +1,7 @@
 # AKM Health — AKM-02 | Local execution evidence (2026-11-14)
 
+This is the historical smoke run from commit `aa14050`. For the current setup, migration and seed instructions, see the [README](../README.md) and [database notes](database.md).
+
 Scope: architecture smoke test only. This does not mean the full MVP is implemented.
 
 ## How to reproduce

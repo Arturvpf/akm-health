@@ -6,11 +6,16 @@ export type DataSource = 'manual' | 'synthetic';
 export type Quality = 'ok' | 'suspect';
 export type InvestigationStatus = 'normal' | 'attention' | 'critical' | 'insufficient_data';
 export interface AstronautRead { id: string; name: string; role: string | null; baseline_sleep_hours: number }
-export interface MeasurementCreate {
-  astronaut_id: string | null; kind: Kind; value: number; unit: MetricUnit;
-  measured_at: string; source: DataSource; quality?: Quality;
+interface MeasurementFields {
+  kind: Kind; value: number; unit: MetricUnit; measured_at: string; source: DataSource;
 }
-export interface MeasurementRead extends Omit<MeasurementCreate, 'quality'> {
+type HabitatKind = 'co2_ppm' | 'cabin_temp_c';
+export type MeasurementCreate = MeasurementFields & { quality?: Quality } & (
+  | { kind: Exclude<Kind, HabitatKind>; astronaut_id: string }
+  | { kind: HabitatKind; astronaut_id?: null }
+);
+export interface MeasurementRead extends MeasurementFields {
+  astronaut_id: string | null;
   id: number; measurement_zone: MeasurementZone; recorded_at: string; quality: Quality;
 }
 export type InvestigationRequest = { scope: 'crew'; astronaut_id?: null } | { scope: 'individual'; astronaut_id: string };
@@ -48,11 +53,13 @@ export interface DashboardResponse {
   alerts: DashboardAlert[]; pending_followups: FollowupRead[];
   last_investigation_at: string | null; has_unanalyzed_measurements: boolean;
 }
-export interface NASAHistoricalObservation {
+export type NASAHistoricalObservation = {
   source: string; source_url: string; mission_id: string; parameter: string;
-  value: number; unit: string; observed_at: string | null;
-  mars_sol?: number | null; instrument?: string | null; context: string;
-}
+  value: number; unit: string; instrument?: string | null; context: string;
+} & (
+  | { observed_at: string; mars_sol?: number | null }
+  | { observed_at?: string | null; mars_sol: number }
+);
 export interface NASAReferenceResponse {
   scientific_references: Array<{ source: string; title: string; url: string; type: 'research_reference' }>;
   historical_series: NASAHistoricalObservation[];

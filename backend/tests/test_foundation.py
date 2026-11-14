@@ -1,3 +1,4 @@
+import json
 import sqlite3
 import pytest
 from fastapi.testclient import TestClient
@@ -62,6 +63,37 @@ def test_habitat_zone():
 def test_api_validation_422():
     response = TestClient(app).post("/api/_contract/validate-measurement",json=payload(unit="ppm"))
     assert response.status_code == 422
+
+
+@pytest.mark.parametrize("token, error_type", [
+    ("NaN", "finite_number"),
+    ("Infinity", "finite_number"),
+    ("-Infinity", "finite_number"),
+    ("1e400", "finite_number"),
+    ("true", "float_type"),
+    ('"5.2"', "float_type"),
+    ('{"nested":[1e400]}', "float_type"),
+])
+def test_invalid_numeric_http_input_returns_json_validation_error(token, error_type):
+    body = json.dumps(payload(value="<value>")).replace('"<value>"', token)
+    response = TestClient(app).post(
+        "/api/_contract/validate-measurement",
+        content=body,
+        headers={"Content-Type": "application/json"},
+    )
+    assert response.status_code == 422
+    error = response.json()["detail"][0]
+    assert error["loc"] == ["body", "value"]
+    assert error["type"] == error_type
+
+
+@pytest.mark.parametrize("value", [950, 950.5])
+def test_habitat_payload_accepts_number_without_astronaut_id(value):
+    body = payload(kind="co2_ppm", unit="ppm", value=value)
+    del body["astronaut_id"]
+    response = TestClient(app).post("/api/_contract/validate-measurement", json=body)
+    assert response.status_code == 200
+    assert response.json()["measurement_zone"] == "habitat"
 
 
 def test_scope_contract():

@@ -26,6 +26,8 @@ A completed follow-up MUST reference an actual later compatible measurement. Fin
 
 All timestamps UTC with Z. Invalid payload 422, absent resource 404, state conflict 409. For Python query parameter "from", use alias. POST creates measurement with measurement_zone derived from kind and recorded_at set by server. Investigation POST accepts scope crew or individual, returning findings, evidence, hypotheses, next_check, followup_id, reused, demo_only. PATCH follow-up requires {"status":"completed","measurement_id":123}; server validates same kind, astronaut/zone, quality ok and recording after followup creation.
 
+Measurement values must be finite JSON numbers. Booleans and numeric strings return 422. For habitat measurements, clients may omit `astronaut_id` or send `null`. Crew measurements require an astronaut ID.
+
 ## Dashboard and data provenance
 
 Dashboard includes mission, astronauts, environment, alerts, pending_followups, last_investigation_at and has_unanalyzed_measurements. Empty dataset with no investigation => false and insufficient_data; new measurement after last collective investigation => true. GET dashboard must never run rules implicitly.
@@ -36,7 +38,7 @@ No clinical diagnosis, use synthetic heuristics and mark all demonstration data.
 
 ## Implemented vs pending
 
-This branch contains Pydantic schemas and matching TypeScript interfaces; smoke server proves /api/health, JSON contract validation, and SQLite connectivity. Business routes, SQLModel CRUD, investigation engine, real dataset import, Figma integration, cross-team approval and deployment are pending.
+The foundation provides Pydantic and TypeScript contracts, the SQLModel schema, the synthetic seed, `GET /api/health` and `GET /api/nasa/references`. The latter returns the HRP catalog with an empty historical series. The measurement validation route is for tests. Measurement persistence over HTTP, other business routes, the investigation engine, real dataset import and the React application remain pending.
 
 
 ## AKM-06 integrated — clinical and data provenance boundary
@@ -45,4 +47,4 @@ See [AKM-06 protocol](./akm-06-measurement-protocol.md). The five metrics are sl
 
 Crew and dashboard timestamps require an explicit timezone and are normalized to UTC, including MetricSnapshot, HabitatSnapshot and last_investigation_at. NASA reference timestamps remain in their source-native time base; Mars sol must not be converted to Earth UTC without reference metadata. NASA history requires HTTPS source URL plus observed_at or mars_sol, and this schema is not proof of authentic provenance.
 
-The environmental snapshot measured_at field describes the most recent available environmental measurement, not proof CO2 and temperature were sampled simultaneously. Missing data is absent (not zero); quality=ok is not a statement of health. Clinical thresholds, red alerts, diagnosis and equipment certifications remain outside the MVP. Business API route implementation remains AKM-17..20/39; formal team review happens at PR review.
+The environmental snapshot measured_at field describes the most recent available environmental measurement, not proof CO2 and temperature were sampled simultaneously. Missing data is absent (not zero); quality=ok is not a statement of health. Clinical thresholds, red alerts, diagnosis and equipment certifications remain outside the MVP. The pending business routes are tracked in AKM-18/19/20/39.
