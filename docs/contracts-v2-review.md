@@ -27,6 +27,25 @@ A completed follow-up MUST reference an actual later compatible measurement. Fin
 All timestamps UTC with Z. Invalid payload 422, absent resource 404, state conflict 409. For Python query parameter "from", use alias. POST creates measurement with measurement_zone derived from kind and recorded_at set by server. Investigation POST accepts scope crew or individual, returning findings, evidence, hypotheses, next_check, followup_id, reused, demo_only. PATCH follow-up requires {"status":"completed","measurement_id":123}; server validates same kind, astronaut/zone, quality ok and recording after followup creation.
 
 Measurement values must be finite JSON numbers. Booleans and numeric strings return 422. For habitat measurements, clients may omit `astronaut_id` or send `null`. Crew measurements require an astronaut ID.
+Measurement timestamps use ISO 8601 with `Z` or an explicit UTC offset such as `-03:00`. Unix timestamps and dates outside the supported UTC range return 422.
+
+### Registering a measurement
+
+With the API running, send this JSON to `POST /api/measurements` using [Swagger UI](http://127.0.0.1:8000/docs). Run the [seed](synthetic-data.md) first if you want to register a crew measurement for A1–A4. The example uses the habitat and also works on an empty database.
+
+```json
+{
+  "kind": "co2_ppm",
+  "value": 975,
+  "unit": "ppm",
+  "measured_at": "2026-11-14T11:00:00-03:00",
+  "source": "synthetic"
+}
+```
+
+A successful write returns 201 with the stored observation, its ID, `measurement_zone=habitat`, UTC times, and `quality=ok`. An astronaut ID that is absent from the database returns 404. A payload that fails metric validation returns 422. Both responses leave the database unchanged.
+
+The dashboard compares `recorded_at` of usable measurements to the latest crew investigation. A late entry for an older collection can therefore require investigation. Suspect samples remain stored for review. The dashboard uses readings with `quality=ok` for its latest-metric snapshot and for the new-data flag. With no valid readings and no crew investigation the flag is false. The snapshot presents the mission and recorded data, and classifications stay at `insufficient_data` until the investigation workflow is integrated.
 
 ## Dashboard and data provenance
 
@@ -38,7 +57,7 @@ No clinical diagnosis, use synthetic heuristics and mark all demonstration data.
 
 ## Implemented vs pending
 
-The foundation provides Pydantic and TypeScript contracts, the SQLModel schema, the synthetic seed, `GET /api/health` and `GET /api/nasa/references`. The latter returns the HRP catalog with an empty historical series. The measurement validation route is for tests. Measurement persistence over HTTP, other business routes, the investigation engine, real dataset import and the React application remain pending.
+The foundation provides Pydantic and TypeScript contracts, the SQLModel schema and the synthetic seed. Implemented API operations include health, measurement registration, the dashboard snapshot and NASA references with an empty historical series. The private measurement validation route is for tests. History and astronaut listings, investigation and follow-up routes, the investigation engine, real dataset import and the React application remain pending.
 
 
 ## AKM-06 integrated — clinical and data provenance boundary

@@ -35,3 +35,16 @@ As duas noites têm registros às 07:00 UTC em 13 e 14/11/2026. O seed inicial u
 - **Histórico NASA indisponível.** `GET /api/nasa/references` apresenta referências científicas do NASA HRP, `historical_data_status=not_imported` e série vazia antes e depois do seed. A importação de telemetria histórica e sua apresentação na interface seguem na AKM-39.
 
 Execute `python -m pytest -q backend` a partir da raiz para verificar as unidades, a proveniência, a sequência de sono, a reexecução concorrente e o vínculo da rechecagem na persistência. O teste ponta a ponta com motor e interface pertence à AKM-30.
+
+## Cenários de investigação da AKM-28
+
+O [arquivo de fixtures](../backend/tests/fixtures/odyssey-26-scenarios.json) reaproveita os perfis e horários da AKM-27. Cada caso descreve o escopo, as alterações na amostra base e o resultado esperado para o motor.
+
+| Caso | Entradas | Resultado esperado |
+| --- | --- | --- |
+| Coletivo | Quatro perfis com duas noites comparáveis. A1, A2 e A3 abaixo ou iguais a 80% de suas baselines nas duas noites. CO₂ da cabine de 680 → 950 → 980 ppm. | `attention` pela heurística sintética. Mostrar a coincidência temporal com incerteza `unconfirmed` e pedir nova medição de CO₂. A simultaneidade orienta a checagem e deixa a causa em aberto. |
+| Individual | Aurora permanece com 5,2 h e 5,4 h. A2, A3 e A4 ficam dentro da referência demonstrativa. CO₂ estável em 680 ppm. | `attention` no escopo individual de A1. Sem padrão de tripulação ou hipótese ambiental sustentada. Próxima medição de sono de A1. |
+| Dados insuficientes | A2, A3 e A4 têm apenas uma noite disponível e faltam leituras de CO₂. | `insufficient_data` na investigação coletiva. O desvio individual de A1 continua observável. Solicitar uma segunda noite de sono, usando A2 como exemplo de alvo na fixture. |
+| Ambiente incerto | Repetir o padrão coletivo com CO₂ suspeito, fora da janela temporal ou ausente. | Preservar a evidência de sono e indicar falta de suporte para a coincidência ambiental. Coletar ou conferir uma leitura comparável antes de inferir associação. |
+
+Da raiz, execute `python -m pytest -q backend/tests/test_scenarios.py`. Os testes registram os dados pela API em bancos temporários e conferem as premissas de cada cenário. Os resultados de investigação da tabela são expectativas para a AKM-29. A execução ponta a ponta com classificação e reanálise depende do motor e das rotas de investigação.

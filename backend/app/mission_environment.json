@@ -1,0 +1,8 @@
+{
+  "name": "ODYSSEY-26",
+  "day": 184,
+  "destination": "mars_surface",
+  "gravity_g_reference": 0.378,
+  "context_source_url": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/",
+  "demo_only": true
+}
