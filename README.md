@@ -32,6 +32,7 @@ python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
 - [Health check](http://127.0.0.1:8000/api/health) returns HTTP 200 with `{"status":"ok","storage":"sqlite_reachable"}`.
 - [Interactive API docs](http://127.0.0.1:8000/docs) and the [OpenAPI schema](http://127.0.0.1:8000/openapi.json) describe the running foundation.
 - [Dashboard API](http://127.0.0.1:8000/api/dashboard) shows the latest usable readings and whether new data awaits investigation. See the [measurement API notes](docs/contracts-v2-review.md#registering-a-measurement) for a request example.
+- [AKM-19 read APIs](docs/akm-19-read-apis.md) document profile, history and agenda queries, inclusive UTC filters, pagination, habitat readings and reproducible examples.
 - The API uses `backend/akm.db` by default. Set `AKM_DB_PATH` to use a different SQLite file. Startup creates or migrates the local database. The TypeScript project currently contains shared contracts. Browser navigation and integration are tracked in AKM-12 through AKM-16.
 
 After installing the dependencies, run the local checks with the virtual environment active.

@@ -4,21 +4,29 @@ from contextlib import asynccontextmanager
 from http import HTTPStatus
 from math import isfinite
 from sqlite3 import SQLITE_CONSTRAINT_FOREIGNKEY
-from typing import Annotated
+from typing import Annotated, Literal
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
-from sqlmodel import Session
+from sqlmodel import Session, select
 from starlette.concurrency import run_in_threadpool
 
 from .dashboard import build_dashboard
 from .db import make_engine, migrate
-from .models import Astronaut, Measurement
+from .models import Astronaut, Followup, Measurement
 from .nasa_reference import HRP_REFERENCES
-from .schemas import DashboardResponse, MeasurementCreate, MeasurementRead, NASAReferenceResponse
+from .schemas import (
+    AstronautRead,
+    DashboardResponse,
+    FollowupRead,
+    MeasurementCreate,
+    MeasurementHistoryQuery,
+    MeasurementRead,
+    NASAReferenceResponse,
+)
 
 
 @asynccontextmanager
@@ -69,6 +77,60 @@ def get_session(request: Request):
 
 
 DatabaseSession = Annotated[Session, Depends(get_session)]
+
+
+def require_astronaut(session: Session, astronaut_id: str | None) -> None:
+    if astronaut_id is not None and session.get(Astronaut, astronaut_id) is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Astronaut not found")
+
+
+@app.get("/api/astronauts", response_model=list[AstronautRead])
+def astronauts(session: DatabaseSession):
+    """Return fictional profiles and their individual synthetic baselines."""
+    return session.exec(select(Astronaut).order_by(Astronaut.id)).all()
+
+
+@app.get(
+    "/api/measurements", response_model=list[MeasurementRead],
+    responses={404: {"description": "Astronaut not found"}},
+)
+def measurement_history(
+    filters: Annotated[MeasurementHistoryQuery, Query()], session: DatabaseSession,
+):
+    """Read crew or habitat history, including suspect samples and provenance."""
+    require_astronaut(session, filters.astronaut_id)
+    statement = select(Measurement)
+    if filters.astronaut_id is not None:
+        statement = statement.where(Measurement.astronaut_id == filters.astronaut_id)
+    if filters.kind is not None:
+        statement = statement.where(Measurement.kind == filters.kind)
+    if filters.from_timestamp is not None:
+        statement = statement.where(Measurement.measured_at >= filters.from_timestamp)
+    if filters.to_timestamp is not None:
+        statement = statement.where(Measurement.measured_at <= filters.to_timestamp)
+    return session.exec(
+        statement.order_by(Measurement.measured_at, Measurement.id)
+        .offset(filters.offset).limit(filters.limit)
+    ).all()
+
+
+@app.get(
+    "/api/followups", response_model=list[FollowupRead],
+    responses={404: {"description": "Astronaut not found"}},
+)
+def followups(
+    session: DatabaseSession,
+    astronaut_id: Annotated[str | None, Query(min_length=1)] = None,
+    status: Literal["pending", "completed"] | None = None,
+):
+    """Read the persisted agenda; scheduling and completion are separate tasks."""
+    require_astronaut(session, astronaut_id)
+    statement = select(Followup)
+    if astronaut_id is not None:
+        statement = statement.where(Followup.astronaut_id == astronaut_id)
+    if status is not None:
+        statement = statement.where(Followup.status == status)
+    return session.exec(statement.order_by(Followup.created_at, Followup.id)).all()
 
 
 @app.post(

@@ -121,6 +121,40 @@ class AstronautRead(StrictModel):
     baseline_sleep_hours: float = Field(gt=0, allow_inf_nan=False)
 
 
+class MeasurementHistoryQuery(StrictModel):
+    """Inclusive observation-time filters; keep the canonical JSON list response."""
+
+    # FastAPI 0.115 passes aliased query values using the model field names.
+    # Accept both representations internally while keeping from/to in OpenAPI.
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    astronaut_id: str | None = Field(default=None, min_length=1)
+    kind: Kind | None = None
+    from_timestamp: datetime | None = Field(default=None, alias="from")
+    to_timestamp: datetime | None = Field(default=None, alias="to")
+    limit: int = Field(default=100, ge=1, le=1000)
+    offset: int = Field(default=0, ge=0, le=2**63 - 1)
+
+    @field_validator("from_timestamp", "to_timestamp", mode="before")
+    @classmethod
+    def check_timestamp_input(cls, value: object) -> object:
+        if value is None:
+            return value
+        return MeasurementCreate.check_timestamp_input(value)
+
+    @field_validator("from_timestamp", "to_timestamp")
+    @classmethod
+    def normalize_timestamp(cls, value: datetime | None) -> datetime | None:
+        return require_utc(value) if value is not None else None
+
+    @model_validator(mode="after")
+    def check_period(self):
+        if (self.from_timestamp is not None and self.to_timestamp is not None
+                and self.from_timestamp > self.to_timestamp):
+            raise ValueError("from must be before or equal to to")
+        return self
+
+
 class InvestigationRunRequest(StrictModel):
     scope: Literal["crew", "individual"]
     astronaut_id: str | None = None
