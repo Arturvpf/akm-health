@@ -1,0 +1,41 @@
+{
+  "collective": {
+    "scope": "crew",
+    "astronaut_id": null,
+    "sleep_overrides": {},
+    "environment": "aligned",
+    "expected": {
+      "affected_astronauts": ["A1", "A2", "A3"],
+      "status": "attention",
+      "collective_pattern": true,
+      "environmental_hypothesis": "unconfirmed",
+      "next_check": {"kind": "co2_ppm", "astronaut_id": null}
+    }
+  },
+  "individual": {
+    "scope": "individual",
+    "astronaut_id": "A1",
+    "sleep_overrides": {"A2": [7.4, 7.6], "A3": [7.9, 8.0]},
+    "environment": "unchanged",
+    "expected": {
+      "affected_astronauts": ["A1"],
+      "status": "attention",
+      "collective_pattern": false,
+      "environmental_hypothesis": null,
+      "next_check": {"kind": "sleep_hours", "astronaut_id": "A1"}
+    }
+  },
+  "insufficient": {
+    "scope": "crew",
+    "astronaut_id": null,
+    "sleep_overrides": {"A2": [5.6, null], "A3": [5.3, null], "A4": [7.7, null]},
+    "environment": "missing",
+    "expected": {
+      "affected_astronauts": ["A1"],
+      "status": "insufficient_data",
+      "collective_pattern": false,
+      "environmental_hypothesis": null,
+      "next_check": {"kind": "sleep_hours", "astronaut_id": "A2"}
+    }
+  }
+}
