@@ -31,7 +31,7 @@ python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
 
 - [Health check](http://127.0.0.1:8000/api/health) returns HTTP 200 with `{"status":"ok","storage":"sqlite_reachable"}`.
 - [Interactive API docs](http://127.0.0.1:8000/docs) and the [OpenAPI schema](http://127.0.0.1:8000/openapi.json) describe the running foundation.
-- The smoke check uses `backend/akm.db` by default. Set `AKM_DB_PATH` to use a different SQLite file. The TypeScript project currently contains shared contracts. Browser navigation and integration are tracked in AKM-12 through AKM-16.
+- The API uses `backend/akm.db` by default. Set `AKM_DB_PATH` to use a different SQLite file. Startup creates or migrates the local database. The TypeScript project currently contains shared contracts. Browser navigation and integration are tracked in AKM-12 through AKM-16.
 
 Run the same checks as CI from the root in a terminal with the virtual environment active.
 
@@ -42,6 +42,10 @@ npm --prefix frontend run typecheck
 ```
 
 The API, tests, and type checking run locally after dependency installation. The interactive Swagger UI currently loads assets from a CDN. The health endpoint and JSON OpenAPI schema are served locally.
+
+To apply the SQLite schema separately, run `python -m app.db` with `backend/` as the working directory. See the [database notes](docs/database.md) for schema versioning and cases that require review.
+
+To load the simulated ODYSSEY-26 profiles and readings, run `python -m app.seed` from `backend/`. See the [scenario and data dictionary](docs/synthetic-data.md) for the optional CO₂ recheck and the expected gaps in the sample.
 
 ## Repository layout and contribution
 
