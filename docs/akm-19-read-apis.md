@@ -53,3 +53,16 @@ The seed returns four astronauts, two sleep observations for A1 (5.2 and 5.4 h),
 ```sh
 python scripts/check.py
 ```
+
+### FastAPI minimum-version regression check
+
+The period-query model accepts population by field name as well as alias because FastAPI 0.115.0 passes parsed `from`/`to` values using the internal model field names. The public OpenAPI parameters remain `from` and `to`; unknown model fields remain forbidden.
+
+In a separate virtual environment, install the declared backend dependencies with the minimum supported FastAPI and run the history API tests:
+
+```sh
+python -m pip install -r backend/requirements-dev.txt "fastapi==0.115.0"
+python -m pytest -q backend/tests/test_history_api.py
+```
+
+The regression suite checks combined and single-boundary period filters, inclusive UTC normalization, invalid periods, pagination limits and the OpenAPI aliases. It must pass both with FastAPI 0.115.0 and with the regular development environment.

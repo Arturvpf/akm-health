@@ -75,6 +75,18 @@ def test_combined_filters_are_inclusive_and_use_observation_time(seeded):
     assert len(seeded.get("/api/measurements", params={"to": "2026-11-12T20:00:00Z"}).json()) == 2
 
 
+@pytest.mark.parametrize("boundary, timestamp, expected", [
+    ("from", "2026-11-14T04:00:00-03:00", [5.4]),
+    ("to", "2026-11-13T04:00:00-03:00", [5.2]),
+])
+def test_single_period_alias_filters_history(seeded, boundary, timestamp, expected):
+    response = seeded.get("/api/measurements", params={
+        "astronaut_id": "A1", "kind": "sleep_hours", boundary: timestamp,
+    })
+    assert response.status_code == 200, response.text
+    assert [row["value"] for row in response.json()] == expected
+
+
 def test_habitat_history_keeps_suspect_samples_but_snapshot_uses_usable_values(seeded):
     history = seeded.get("/api/measurements", params={"kind": "co2_ppm"}).json()
     assert [row["value"] for row in history] == [680, 950, 980, 2200]

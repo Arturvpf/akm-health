@@ -124,6 +124,10 @@ class AstronautRead(StrictModel):
 class MeasurementHistoryQuery(StrictModel):
     """Inclusive observation-time filters; keep the canonical JSON list response."""
 
+    # FastAPI 0.115 passes aliased query values using the model field names.
+    # Accept both representations internally while keeping from/to in OpenAPI.
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
     astronaut_id: str | None = Field(default=None, min_length=1)
     kind: Kind | None = None
     from_timestamp: datetime | None = Field(default=None, alias="from")
