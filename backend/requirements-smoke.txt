@@ -1,5 +1,2 @@
-# Minimal prerequisites for the architecture smoke proof (no SQLModel import)
-fastapi>=0.115,<1
-uvicorn>=0.30,<1
-pytest>=8,<10
-httpx>=0.27,<1
+# The smoke suite starts the same SQLModel-backed application.
+-r requirements.txt

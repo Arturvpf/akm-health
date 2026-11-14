@@ -1,14 +1,34 @@
-"""AKM Health execution proof: FastAPI + SQLite connectivity, not the full MVP."""
+"""AKM Health API and local database startup."""
+
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
-from .db import connect
+from starlette.concurrency import run_in_threadpool
+
+from .db import make_engine, migrate
 from .schemas import MeasurementCreate
 
-app = FastAPI(title="AKM Health · backend foundation", version="0.2.0")
+
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    engine = make_engine()
+    try:
+        await run_in_threadpool(migrate, engine)
+        application.state.engine = engine
+        yield
+    finally:
+        application.state.engine = None
+        engine.dispose()
+
+
+app = FastAPI(title="AKM Health · backend foundation", version="0.2.0", lifespan=lifespan)
+
 
 @app.get("/api/health")
 def health():
-    with connect() as db:
-        db.execute("SELECT 1").fetchone()
+    engine = getattr(app.state, "engine", None)
+    with (engine if engine is not None else make_engine()).connect() as connection:
+        connection.exec_driver_sql("SELECT 1")
     return {"status": "ok", "storage": "sqlite_reachable"}
 
 @app.post("/api/_contract/validate-measurement")
