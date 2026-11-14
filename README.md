@@ -61,3 +61,5 @@ To load the simulated ODYSSEY-26 profiles and readings, run `python -m app.seed`
 Start a topic branch from `main`. Group commits by deliverable and open a PR with the AKM task IDs, acceptance criteria, commands run and any gaps. Ask the relevant frontend, backend or research owner to review contract or scientific changes before merging. Keep Pydantic and TypeScript aligned, follow the canonical HTTP and UTC conventions, and update the affected contract tests and examples together.
 
 [Canonical architecture and API](https://app.notion.com/p/4189432b2222816494fdd66f32e11ec4) · [Contract review](docs/contracts-v2-review.md) · [Investigation flow](docs/akm-04-investigation-flow.md) · [NASA scientific sources and hypothesis matrix](docs/scientific-sources.md)
+
+[Alert and safety criteria](docs/akm-08-alert-safety.md) · [Educational guidance and measurement copy](docs/akm-09-guidance-library.md)
