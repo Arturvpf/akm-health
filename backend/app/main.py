@@ -6,7 +6,8 @@ from fastapi import FastAPI
 from starlette.concurrency import run_in_threadpool
 
 from .db import make_engine, migrate
-from .schemas import MeasurementCreate
+from .nasa_reference import HRP_REFERENCES
+from .schemas import MeasurementCreate, NASAReferenceResponse
 
 
 @asynccontextmanager
@@ -30,6 +31,16 @@ def health():
     with (engine if engine is not None else make_engine()).connect() as connection:
         connection.exec_driver_sql("SELECT 1")
     return {"status": "ok", "storage": "sqlite_reachable"}
+
+
+@app.get("/api/nasa/references", response_model=NASAReferenceResponse)
+def nasa_references():
+    return NASAReferenceResponse(
+        scientific_references=list(HRP_REFERENCES),
+        historical_series=[],
+        historical_data_status="not_imported",
+    )
+
 
 @app.post("/api/_contract/validate-measurement")
 def validate_measurement(body: MeasurementCreate):

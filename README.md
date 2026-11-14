@@ -45,6 +45,8 @@ The API, tests, and type checking run locally after dependency installation. The
 
 To apply the SQLite schema separately, run `python -m app.db` with `backend/` as the working directory. See the [database notes](docs/database.md) for schema versioning and cases that require review.
 
+To load the simulated ODYSSEY-26 profiles and readings, run `python -m app.seed` from `backend/`. See the [scenario and data dictionary](docs/synthetic-data.md) for the optional CO₂ recheck and the expected gaps in the sample.
+
 ## Repository layout and contribution
 
 | Path | Responsibility |
