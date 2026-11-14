@@ -199,6 +199,10 @@ class MetricSnapshot(StrictModel):
     unit: MetricUnit
     measured_at: datetime
 
+    @field_validator("measured_at")
+    @classmethod
+    def utc_timestamp(cls, value: datetime) -> datetime:
+        return require_utc(value)
 
 class AstronautDashboardRead(StrictModel):
     id: str
@@ -208,11 +212,15 @@ class AstronautDashboardRead(StrictModel):
 
 
 class HabitatSnapshot(StrictModel):
-    co2_ppm: float | None
-    cabin_temp_c: float | None
+    co2_ppm: float | None = Field(allow_inf_nan=False)
+    cabin_temp_c: float | None = Field(allow_inf_nan=False)
     measured_at: datetime | None
     measurement_zone: Literal["habitat"]
 
+    @field_validator("measured_at")
+    @classmethod
+    def utc_timestamp(cls, value: datetime | None) -> datetime | None:
+        return require_utc(value) if value is not None else None
 
 class DashboardAlert(StrictModel):
     id: int
@@ -239,6 +247,10 @@ class DashboardResponse(StrictModel):
     last_investigation_at: datetime | None
     has_unanalyzed_measurements: bool
 
+    @field_validator("last_investigation_at")
+    @classmethod
+    def utc_timestamp(cls, value: datetime | None) -> datetime | None:
+        return require_utc(value) if value is not None else None
 
 class ScientificReference(StrictModel):
     source: str
@@ -248,17 +260,30 @@ class ScientificReference(StrictModel):
 
 
 class NASAHistoricalObservation(StrictModel):
-    source: str
-    source_url: str
-    mission_id: str
-    parameter: str
+    """Preserve NASA source-native time; never invent Earth UTC for Mars sols."""
+    source: str = Field(min_length=1)
+    source_url: str = Field(min_length=10)
+    mission_id: str = Field(min_length=1)
+    parameter: str = Field(min_length=1)
     value: float = Field(allow_inf_nan=False)
-    unit: str
+    unit: str = Field(min_length=1)
     observed_at: str | None = None
-    mars_sol: int | None = None
+    mars_sol: int | None = Field(default=None, ge=0)
     instrument: str | None = None
-    context: str
+    context: str = Field(min_length=1)
 
+    @field_validator("source_url")
+    @classmethod
+    def validate_https_source(cls, value: str) -> str:
+        if not value.startswith("https://"):
+            raise ValueError("Historical NASA observations require HTTPS source URL")
+        return value
+
+    @model_validator(mode="after")
+    def require_observation_time(self):
+        if not self.observed_at and self.mars_sol is None:
+            raise ValueError("Historical observation requires source-native timestamp or mars_sol")
+        return self
 
 class NASAReferenceResponse(StrictModel):
     scientific_references: list[ScientificReference]

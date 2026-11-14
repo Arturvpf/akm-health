@@ -37,3 +37,12 @@ No clinical diagnosis, use synthetic heuristics and mark all demonstration data.
 ## Implemented vs pending
 
 This branch contains Pydantic schemas and matching TypeScript interfaces; smoke server proves /api/health, JSON contract validation, and SQLite connectivity. Business routes, SQLModel CRUD, investigation engine, real dataset import, Figma integration, cross-team approval and deployment are pending.
+
+
+## AKM-06 integrated — clinical and data provenance boundary
+
+See [AKM-06 protocol](./akm-06-measurement-protocol.md). The five metrics are sleep_hours (estimated actual sleep duration, h), heart_rate_bpm (point BPM, ideally rest), mood_score (ordinal non-validated self report 1..5), co2_ppm (internal habitat) and cabin_temp_c (internal cabin air, C). Their recommended demo cadences are UX choices, not NASA operational protocols.
+
+Crew and dashboard timestamps require an explicit timezone and are normalized to UTC, including MetricSnapshot, HabitatSnapshot and last_investigation_at. NASA reference timestamps remain in their source-native time base; Mars sol must not be converted to Earth UTC without reference metadata. NASA history requires HTTPS source URL plus observed_at or mars_sol, and this schema is not proof of authentic provenance.
+
+The environmental snapshot measured_at field describes the most recent available environmental measurement, not proof CO2 and temperature were sampled simultaneously. Missing data is absent (not zero); quality=ok is not a statement of health. Clinical thresholds, red alerts, diagnosis and equipment certifications remain outside the MVP. Business API route implementation remains AKM-17..20/39; formal team review happens at PR review.
