@@ -41,7 +41,7 @@ class StrictModel(BaseModel):
 class MeasurementCreate(StrictModel):
     astronaut_id: str | None = None
     kind: Kind
-    value: float = Field(allow_inf_nan=False)
+    value: float = Field(strict=True, allow_inf_nan=False)
     unit: MetricUnit
     measured_at: datetime
     source: DataSource
