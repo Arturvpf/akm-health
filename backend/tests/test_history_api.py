@@ -108,6 +108,20 @@ def test_stable_pagination_does_not_drop_equal_timestamp_samples(seeded):
     assert paged == complete
 
 
+def test_offset_respects_sqlite_integer_boundary(seeded):
+    maximum = 2**63 - 1
+    response = seeded.get("/api/measurements", params={"offset": str(maximum)})
+    assert response.status_code == 200
+    assert response.json() == []
+
+    for offset in (maximum + 1, 10**100):
+        response = seeded.get("/api/measurements", params={"offset": str(offset)})
+        assert response.status_code == 422
+        error = response.json()["detail"][0]
+        assert error["loc"] == ["query", "offset"]
+        assert error["type"] == "less_than_equal"
+
+
 @pytest.mark.parametrize("params", [
     {"kind": "unknown"}, {"astronaut_id": ""}, {"from": "2026-11-14"},
     {"to": "2026-11-14T07:00:00"}, {"from": "1794639600"},

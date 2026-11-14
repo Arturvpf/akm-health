@@ -129,7 +129,7 @@ class MeasurementHistoryQuery(StrictModel):
     from_timestamp: datetime | None = Field(default=None, alias="from")
     to_timestamp: datetime | None = Field(default=None, alias="to")
     limit: int = Field(default=100, ge=1, le=1000)
-    offset: int = Field(default=0, ge=0)
+    offset: int = Field(default=0, ge=0, le=2**63 - 1)
 
     @field_validator("from_timestamp", "to_timestamp", mode="before")
     @classmethod
