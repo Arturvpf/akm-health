@@ -27,6 +27,7 @@ A completed follow-up MUST reference an actual later compatible measurement. Fin
 All timestamps UTC with Z. Invalid payload 422, absent resource 404, state conflict 409. For Python query parameter "from", use alias. POST creates measurement with measurement_zone derived from kind and recorded_at set by server. Investigation POST accepts scope crew or individual, returning findings, evidence, hypotheses, next_check, followup_id, reused, demo_only. PATCH follow-up requires {"status":"completed","measurement_id":123}; server validates same kind, astronaut/zone, quality ok and recording after followup creation.
 
 Measurement values must be finite JSON numbers. Booleans and numeric strings return 422. For habitat measurements, clients may omit `astronaut_id` or send `null`. Crew measurements require an astronaut ID.
+Measurement timestamps use ISO 8601 with `Z` or an explicit UTC offset such as `-03:00`. Unix timestamps and dates outside the supported UTC range return 422.
 
 ### Registering a measurement
 

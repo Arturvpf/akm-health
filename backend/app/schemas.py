@@ -1,6 +1,7 @@
 """AKM Health API contracts (AKM-03). Data persistence belongs to AKM-17/20."""
 from datetime import datetime, timezone
 from enum import Enum
+import re
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator, model_validator
 
@@ -19,6 +20,11 @@ DataSource = Literal["manual", "synthetic"]
 Quality = Literal["ok", "suspect"]
 InvestigationStatus = Literal["normal", "attention", "critical", "insufficient_data"]
 
+MEASUREMENT_TIMESTAMP = re.compile(
+    r"[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt][0-9]{2}:[0-9]{2}"
+    r"(?::[0-9]{2}(?:\.[0-9]+)?)?(?:[Zz]|[+-][0-9]{2}:[0-9]{2})"
+)
+
 METRICS: dict[Kind, tuple[str, str]] = {
     Kind.sleep_hours: ("h", "astronaut"),
     Kind.heart_rate_bpm: ("bpm", "astronaut"),
@@ -31,7 +37,10 @@ METRICS: dict[Kind, tuple[str, str]] = {
 def require_utc(value: datetime) -> datetime:
     if value.tzinfo is None or value.utcoffset() is None:
         raise ValueError("Timestamp requires an explicit timezone")
-    return value.astimezone(timezone.utc)
+    try:
+        return value.astimezone(timezone.utc)
+    except OverflowError as exc:
+        raise ValueError("Timestamp is outside the supported UTC range") from exc
 
 
 class StrictModel(BaseModel):
@@ -46,6 +55,15 @@ class MeasurementCreate(StrictModel):
     measured_at: datetime
     source: DataSource
     quality: Quality = "ok"
+
+    @field_validator("measured_at", mode="before")
+    @classmethod
+    def check_timestamp_input(cls, value: object) -> object:
+        if isinstance(value, datetime):
+            return value
+        if isinstance(value, str) and MEASUREMENT_TIMESTAMP.fullmatch(value):
+            return value
+        raise ValueError("Measurement timestamp must be an ISO 8601 date and time with an explicit timezone")
 
     @field_validator("measured_at")
     @classmethod
