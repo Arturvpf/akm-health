@@ -3,16 +3,22 @@
 from contextlib import asynccontextmanager
 from http import HTTPStatus
 from math import isfinite
+from sqlite3 import SQLITE_CONSTRAINT_FOREIGNKEY
+from typing import Annotated
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import IntegrityError
+from sqlmodel import Session
 from starlette.concurrency import run_in_threadpool
 
+from .dashboard import build_dashboard
 from .db import make_engine, migrate
+from .models import Astronaut, Measurement
 from .nasa_reference import HRP_REFERENCES
-from .schemas import MeasurementCreate, NASAReferenceResponse
+from .schemas import DashboardResponse, MeasurementCreate, MeasurementRead, NASAReferenceResponse
 
 
 @asynccontextmanager
@@ -55,6 +61,50 @@ def health():
     with (engine if engine is not None else make_engine()).connect() as connection:
         connection.exec_driver_sql("SELECT 1")
     return {"status": "ok", "storage": "sqlite_reachable"}
+
+
+def get_session(request: Request):
+    with Session(request.app.state.engine) as session:
+        yield session
+
+
+DatabaseSession = Annotated[Session, Depends(get_session)]
+
+
+@app.post(
+    "/api/measurements",
+    status_code=HTTPStatus.CREATED,
+    response_model=MeasurementRead,
+    responses={
+        404: {
+            "description": "Astronaut not found",
+            "content": {"application/json": {"example": {"detail": "Astronaut not found"}}},
+        },
+    },
+)
+def create_measurement(body: MeasurementCreate, session: DatabaseSession) -> MeasurementRead:
+    """Record a crew or cabin observation and return the stored measurement."""
+    if body.astronaut_id is not None and session.get(Astronaut, body.astronaut_id) is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Astronaut not found")
+
+    measurement = Measurement.from_payload(body)
+    try:
+        session.add(measurement)
+        session.flush()
+        result = MeasurementRead.model_validate(measurement, from_attributes=True)
+        session.commit()
+    except IntegrityError as exc:
+        session.rollback()
+        if getattr(exc.orig, "sqlite_errorcode", None) == SQLITE_CONSTRAINT_FOREIGNKEY:
+            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Astronaut not found") from exc
+        raise
+    return result
+
+
+@app.get("/api/dashboard", response_model=DashboardResponse)
+def dashboard(session: DatabaseSession) -> DashboardResponse:
+    """Read the local snapshot and indicate observations awaiting investigation."""
+    return build_dashboard(session)
 
 
 @app.get("/api/nasa/references", response_model=NASAReferenceResponse)
