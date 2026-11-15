@@ -26,7 +26,7 @@ export const ENVIRONMENTS: readonly MissionEnvironment[] = [
   },
   {
     id: 'lunar_surface', name: 'Lunar surface', setting: 'Hypothetical lunar habitat',
-    gravity: '1.62 m/s² (~0.16 Earth g)', gravityRatio: 1.62 / 9.82,
+    gravity: '1.62 m/s² (~0.165 Earth g)', gravityRatio: 1.62 / 9.82,
     factors: ['Partial gravity', 'Closed environment', 'Space exposure (context)'],
     implications: 'Lunar gravity is lower than Earth gravity and the habitat needs environmental control. Displayed readings stay simulated; no thresholds are recalibrated.',
     limitations: 'MVP crew data are not lunar mission data. Do not extrapolate quantitative clinical risk.',

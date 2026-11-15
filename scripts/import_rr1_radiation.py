@@ -45,7 +45,8 @@ def _rows(original: bytes) -> tuple[list[str], list[dict[str, str]]]:
 
 def _date_column(headers: list[str]) -> str:
     for header in headers:
-        if "date" in header.lower() or "time" in header.lower() or "day" in header.lower():
+        # The NASA EDA radiation export names its date column "Data".
+        if header.strip().lower() in {"data", "date"} or "time" in header.lower() or "day" in header.lower():
             return header
     raise ImportError_(f"No date column found in the radiation export; headers: {headers}")
 
