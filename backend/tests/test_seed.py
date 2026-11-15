@@ -1,4 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
+import json
 from datetime import timezone
 
 from fastapi.testclient import TestClient
@@ -158,3 +159,27 @@ def test_unavailable_or_invalid_nasa_history_retains_hrp_catalog(content, tmp_pa
     assert response.json()["historical_data_status"] == "not_imported"
     assert response.json()["historical_series"] == []
     assert len(response.json()["scientific_references"]) == 3
+
+
+def test_clock_relative_seed_yields_collective_attention_with_real_clock(tmp_path, monkeypatch):
+    """A fresh database seeded next to 'now' must show the main scenario on any date."""
+    from datetime import datetime, timedelta
+
+    from app.seed import DEMO_ANCHOR
+
+    monkeypatch.setenv("AKM_DB_PATH", str(tmp_path / "live.db"))
+    now = datetime.now(timezone.utc).replace(microsecond=0)
+    shift = now - timedelta(minutes=2) - DEMO_ANCHOR
+    with TestClient(app) as client:
+        assert seed(app.state.engine, shift=shift) == (4, 29)
+        response = client.post("/api/investigations/run", json={"scope": "crew"})
+        assert response.status_code == 200, response.text
+        result = response.json()
+        assert result["status"] == "attention"
+        coverage = result["explanation"]["coverage"]
+        assert coverage["evaluated_astronaut_ids"] == ["A1", "A2", "A3", "A4"]
+        dashboard = client.get("/api/dashboard").json()
+        assert [row["status"] for row in dashboard["astronauts"]] == ["attention"] * 3 + ["normal"]
+        with Session(app.state.engine) as session:
+            document = json.loads(session.get(Investigation, result["id"]).result_json)
+        assert document["audit"]["detection"]["affected_astronaut_ids"] == ["A1", "A2", "A3"]

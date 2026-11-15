@@ -63,7 +63,7 @@ python scripts/demo_investigation_flow.py
 
 It uses FastAPI TestClient, temporary SQLite and a frozen demo clock. It checks explicit investigation, reuse, recovery, completion with compatible measurement evidence and explicit reanalysis. Expect repeat_reused=true, new_data_requires_explicit_run=true and a new investigation ID. It restores its environment and does not modify the normal demo database. The recheck is inserted through SQLModel; this is not a browser or POST-registration acceptance test.
 
-**Time matters:** seed dates are 13–14 November 2026, while the normal API uses the current clock. The default 48-hour window can exclude older samples. Insufficient data is valid; do not promise a collective/yellow result from an aged seed. See the [interactive demo walkthrough](docs/demo-script.md).
+**Time matters:** the seed follows the clock. `python -m app.seed` (run from `backend/`) shifts the synthetic 13–14 November 2026 observations so the latest one lands about two minutes before "now", keeping them inside the detector's default 48-hour window; a new database plus the seed therefore shows the collective attention scenario (A1, A2, A3) immediately. `--fixed-dates` reproduces the original 13–14 November 2026 timestamps (they age out of the 48-hour window, so expect `insufficient_data` later). The seed is idempotent: to start over, use a new database file (a new `AKM_DB_PATH`). Details are in the [interactive demo walkthrough](docs/demo-script.md).
 
 ## Data, NASA and limitations
 
