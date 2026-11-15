@@ -33,13 +33,24 @@ export interface NextCheck {
   kind: Kind; astronaut_id: string | null; reason: string; effort: 'low' | 'medium' | 'high';
 }
 export interface EducationalGuidance { text: string; source_id: string }
+export interface InvestigationExplanation {
+  coverage: { window_start: string; window_end: string; evaluated_astronaut_ids: string[] } | null;
+  limitations: string[];
+  uncertainty: string;
+  references: Array<{ source_id: string; title: string; url: string; relevance: string }>;
+  check_context: {
+    status: 'selected' | 'unavailable' | 'no_check_needed' | 'needs_context' | 'protocol_referral';
+    reason: string;
+  } | null;
+  human_review: { mode: 'conditional' | 'per_protocol'; instruction: string; protocol_reference: string | null };
+}
 export interface InvestigationResult {
   id: number; scope: 'crew' | 'individual'; astronaut_id: string | null;
   status: InvestigationStatus; created_at: string; rules_version: string;
   input_fingerprint: string; reused: boolean; findings: string[];
   evidence: InvestigationEvidence[]; hypotheses: InvestigationHypothesis[];
   next_check: NextCheck | null; followup_id: number | null;
-  guidance: EducationalGuidance[]; demo_only: true;
+  guidance: EducationalGuidance[]; explanation?: InvestigationExplanation | null; demo_only: true;
 }
 export interface FollowupCompleteRequest { status: 'completed'; measurement_id: number }
 export interface FollowupRead {

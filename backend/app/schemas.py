@@ -192,6 +192,44 @@ class EducationalGuidance(StrictModel):
     source_id: str
 
 
+class InvestigationReference(StrictModel):
+    source_id: str
+    title: str
+    url: str
+    relevance: str
+
+
+class InvestigationCoverage(StrictModel):
+    window_start: datetime
+    window_end: datetime
+    evaluated_astronaut_ids: list[str]
+
+    @field_validator("window_start", "window_end")
+    @classmethod
+    def normalize_window(cls, value: datetime) -> datetime:
+        return require_utc(value)
+
+
+class InvestigationCheckContext(StrictModel):
+    status: Literal["selected", "unavailable", "no_check_needed", "needs_context", "protocol_referral"]
+    reason: str
+
+
+class HumanReview(StrictModel):
+    mode: Literal["conditional", "per_protocol"]
+    instruction: str
+    protocol_reference: str | None = None
+
+
+class InvestigationExplanation(StrictModel):
+    coverage: InvestigationCoverage | None = None
+    limitations: list[str]
+    uncertainty: str
+    references: list[InvestigationReference]
+    check_context: InvestigationCheckContext | None = None
+    human_review: HumanReview
+
+
 class InvestigationResult(StrictModel):
     id: int = Field(gt=0)
     scope: Literal["crew", "individual"]
@@ -207,6 +245,7 @@ class InvestigationResult(StrictModel):
     next_check: NextCheck | None
     followup_id: int | None = Field(default=None, gt=0)
     guidance: list[EducationalGuidance]
+    explanation: InvestigationExplanation | None = None
     demo_only: Literal[True]
 
     @field_validator("created_at")
