@@ -22,6 +22,7 @@ from test_investigations import counts, finish, run
 @pytest.fixture
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("AKM_DB_PATH", str(tmp_path / "routine.db"))
+    monkeypatch.delenv("AKM_INVESTIGATION_CONFIG", raising=False)
     clock = [datetime(2026, 11, 14, 8, tzinfo=timezone.utc)]
     monkeypatch.setattr(investigations, "utc_now", lambda: clock[0])
     class Clock(datetime):
@@ -84,6 +85,8 @@ def test_seed_creates_only_missing_routine_items_and_keeps_adaptive_check_first(
     configure(("sleep_hours", "A1"), ("mood_score", "A3"),
               ("heart_rate_bpm", "A4"), ("cabin_temp_c", None))
     result = run(seeded)
+    assert result["explanation"] is not None
+    assert seeded.get(f'/api/investigations/{result["id"]}').json() == result
     rows = agenda(seeded)
     assert [(row["kind"], row["astronaut_id"]) for row in rows] == [
         ("co2_ppm", None), ("heart_rate_bpm", "A4"), ("mood_score", "A3"),

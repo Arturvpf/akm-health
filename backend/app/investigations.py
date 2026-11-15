@@ -14,6 +14,7 @@ from sqlalchemy import or_, text
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
+from .guidance import explain_investigation, explain_stored_investigation
 from .models import Astronaut, Followup, Investigation, Measurement
 from .next_check import CheckResource, NextCheckSelection, ValidatedProtocol, prioritize_next_check
 from .rules import (
@@ -139,13 +140,14 @@ def stored_document(row: Investigation) -> tuple[InvestigationResult, dict]:
 
 
 def _response(row: Investigation, *, reused: bool = False) -> InvestigationResult:
-    result, _audit = stored_document(row)
-    return result.model_copy(update={"reused": reused})
+    result, audit = stored_document(row)
+    explanation = explain_stored_investigation(result, audit)
+    return result.model_copy(update={"reused": reused, "explanation": explanation})
 
 
 def _encode_document(response: InvestigationResult, snapshot, settings, detection, selection, routine_audit=None) -> str:
     document = {
-        "schema_version": 1, "response": response.model_dump(mode="json"),
+        "schema_version": 1, "response": response.model_dump(mode="json", exclude={"explanation"}),
         "audit": {
             "snapshot": snapshot.model_dump(mode="json"), "settings": settings.model_dump(mode="json"),
             "detection": detection.model_dump(mode="json"), "selection": selection.model_dump(mode="json"),
@@ -223,13 +225,14 @@ def _compose_result(row: Investigation, detection, selection, followup_id: int |
     findings.extend(f"Limitação: {limitation}" for limitation in detection.limitations)
     if selection.next_check is None:
         findings.append(selection.reason)
-    return InvestigationResult(
+    result = InvestigationResult(
         id=row.id, scope=row.scope, astronaut_id=row.astronaut_id, status=row.status,
         created_at=row.created_at, rules_version=row.rules_version, input_fingerprint=row.input_fingerprint,
         reused=False, findings=findings, evidence=evidence, hypotheses=hypotheses,
         next_check=NextCheck.model_validate(selection.next_check.model_dump()) if selection.next_check else None,
         followup_id=followup_id, guidance=[], demo_only=True,
     )
+    return result.model_copy(update={"explanation": explain_investigation(result, detection, selection)})
 
 
 def run_investigation(
