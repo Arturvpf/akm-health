@@ -66,7 +66,7 @@ test('network, unexpected status, bad JSON and mismatched receipt all require hi
   t.mock.method(globalThis, 'fetch',async()=>{throw new Error('network');});
   for (const response of [null, {status:500}, {status:200}, {status:201,json:async()=>{throw new Error('bad JSON');}}, {status:201,json:async()=>({...receipt(),value:100})}, {status:201,json:async()=>({...receipt(),source:'NASA'})}]) {
     globalThis.fetch=async()=>{if(!response)throw new Error('network'); return response;};
-    await assert.rejects(saveMeasurement(payload(),new AbortController().signal),e=>e.uncertain && /histórico/.test(e.message));
+    await assert.rejects(saveMeasurement(payload(),new AbortController().signal),e=>e.uncertain && /History/.test(e.message));
   }
   assert.throws(()=>parseMeasurement({...receipt(),measurement_zone:'habitat'}));
 });
@@ -94,23 +94,23 @@ test('validation rejection preserves retry capability without automatic retry', 
 });
 test('render labels, inline errors, instructions, provenance and explicit timezone are accessible', () => {
   const html=render({errors:{value:'Informe o valor'}});
-  for(const text of ['measurement-value','aria-invalid="true"','error-value','measurement-instructions','Fuso em relação a UTC','MED-SONO','Registro manual da demonstração','Aproveitável tecnicamente','TEST-26','Teste · A1']) assert.ok(html.includes(text),text);
+  for(const text of ['measurement-value','aria-invalid="true"','error-value','measurement-instructions','UTC offset','MED-SONO','Manual demo entry','Valid for analysis','TEST-26','Teste · A1']) assert.ok(html.includes(text),text);
   assert.ok(!html.includes('value="NASA"'));
-  const mood=render({draft:draft({kind:'mood_score',value:'3'})});for(const label of ['Muito ruim','Ruim','Neutro','Bom','Muito bom']) assert.ok(mood.includes(label));
-  const habitat=render({draft:draft({kind:'co2_ppm'})});assert.ok(!habitat.includes('id="measurement-astronaut"'));assert.ok(habitat.includes('Habitat · ar interno'));
+  const mood=render({draft:draft({kind:'mood_score',value:'3'})});for(const label of ['Very poor','Poor','Neutral','Good','Very good']) assert.ok(mood.includes(label));
+  const habitat=render({draft:draft({kind:'co2_ppm'})});assert.ok(!habitat.includes('id="measurement-astronaut"'));assert.ok(habitat.includes('Habitat · cabin air'));
 });
 test('empty crew permits habitat and blocks personal; loading and failure retain draft', () => {
   const empty={...context,data:{...context.data,astronauts:[]}};
-  assert.ok(render({context:empty}).includes('Nenhum tripulante cadastrado'));
+  assert.ok(render({context:empty}).includes('No crew profiles are available'));
   assert.match(render({context:empty}),/type="submit" disabled/);
   assert.doesNotMatch(render({context:empty,draft:draft({kind:'co2_ppm'})}),/type="submit" disabled/);
   for(const phase of ['loading','error']){const html=render({context:{...context,phase,error:'Falha'}});assert.ok(html.includes('value="5,2"'));assert.match(html,/fieldset disabled/);}
 });
 test('uncertain UI locks fields with explicit history check, confirmed receipt separates recorded time and analysis', () => {
   const uncertain=render({registration:{...INITIAL_REGISTRATION,phase:'uncertain',error:'Confira o histórico'}});
-  assert.match(uncertain,/fieldset disabled/);assert.ok(uncertain.includes('a medição não consta'));assert.ok(uncertain.includes('target="_blank"'));
+  assert.match(uncertain,/fieldset disabled/);assert.ok(uncertain.includes('the reading is missing'));assert.ok(uncertain.includes('target="_blank"'));
   const saved=render({registration:{...INITIAL_REGISTRATION,phase:'saved',receipt:receipt()}});
-  for(const text of ['#42','2026-11-14T14:00:00.000Z','2026-11-15T00:00:00Z','não foram executadas','não podem ser editados','Registrar outra medição'])assert.ok(saved.includes(text),text);
+  for(const text of ['#42','2026-11-14T14:00:00.000Z','2026-11-15T00:00:00Z','Measurement saved.','Review saved readings in History','Register another measurement'])assert.ok(saved.includes(text),text);
   assert.ok(!saved.includes('<form'));
 });
 
@@ -154,6 +154,6 @@ test('real API accepts frontend payloads, receipts render, history updates and n
   for(let index=0;index<result.receipts.length;index++) {
     const saved=parseMeasurement(result.receipts[index]);assert.equal(saved.kind,payloads[index].kind);
     const html=render({registration:{...INITIAL_REGISTRATION,phase:'saved',receipt:saved}});
-    assert.ok(html.includes('Medição #'+saved.id+' confirmada'));assert.ok(html.includes(saved.measured_at));assert.ok(html.includes(saved.recorded_at));
+    assert.ok(html.includes('Measurement #'+saved.id+' confirmed'));assert.ok(html.includes(saved.measured_at));assert.ok(html.includes(saved.recorded_at));
   }
 });

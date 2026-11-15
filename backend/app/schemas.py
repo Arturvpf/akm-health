@@ -4,6 +4,7 @@ from enum import Enum
 import re
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator, model_validator
+from uuid import UUID
 
 
 class Kind(str, Enum):
@@ -393,7 +394,6 @@ class NASAReferenceResponse(StrictModel):
 
 
 # AKM-33: transport envelope is independent of the canonical measurement payload.
-from uuid import UUID
 
 class SyncMeasurementRequest(StrictModel):
     operation_id: UUID

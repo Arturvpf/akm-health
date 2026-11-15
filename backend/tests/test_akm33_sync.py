@@ -55,7 +55,9 @@ def test_equivalent_utc_timestamp_and_default_quality_are_same_operation(client)
 def test_bad_measurement_never_creates_receipt(client):
     bad = envelope(value=-5)
     assert client.post('/api/sync/measurements', json=bad).status_code == 422
-    bad = envelope(); bad['measurement']['astronaut_id'] = 'MISSING'
+    bad = envelope()
+    # Personal metric so the unknown astronaut reaches the 404 path (CO2 is cabin-only and fails zone validation first).
+    bad['measurement'].update({'kind': 'sleep_hours', 'value': 6, 'unit': 'h', 'astronaut_id': 'MISSING'})
     assert client.post('/api/sync/measurements', json=bad).status_code == 404
     assert len(client.get('/api/measurements').json()) == 0
 

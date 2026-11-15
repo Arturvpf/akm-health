@@ -1,15 +1,15 @@
 /** AKM-12 — named P0 sections, deliberately without a router dependency. */
 export const NAVIGATION = [
-  { id: 'dashboard', label: 'Dashboard', description: 'Visão da missão' },
-  { id: 'registrar', label: 'Registrar', description: 'Nova medição' },
-  { id: 'historico', label: 'Histórico', description: 'Medições registradas' },
-  { id: 'investigacao', label: 'Investigação', description: 'Análise e acompanhamento' },
+  { id: 'dashboard', label: 'Dashboard', description: 'Mission overview' },
+  { id: 'registrar', label: 'Register', description: 'New measurement' },
+  { id: 'historico', label: 'History', description: 'Recorded measurements' },
+  { id: 'investigacao', label: 'Investigation', description: 'Analysis and follow-up' },
 ] as const;
 
 export const EXPERIMENTAL_NAVIGATION = [
-  { id: 'comparador', label: 'Cenários hipotéticos', description: 'AKM-34 · comparação simulada' },
-  { id: 'ambientes', label: 'Ambientes de missão', description: 'AKM-35 · contexto NASA' },
-  { id: 'corpo', label: 'Corpo interativo', description: 'AKM-36 · associação educativa' },
+  { id: 'comparador', label: 'Scenario comparator', description: 'AKM-34 · Simulated comparison' },
+  { id: 'ambientes', label: 'Mission environments', description: 'AKM-35 · NASA context' },
+  { id: 'corpo', label: 'Body map', description: 'AKM-36 · Educational links' },
 ] as const;
 export const ALL_NAVIGATION = [...NAVIGATION, ...EXPERIMENTAL_NAVIGATION] as const;
 export type PageId = (typeof ALL_NAVIGATION)[number]['id'];

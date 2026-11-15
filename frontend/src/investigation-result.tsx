@@ -1,15 +1,16 @@
 import { nasaReferenceUrl } from './api';
+import { englishMissionCopy } from './mission-copy';
 import { ActionButton, ActionLink, Details, QualityBadge, SourceBadge, StatusBadge } from './design-system';
 import { pageHref } from './navigation';
 import type { AstronautRead, FollowupRead, InvestigationExplanation, InvestigationResult, Kind, MetricUnit } from './types';
 
 export const metricNames: Record<Kind, string> = {
-  sleep_hours: 'Duração do sono', heart_rate_bpm: 'Frequência cardíaca', mood_score: 'Humor',
-  co2_ppm: 'CO₂ interno', cabin_temp_c: 'Temperatura interna',
+  sleep_hours: 'Sleep duration', heart_rate_bpm: 'Heart rate', mood_score: 'Mood',
+  co2_ppm: 'Cabin CO₂', cabin_temp_c: 'Cabin temperature',
 };
 const units: Record<MetricUnit, string> = { h: 'h', bpm: 'bpm', ppm: 'ppm', C: '°C', score_1_to_5: '/ 5' };
-const numberFormat = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 8 });
-const timeFormat = new Intl.DateTimeFormat('pt-BR', {
+const numberFormat = new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 });
+const timeFormat = new Intl.DateTimeFormat('en-US', {
   timeZone: 'UTC', dateStyle: 'short', timeStyle: 'medium',
 });
 
@@ -26,19 +27,19 @@ export function UtcTime({ value }: { value: string }) {
 }
 
 export function targetName(astronautId: string | null, profiles: AstronautRead[]) {
-  if (astronautId === null) return 'Habitat interno';
+  if (astronautId === null) return 'Cabin';
   const profile = profiles.find(({ id }) => id === astronautId);
   return profile ? `${profile.name} · ${profile.id}` : astronautId;
 }
 
 const checkStatuses = {
-  selected: 'Checagem selecionada',
-  unavailable: 'Checagem indisponível',
-  no_check_needed: 'Sem checagem indicada',
-  needs_context: 'Mais contexto necessário',
-  protocol_referral: 'Encaminhamento para revisão humana',
+  selected: 'Selected check',
+  unavailable: 'Check unavailable',
+  no_check_needed: 'No check required',
+  needs_context: 'More context needed',
+  protocol_referral: 'Referred for human review',
 } as const;
-const effortLabels = { low: 'Baixo', medium: 'Médio', high: 'Alto' } as const;
+const effortLabels = { low: 'Low', medium: 'Medium', high: 'High' } as const;
 
 type References = InvestigationExplanation['references'];
 
@@ -49,8 +50,8 @@ function isNasaReference(reference: References[number]) {
 function ReferenceList({ references }: { references: References }) {
   return <ul>{references.map(reference => (
     <li key={reference.source_id}>
-      <a href={reference.url}>{reference.title}</a>
-      <p>{reference.relevance}</p>
+      <a href={reference.url}>{englishMissionCopy(reference.title)}</a>
+      <p>{englishMissionCopy(reference.relevance)}</p>
     </li>
   ))}</ul>;
 }
@@ -63,7 +64,7 @@ export function ResultDetails({ result, profiles, check, openCheck }: {
   const coverage = explanation?.coverage;
   const decision = explanation?.check_context;
   const review = explanation?.human_review;
-  const scope = result.scope === 'crew' ? 'Tripulação · ODYSSEY-26' : targetName(result.astronaut_id, profiles);
+  const scope = result.scope === 'crew' ? 'Crew · ODYSSEY-26' : targetName(result.astronaut_id, profiles);
   const nasa = explanation?.references.filter(isNasaReference) ?? [];
   const otherReferences = explanation?.references.filter(reference => !isNasaReference(reference)) ?? [];
   const displayedLimitations = new Set(explanation?.limitations.map(limitation => `Limitação: ${limitation}`));
@@ -75,36 +76,36 @@ export function ResultDetails({ result, profiles, check, openCheck }: {
     <div className="investigation-details">
       <div className="badge-row">
         {result.status === 'critical'
-          ? <span className="ds-badge tone-neutral">Consultar o protocolo da missão</span>
+          ? <span className="ds-badge tone-neutral">Consult the mission protocol</span>
           : <StatusBadge status={result.status} />}
-        <span className="ds-badge tone-info">Regra experimental · Demonstração</span>
+        <span className="ds-badge tone-info">Experimental rule · Demo</span>
       </div>
       <Details items={[
-        { label: 'Investigação', value: `#${result.id}` },
-        { label: 'Escopo', value: scope },
-        { label: 'Análise', value: <UtcTime value={result.created_at} /> },
-        { label: 'Versão das regras', value: result.rules_version },
+        { label: 'Investigation', value: `#${result.id}` },
+        { label: 'Scope', value: scope },
+        { label: 'Analyzed at', value: <UtcTime value={result.created_at} /> },
+        { label: 'Rule version', value: result.rules_version },
       ]} />
       <section>
-        <h3>Achados da tripulação fictícia</h3>
+        <h3>Findings for the simulated crew</h3>
         {findings.length ? (
-          <ul>{findings.map((finding, i) => <li key={i}>{finding}</li>)}</ul>
-        ) : <p>O resultado salvo não inclui achados.</p>}
-        {result.status === 'insufficient_data' ? <ActionLink href={pageHref('registrar')}>Adicionar medição</ActionLink> : null}
+          <ul>{findings.map((finding, i) => <li key={i}>{englishMissionCopy(finding)}</li>)}</ul>
+        ) : <p>This saved result has no findings.</p>}
+        {result.status === 'insufficient_data' ? <ActionLink href={pageHref('registrar')}>Add measurement</ActionLink> : null}
       </section>
       <section>
-        <h3>Cobertura</h3>
+        <h3>Coverage</h3>
         {coverage ? (
           <Details items={[
-            { label: 'Período avaliado', value: <><UtcTime value={coverage.window_start} /> a <UtcTime value={coverage.window_end} /></> },
-            { label: 'Perfis avaliados', value: coverage.evaluated_astronaut_ids.length ?
+            { label: 'Evaluation window', value: <><UtcTime value={coverage.window_start} /> to <UtcTime value={coverage.window_end} /></> },
+            { label: 'Profiles evaluated', value: coverage.evaluated_astronaut_ids.length ?
               coverage.evaluated_astronaut_ids.map(id => targetName(id, profiles)).join(', ') :
-              'Cobertura insuficiente para classificar o escopo solicitado.' },
+              'Coverage is insufficient for this scope.' },
           ]} />
-        ) : <p>O registro salvo não traz a janela ou os perfis avaliados.</p>}
+        ) : <p>The saved result does not include the window or evaluated profiles.</p>}
       </section>
       <section>
-        <h3>Evidências</h3>
+        <h3>Evidence</h3>
         {result.evidence.length ? (
           <ul className="investigation-evidence">
             {result.evidence.map((item, i) => (
@@ -112,70 +113,70 @@ export function ResultDetails({ result, profiles, check, openCheck }: {
                 <strong>{metricNames[item.kind]}</strong>
                 <span>{item.astronaut_ids.length
                   ? item.astronaut_ids.map(id => targetName(id, profiles)).join(', ')
-                  : (item.kind === 'co2_ppm' || item.kind === 'cabin_temp_c') ? 'Habitat interno' : 'Sem perfis listados'}</span>
+                  : (item.kind === 'co2_ppm' || item.kind === 'cabin_temp_c') ? 'Cabin' : 'No profiles listed'}</span>
                 <div><QualityBadge quality={item.quality} /></div>
               </li>
             ))}
           </ul>
-        ) : <p>O resultado salvo não inclui evidências.</p>}
+        ) : <p>This saved result has no evidence.</p>}
       </section>
       <section>
-        <h3>Hipóteses não confirmadas</h3>
+        <h3>Unconfirmed hypotheses</h3>
         {result.hypotheses.length ? (
           <ul>{result.hypotheses.map((hypothesis, i) => (
-            <li key={i}><strong>{hypothesis.label}</strong><p>{hypothesis.explanation}</p></li>
+            <li key={i}><strong>{englishMissionCopy(hypothesis.label)}</strong><p>{englishMissionCopy(hypothesis.explanation)}</p></li>
           ))}</ul>
-        ) : <p>Nenhuma hipótese foi incluída neste resultado.</p>}
+        ) : <p>This result has no hypotheses.</p>}
       </section>
       <section>
-        <h3>Incerteza e limitações</h3>
-        <p>{explanation?.uncertainty ?? 'O registro salvo não traz uma explicação detalhada da incerteza.'}</p>
+        <h3>Uncertainty and limitations</h3>
+        <p>{explanation ? englishMissionCopy(explanation.uncertainty) : 'This saved result has no detailed uncertainty statement.'}</p>
         {explanation?.limitations.length ? (
-          <ul>{explanation.limitations.map((limitation, i) => <li key={i}>{limitation}</li>)}</ul>
+          <ul>{explanation.limitations.map((limitation, i) => <li key={i}>{englishMissionCopy(limitation)}</li>)}</ul>
         ) : null}
       </section>
       <section>
-        <h3>Próxima checagem</h3>
+        <h3>Next check</h3>
         {decision ? <strong>{checkStatuses[decision.status]}</strong> : null}
         {nextCheck && (!decision || decision.status === 'selected') ? (
           <>
             <Details items={[
-              { label: 'Indicador', value: metricNames[nextCheck.kind] },
-              { label: 'Alvo', value: targetName(nextCheck.astronaut_id, profiles) },
-              { label: 'Esforço', value: effortLabels[nextCheck.effort] },
+              { label: 'Metric', value: metricNames[nextCheck.kind] },
+              { label: 'Target', value: targetName(nextCheck.astronaut_id, profiles) },
+              { label: 'Effort', value: effortLabels[nextCheck.effort] },
             ]} />
-            <p>{decision?.reason ?? nextCheck.reason}</p>
+            <p>{englishMissionCopy(decision?.reason ?? nextCheck.reason)}</p>
             {check ? <ActionButton onClick={() => openCheck(check)}>
-              {check.status === 'pending' ? `Abrir checagem #${check.id} na agenda` : `Ver conclusão da checagem #${check.id}`}
+              {check.status === 'pending' ? `Open check #${check.id} in the schedule` : `View completion for check #${check.id}`}
             </ActionButton> : result.followup_id !== null ? (
-              <p>Consulte a agenda para confirmar o estado da checagem #{result.followup_id}.</p>
+              <p>Check the schedule for the status of check #{result.followup_id}.</p>
             ) : null}
           </>
-        ) : <p>{decision?.reason ?? 'O registro salvo não traz a decisão de próxima checagem.'}</p>}
+        ) : <p>{decision ? englishMissionCopy(decision.reason) : 'This saved result has no decision about a next check.'}</p>}
       </section>
       <section>
-        <h3>Revisão humana</h3>
+        <h3>Human review</h3>
         {review ? (
           <>
-            <p><strong>{review.mode === 'per_protocol' ? 'Conforme o protocolo da missão' : 'Quando consultar o responsável'}</strong></p>
-            <p>{review.instruction}</p>
-            {review.protocol_reference ? <p>Protocolo informado · {review.protocol_reference}</p> : null}
-            <p>O contato com o responsável e o envio do resumo são manuais.</p>
+            <p><strong>{review.mode === 'per_protocol' ? 'Under the mission protocol' : 'When to contact mission staff'}</strong></p>
+            <p>{englishMissionCopy(review.instruction)}</p>
+            {review.protocol_reference ? <p>Protocol reference · {review.protocol_reference}</p> : null}
+            <p>Contact mission staff and share the summary directly.</p>
           </>
-        ) : <p>O registro salvo não inclui instruções de revisão.</p>}
+        ) : <p>This saved result has no review instructions.</p>}
       </section>
       <section className="scientific-context">
-        <h3>Referências científicas NASA HRP</h3>
+        <h3>NASA HRP research references</h3>
         {nasa.length ? (
           <>
             <SourceBadge source="nasa_reference" />
             <ReferenceList references={nasa} />
           </>
-        ) : <p>O resultado salvo não inclui referências científicas NASA.</p>}
+        ) : <p>This saved result has no NASA research references.</p>}
       </section>
       {otherReferences.length ? (
         <section>
-          <h3>Documentação da demonstração</h3>
+          <h3>Demo documentation</h3>
           <ReferenceList references={otherReferences} />
         </section>
       ) : null}

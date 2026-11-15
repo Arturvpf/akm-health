@@ -2,11 +2,11 @@ import { cachedRead } from './offline-store';
 import type { AstronautRead, Kind, MeasurementRead } from './types';
 
 export const METRICS = {
-  sleep_hours: { label: 'Duração do sono', unit: 'h' },
-  heart_rate_bpm: { label: 'Frequência cardíaca', unit: 'bpm' },
-  mood_score: { label: 'Humor', unit: 'pontos (1–5)' },
-  co2_ppm: { label: 'CO₂ interno', unit: 'ppm' },
-  cabin_temp_c: { label: 'Temperatura da cabine', unit: '°C' },
+  sleep_hours: { label: 'Sleep duration', unit: 'h' },
+  heart_rate_bpm: { label: 'Heart rate', unit: 'bpm' },
+  mood_score: { label: 'Mood', unit: 'points (1–5)' },
+  co2_ppm: { label: 'Cabin CO₂', unit: 'ppm' },
+  cabin_temp_c: { label: 'Cabin temperature', unit: '°C' },
 } as const satisfies Record<Kind, { label: string; unit: string }>;
 
 export const CREW_KINDS = ['sleep_hours', 'heart_rate_bpm', 'mood_score'] as const;
