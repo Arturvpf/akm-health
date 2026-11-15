@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { NAVIGATION, pageHref, parsePage, type PageId } from './navigation';
 import { MissionPreview } from './MissionPreview';
+import { ActionLink, Card, SimulationNotice } from './design-system';
 
 type Section = {
   eyebrow: string;
@@ -72,14 +73,13 @@ export function App() {
         <nav className="side-nav" aria-label="Navegação principal">
           {NAVIGATION.map(item => (
             <a key={item.id} href={pageHref(item.id)}
-              aria-current={page === item.id ? 'page' : undefined}
-              className={page === item.id ? 'nav-link active' : 'nav-link'}>
+              aria-current={page === item.id ? 'page' : undefined} className="nav-link">
               <span>{item.label}</span>
             </a>
           ))}
         </nav>
         <div className="sidebar-note">
-          <span className="dot" aria-hidden="true"/> Fluxo de demonstração fictício
+          Fluxo de demonstração fictício
           <small>Não representa monitoramento real ou validação clínica.</small>
         </div>
       </aside>
@@ -94,30 +94,27 @@ export function App() {
           <h1>{view.heading}</h1>
           <p className="lead">{view.intro}</p>
 
-          <div className="shell-status" role="note">
-            <span className="shell-status-icon" aria-hidden="true">i</span>
-            <div><strong>Dados simulados</strong><p>Os exemplos abaixo são demonstrações locais.</p></div>
-          </div>
+          <SimulationNotice />
 
           <section className="panels" aria-label="Dados de exemplo e navegação">
-            <article className="panel primary-panel">
-              <MissionPreview page={page} />
-            </article>
-            <article className="panel secondary-panel">
-              <h2>Próxima etapa da jornada</h2>
-              <a className="primary-action" href={pageHref(view.next)}>
-                Ir para {NAVIGATION.find((item) => item.id === view.next)?.label}
-                <span aria-hidden="true"> →</span>
-              </a>
-              <a className="wireframe-action" href="akm-10-wireframe.html" target="_blank" rel="noopener noreferrer">
-                Abrir wireframe interativo <span aria-hidden="true">↗</span>
-              </a>
+            <MissionPreview page={page} />
+            <Card heading="Próxima etapa da jornada">
+              <div className="journey-actions">
+                <ActionLink variant="primary" href={pageHref(view.next)}>
+                  Ir para {NAVIGATION.find((item) => item.id === view.next)?.label}
+                  <span aria-hidden="true">→</span>
+                </ActionLink>
+                <ActionLink href="akm-10-wireframe.html" target="_blank" rel="noopener noreferrer">
+                  Abrir wireframe interativo <span aria-hidden="true">↗</span>
+                  <span className="sr-only">(abre em nova aba)</span>
+                </ActionLink>
+              </div>
               <div className="links" aria-label="Outras áreas">
                 {NAVIGATION.filter((item) => item.id !== page && item.id !== view.next).map((item) => (
-                  <a href={pageHref(item.id)} key={item.id}>{item.label}</a>
+                  <ActionLink variant="quiet" href={pageHref(item.id)} key={item.id}>{item.label}</ActionLink>
                 ))}
               </div>
-            </article>
+            </Card>
           </section>
           <p className="disclaimer">Prova de navegação com missão e tripulação fictícias. Este shell não executa análises médicas, não consulta sensores e não cria alertas clínicos.</p>
         </main>
