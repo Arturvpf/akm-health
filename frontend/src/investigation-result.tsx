@@ -1,6 +1,7 @@
 import { nasaReferenceUrl } from './api';
 import { ActionButton, ActionLink, Details, QualityBadge, SourceBadge, StatusBadge } from './design-system';
 import { pageHref } from './navigation';
+import { WhyThisFinding } from './why-finding';
 import type { AstronautRead, FollowupRead, InvestigationExplanation, InvestigationResult, Kind, MetricUnit } from './types';
 
 export const metricNames: Record<Kind, string> = {
@@ -92,6 +93,7 @@ export function ResultDetails({ result, profiles, check, openCheck }: {
         ) : <p>This saved result has no findings.</p>}
         {result.status === 'insufficient_data' ? <ActionLink href={pageHref('register')}>Add measurement</ActionLink> : null}
       </section>
+      <WhyThisFinding id={result.id} profiles={profiles} />
       <section>
         <h3>Coverage</h3>
         {coverage ? (

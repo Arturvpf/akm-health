@@ -1,7 +1,7 @@
 import { cachedRead } from './offline-store';
 import type {
   AstronautRead, FollowupCompleteRequest, FollowupRead, InvestigationRequest,
-  InvestigationResult, MeasurementRead,
+  InvestigationBasis, InvestigationResult, MeasurementRead,
 } from './types';
 
 export class InvestigationApiError extends Error {
@@ -44,6 +44,10 @@ export function runInvestigation(body: InvestigationRequest) {
 
 export function readInvestigation(id: number, signal?: AbortSignal) {
   return request<InvestigationResult>(`/investigations/${id}`, { signal });
+}
+
+export function readInvestigationBasis(id: number, signal?: AbortSignal) {
+  return request<InvestigationBasis>(`/investigations/${id}/basis`, { signal });
 }
 
 export async function readAgenda(signal?: AbortSignal) {

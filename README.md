@@ -1,6 +1,76 @@
 # AKM Health — Space Health Monitoring
 
-Experimental NASA Space Apps Challenge prototype: record observations for a fictional crew, inspect history, explicitly investigate patterns and verify a finding with a new observation. ODYSSEY-26, its crew and mission readings are fictional. This is not a medical device, diagnosis, prescription, clinical validation or live astronaut monitoring.
+**A health-monitoring assistant for a crew that cannot just call a doctor.** AKM Health turns scattered readings (sleep, heart rate, mood, cabin air) into plain, checkable findings, explains exactly why each one appeared, and keeps working when the link to Earth drops.
+
+Built by **The Bug Bang Theory** for the [NASA Space Apps Challenge 2026](https://www.spaceappschallenge.org/2026/) challenge *Create Health Monitoring Software for Astronauts on Space Missions*.
+
+**Live demo:** <https://akm-health.vercel.app> (the hosted demo keeps its data in temporary storage, so it resets when the server restarts). Click **Take the 2-minute tour** on the home page for a guided walk-through.
+
+> ODYSSEY-26, its crew and every reading are fictional. AKM Health is a software prototype, not a medical device. It makes no diagnosis, prescription or clinical claim, and it does not monitor real astronauts.
+
+## The problem
+
+On a long mission the crew faces health hazards that build up slowly and rarely arrive alone: radiation, isolation and confinement, altered gravity, and a hostile, closed environment. Small changes, such as two short nights in a row while cabin CO₂ drifts up, are easy to miss. Three things make them hard to catch:
+
+- **The data is scattered.** Sleep, vitals, mood and cabin sensors live in different places and are rarely read together.
+- **Help is far away.** Communication with Earth is delayed or interrupted, so the crew and a ground team cannot rely on a live conversation.
+- **Trust is earned.** Anything that flags a crew member must say why, admit what it does not know, and leave the decision to people. A black box, or an alarm that claims a cause, is worse than nothing.
+
+## The solution
+
+AKM Health is a small, end-to-end system. Record an observation, ask the engine to investigate, read what it found and why, then verify the finding with one new observation.
+
+1. **Record** manual or synthetic readings with their origin, quality, unit and UTC time.
+2. **Investigate** on request. A deterministic rules engine looks at each crew member and at the crew as a whole, and compares cabin CO₂ and temperature as context.
+3. **Explain.** Every result lists its findings, evidence, uncertainty, limits and NASA research references, plus a **Why this finding** panel with the rule, the threshold, and the exact readings used.
+4. **Check next.** The engine suggests the single most useful follow-up measurement. Completing it closes the loop and the next run takes it into account.
+5. **Report.** One click produces a printable **downlink report** for ground control: crew status, findings and pending checks on one page.
+
+## What makes it different
+
+- **Auditable, not a black box.** The engine is plain deterministic Python with versioned rules (`demo-v1`), not an LLM. The same data always gives the same answer, and the stored audit lets you see the rule, threshold and readings behind it without recalculating anything.
+- **Honest about uncertainty.** Hypotheses are always labelled unconfirmed, a shared timing is never called a cause, suspect readings are excluded and said so, and there is no automatic critical alarm. Missing data is never treated as zero.
+- **Built for a bad link.** It is offline-first: a service worker caches the whole app, new readings queue in the browser and sync later without duplicates, and a built-in **Simulate link loss** switch lets you rehearse a communication blackout.
+- **Closes the loop.** It does not stop at flagging. It picks the next check, tracks it on a follow-up schedule and updates every screen as soon as data changes.
+- **Grounded in NASA research.** NASA Human Research Program hazards frame the interface, and real historical data from NASA OSDR Rodent Research-1 (ISS environment telemetry, radiation dose, CO₂) is shown, credited and kept separate from the simulated crew.
+- **Accessible and teachable.** English interface built for keyboard use and checked with automated accessibility tests (a human screen-reader pass is still pending), and a guided tour that walks a new user through the whole flow in about two minutes.
+- **Ready to hand over.** Contracts are validated in Python and TypeScript, and the repository ships its tests, source and AI-use documentation.
+
+## Features at a glance
+
+| Area | What you get |
+| --- | --- |
+| Dashboard | Crew status, latest readings with origin and time, cabin air, upcoming checks, downlink report export |
+| Register | Manual measurement form with validation, offline queue and sync |
+| History | Trend charts and a full measurement log |
+| Investigation | Run, read and re-open results; evidence, hypotheses, next check, human review, NASA references, **Why this finding** |
+| Link loss | Simulated blackout with cached data and a queue that syncs on restore |
+| Labs | Hypothetical scenarios, mission environments, body map, self-care journey |
+
+## Where the data comes from
+
+- Crew and cabin readings are **simulated or entered by hand**. Baselines are simulated per crew member.
+- NASA material is context, never detector input: three Human Research Program entries, and a credited OSDR RR-1 excerpt (ISS environmental telemetry, daily radiation dose, CO₂ summary). It is shown separately and never presented as current mission telemetry.
+- Sources, file hashes, transformations and reuse terms are in [docs/data-sources.md](docs/data-sources.md) and [docs/third-party-notices.md](docs/third-party-notices.md).
+- AI assistance is disclosed in [docs/ai-usage.md](docs/ai-usage.md).
+
+## How the rules work
+
+| Rule | Plain meaning |
+| --- | --- |
+| DR-01 | A crew member is flagged when their two latest usable sleep observations, on distinct UTC days within 48 hours, are both at or below 80% of their simulated baseline. |
+| DR-02 | A crew pattern is reported when at least two members with comparable periods are flagged by DR-01. |
+| DR-03 | Cabin CO₂ and temperature near those periods are compared with an earlier reference (12 h tolerance). A shared direction is context only. |
+| DR-04 | Readings marked suspect are excluded, and the result says so. |
+
+These are software parameters for the demo, not clinical thresholds. `GET /api/investigations/{id}/basis` returns the stored rule, threshold and readings behind any result.
+
+## Limitations
+
+- Prototype with simulated data. No diagnosis, clinical validation, authentication or connected sensors. Keep loopback bindings when running locally.
+- Only `POST /api/investigations/run` executes rules. Recording data does not rerun them or reclassify saved results.
+- Offline mode queues new measurements only. Investigations and follow-up completion need the API.
+- The hosted demo uses temporary storage that resets.
 
 ## Start locally
 
@@ -65,17 +135,6 @@ It uses FastAPI TestClient, temporary SQLite and a frozen demo clock. It checks 
 
 **Time matters:** the seed follows the clock. `python -m app.seed` (run from `backend/`) shifts the synthetic 13–14 November 2026 observations so the latest one lands about two minutes before "now", keeping them inside the detector's default 48-hour window; a new database plus the seed therefore shows the collective attention scenario (A1, A2, A3) immediately. `--fixed-dates` reproduces the original 13–14 November 2026 timestamps (they age out of the 48-hour window, so expect `insufficient_data` later). The seed is idempotent: to start over, use a new database file (a new `AKM_DB_PATH`). Details are in the [interactive demo walkthrough](docs/demo-script.md).
 
-## Data, NASA and limitations
-
-- Mission records are manual or synthetic, stored with origin, quality, unit and UTC time. Missing data is not zero; quality=ok does not mean clinically safe.
-- The app includes a **NASA OSDR EDA Rodent Research-1 ISS environmental telemetry excerpt**, 1 October 2014: 288 timestamps / 864 values. Local JSON is displayed separately in Dashboard and Investigation, never as current mission telemetry or detector input.
-- Three NASA HRP entries provide research context, not measurements. Mars gravity is a static reference, not a measured cabin value.
-- [Exact sources, hashes, transformations, reuse terms and import](docs/data-sources.md), [third-party notices](docs/third-party-notices.md), [AI assistance disclosure](docs/ai-usage.md).
-- The engine is deterministic Python, not an LLM service. Only POST /api/investigations/run executes investigation; GET does not run rules. Recording does not automatically complete follow-ups or reclassify saved results.
-- Demo thresholds are software parameters, not clinical thresholds. No automatic critical medical alarm or proven causal relation is produced. Missing/suspect evidence and uncertainty remain explicit.
-- The offline shell (service worker) is registered only in production builds: use `npm --prefix frontend run build` and `npm --prefix frontend run preview` (or the deployed site) to demo offline; `npm run dev` has no offline shell. The first visit precaches the whole app shell and fonts, so a reload offline works right after it.
-- Local offline use requires installed packages and local NASA files. New measurements can be queued offline in the browser and synced later (AKM-33); investigations still need the API. This guide does not claim a full mobile offline app, connected sensors, authentication or production deployment. Keep loopback bindings: there is no authentication layer.
-
 ## Check the checkout
 
 The canonical integration and accessibility matrix (T01–T15) and its browser suite are documented in [AKM-30 acceptance](docs/akm-30-acceptance.md); the suite uses a disposable fixture and a separately installed browser.
@@ -91,14 +150,6 @@ npm --prefix frontend run build
 
 scripts/check.py covers Ruff, backend tests and TypeScript, **not** the complete frontend/browser suite. Registration integration expects the repository .venv; PYTHON may select another interpreter. The [verification record](docs/akm-31-verification.md) separates executed commands from remaining browser, accessibility and scientific review. Automated success does not mean visual approval, merge or clinical validation.
 
-## Space Apps 2026 submission and acceptance
-
-- [Requirements-to-evidence audit](docs/space-apps-2026-final-audit.md) distinguishes verified functionality from pending scientific sign-off and official submission; its status update covers PRs #33 and #34.
-- [AKM-30 acceptance](docs/akm-30-acceptance.md) records T01–T15; an English screen-reader walkthrough and a visual focus check of date/time inputs still need a person. The AKM-32 submission task (tracked in the team's internal Notion workspace, which is in Portuguese and not part of the submission) must be completed with evidence; a merged PR or passing unit tests alone are not the final event submission.
-- The GitHub Actions workflow in `.github/workflows/ci.yml` is manual only (`workflow_dispatch`); it does not run on pull requests or pushes.
-- The 2026 NASA Space Apps submission deadline is November 15 at 11:59 PM in the applicable event's local time: [official event page](https://www.spaceappschallenge.org/2026/). Check the team's Project tab and any earlier local deadline. Do not claim the project has been submitted without confirmation.
-- The challenge's complete Resources tab and exact project-form requirements still require verification in the signed-in Space Apps platform. The credited NASA RR-1 historical excerpt is an input for contextual visualization, not a real clinical astronaut dataset or a medical threshold.
-
 ## Architecture and contributing
 
 [Executable architecture/API](docs/architecture-backend.md) describes the four tables, transactions, UTC, idempotency and configuration. Keep Python schemas and TypeScript contracts aligned.
@@ -112,7 +163,7 @@ scripts/check.py covers Ruff, backend tests and TypeScript, **not** the complete
 | docs/ | Contracts, sources, feature records and verification (English) |
 | docs/internal-pt/ | Internal working records kept in Portuguese; not part of the submission documentation |
 
-Start a task branch from main. Consult the [executable architecture](docs/architecture-backend.md) and the task description before changing contracts; compare plans with code and OpenAPI. Review PRs and record tests/limitations before closing tasks. Do not add the assistant as commit coauthor.
+Start a task branch from main. Consult the [executable architecture](docs/architecture-backend.md) and the task description before changing contracts; compare plans with code and OpenAPI. Review PRs and record tests/limitations before closing tasks.
 
 [Measurement protocol](docs/akm-06-measurement-protocol.md) · [Safety matrix](docs/akm-08-alert-safety.md) · [Guidance](docs/akm-09-guidance-library.md) · [Scientific sources](docs/scientific-sources.md) · [NASA feature evidence](docs/akm-39-nasa-references.md)
 
@@ -126,7 +177,7 @@ Start a task branch from main. Consult the [executable architecture](docs/archit
 - **Schema error:** check AKM_DB_PATH and [database notes](docs/database.md). Back up data; do not delete the database as a first response.
 - **NASA unavailable:** missing/invalid history yields not_imported without fabricated values; a broken HRP catalog yields 503. Restore trusted artifacts using the [data guide](docs/data-sources.md).
 
-## Exploratory P1/P2 tools (AKM-33 to AKM-37)
+## Labs: exploratory tools (AKM-33 to AKM-37)
 
 These additions are experimental and do not change the P0 investigation engine. Open them from the **Labs** tabs in the header.
 

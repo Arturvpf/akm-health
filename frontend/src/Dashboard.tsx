@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { METRIC_LABELS } from './api';
+import { DownlinkReport } from './DownlinkReport';
 import { NasaReferences } from './NasaReferences';
 import { onDataChange } from './data-changes';
 import { createDashboardController, INITIAL_DASHBOARD_STATE, type DashboardState } from './dashboard-state';
@@ -140,6 +141,7 @@ export function DashboardView({ state, onRefresh }: { state: DashboardState; onR
           <ProtocolLegend />
         </Card>
       </section>
+      <DownlinkReport data={data} />
     </>}
     <NasaReferences mission={data?.mission} environment={data?.environment} />
   </div>;

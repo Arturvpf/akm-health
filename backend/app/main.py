@@ -15,11 +15,13 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 from starlette.concurrency import run_in_threadpool
 
+from .basis import InvestigationBasis
 from .dashboard import build_dashboard
 from .agenda import pending_followups
 from .db import make_engine, migrate
 from .investigations import (
-    InvestigationSettings, complete_followup, get_investigation, load_settings, run_investigation,
+    InvestigationSettings, complete_followup, get_investigation, get_investigation_basis, load_settings,
+    run_investigation,
 )
 from .models import Astronaut, Followup, Measurement
 from .nasa_reference import load_nasa_references
@@ -217,6 +219,12 @@ def investigate(body: InvestigationRunRequest, session: DatabaseSession, setting
          responses={404: {"description": "Investigation not found"}})
 def investigation(id: ResourceId, session: DatabaseSession):
     return get_investigation(session, id)
+
+
+@app.get("/api/investigations/{id}/basis", response_model=InvestigationBasis,
+         responses={404: {"description": "Investigation or stored basis not found"}})
+def investigation_basis(id: ResourceId, session: DatabaseSession):
+    return get_investigation_basis(session, id)
 
 
 @app.patch("/api/followups/{id}", response_model=FollowupRead, responses={

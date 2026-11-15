@@ -28,6 +28,8 @@ from .schemas import (
 )
 
 
+from .basis import InvestigationBasis, build_basis
+
 logger = logging.getLogger(__name__)
 
 
@@ -304,6 +306,21 @@ def get_investigation(session: Session, id: int) -> InvestigationResult:
     except (ValueError, KeyError, TypeError) as exc:
         logger.error("Stored investigation could not be decoded: %s", type(exc).__name__)
         raise HTTPException(500, "Stored investigation is invalid") from None
+
+
+def get_investigation_basis(session: Session, id: int) -> InvestigationBasis:
+    row = session.get(Investigation, id)
+    if row is None:
+        raise HTTPException(404, "Investigation not found")
+    try:
+        result, audit = stored_document(row)
+        basis = build_basis(result, audit)
+    except (ValueError, KeyError, TypeError) as exc:
+        logger.error("Stored investigation could not be decoded: %s", type(exc).__name__)
+        raise HTTPException(500, "Stored investigation is invalid") from None
+    if basis is None:
+        raise HTTPException(404, "No stored basis for this investigation")
+    return basis
 
 
 def complete_followup(session: Session, id: int, measurement_id: int) -> FollowupRead:
