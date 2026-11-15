@@ -12,24 +12,25 @@ export type MissionEnvironment = {
   sources: readonly { title: string; url: string }[];
 };
 const HAZARDS = 'https://www.nasa.gov/hrp/hazards/';
-const FACT_SHEET = 'https://nssdc.gsfc.nasa.gov/planetary/factsheet/';
+const MARS_FACT_SHEET = 'https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html';
+const MOON_FACT_SHEET = 'https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html';
 const RISKS = 'https://www.nasa.gov/hrp/risks/';
 export const ENVIRONMENTS: readonly MissionEnvironment[] = [
   {
     id: 'mars_surface', name: 'Mars surface', setting: 'Fictional surface habitat',
-    gravity: '3.7 m/s² (~0.38 Earth g)', gravityRatio: 3.7 / 9.8,
+    gravity: '3.73 m/s² (~0.38 Earth g)', gravityRatio: 3.73 / 9.82,
     factors: ['Partial gravity', 'Distance from Earth', 'Closed environment', 'Space radiation'],
     implications: 'Crew autonomy and monitoring of habitat conditions are relevant themes. Partial gravity changes the physical context of the mission, not the app rules.',
     limitations: 'Outside Martian temperature is not cabin temperature; this selection does not modify ODYSSEY-26 records.',
-    sources: [{ title: 'NASA Planetary Fact Sheet', url: FACT_SHEET }, { title: 'NASA HRP — Five Hazards', url: HAZARDS }],
+    sources: [{ title: 'NASA Mars Fact Sheet', url: MARS_FACT_SHEET }, { title: 'NASA HRP — Five Hazards', url: HAZARDS }],
   },
   {
     id: 'lunar_surface', name: 'Lunar surface', setting: 'Hypothetical lunar habitat',
-    gravity: '1.6 m/s² (~0.16 Earth g)', gravityRatio: 1.6 / 9.8,
+    gravity: '1.62 m/s² (~0.16 Earth g)', gravityRatio: 1.62 / 9.82,
     factors: ['Partial gravity', 'Closed environment', 'Space exposure (context)'],
     implications: 'Lunar gravity is lower than Earth gravity and the habitat needs environmental control. Displayed readings stay simulated; no thresholds are recalibrated.',
     limitations: 'MVP crew data are not lunar mission data. Do not extrapolate quantitative clinical risk.',
-    sources: [{ title: 'NASA Planetary Fact Sheet', url: FACT_SHEET }, { title: 'NASA HRP — Five Hazards', url: HAZARDS }],
+    sources: [{ title: 'NASA Moon Fact Sheet', url: MOON_FACT_SHEET }, { title: 'NASA HRP — Five Hazards', url: HAZARDS }],
   },
   {
     id: 'iss_microgravity', name: 'Low Earth orbit / ISS', setting: 'Hypothetical orbital habitat',
@@ -41,11 +42,11 @@ export const ENVIRONMENTS: readonly MissionEnvironment[] = [
   },
   {
     id: 'earth_analog', name: 'Earth analog', setting: 'Simulation habitat on Earth',
-    gravity: '9.8 m/s² (1 Earth g)', gravityRatio: 1,
+    gravity: '9.82 m/s² (1 Earth g)', gravityRatio: 1,
     factors: ['Experimental isolation', 'Controlled environment', 'Earth conditions'],
     implications: 'Earth analogs help study isolation and performance factors. This MVP data source remains synthetic.',
     limitations: 'An Earth analog does not reproduce space radiation or microgravity. Do not use it as a clinical rule.',
-    sources: [{ title: 'NASA Planetary Fact Sheet', url: FACT_SHEET }, { title: 'NASA HRP — Five Hazards', url: HAZARDS }],
+    sources: [{ title: 'NASA Mars Fact Sheet (Earth column)', url: MARS_FACT_SHEET }, { title: 'NASA HRP — Five Hazards', url: HAZARDS }],
   },
 ] as const;
 export const DEFAULT_ENVIRONMENT: EnvironmentId = 'mars_surface';

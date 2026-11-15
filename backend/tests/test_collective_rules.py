@@ -66,7 +66,7 @@ def test_collective_fixture_identifies_three_profiles_and_uncertain_co2_hypothes
     assert temperature.kind == "cabin_temp_c"
     assert len(result.hypotheses) == 2
     assert all(hypothesis.certainty == "unconfirmed" for hypothesis in result.hypotheses)
-    assert "alternativas" in result.hypotheses[1].label
+    assert "alternative explanations" in result.hypotheses[1].label
     assert all(row.source == "synthetic" for row in co2.aligned_readings)
     assert result.demo_only and result.rules_version == "demo-v1"
 
@@ -77,7 +77,7 @@ def test_weak_environment_never_erases_collective_sleep_finding(variant):
     assert result.status == "attention"
     assert not result.environment[0].consistent_shift
     assert len(result.hypotheses) == 1
-    assert "alternativas" in result.hypotheses[0].label
+    assert "alternative explanations" in result.hypotheses[0].label
 
 
 def test_individual_fixture_keeps_individual_attention_without_collective_pattern():

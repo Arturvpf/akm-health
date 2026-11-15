@@ -312,7 +312,7 @@ export function InvestigationPage() {
         ) : operation === null ? (
           <>
             <p>Run an experimental investigation or retrieve a saved result.</p>
-            <ActionLink href={pageHref('registrar')}>Add measurement</ActionLink>
+            <ActionLink href={pageHref('register')}>Add measurement</ActionLink>
           </>
         ) : null}
         <details className="investigation-disclosure">
@@ -324,7 +324,7 @@ export function InvestigationPage() {
         profiles={people} active={activeCheck} select={select} recover={id => void recover(id, true)}
         completing={completing} complete={id => void complete(id)} linkMessage={agendaMessage}
         recovering={operation !== null} heading={checkHeading} />
-      <NasaReferences mission={dashboard.data?.mission} />
+      <NasaReferences mission={dashboard.data?.mission} environment={dashboard.data?.environment} />
     </div>
   );
 }

@@ -58,8 +58,8 @@ def test_followup_state_requires_measurement_evidence():
 
 def test_dashboard_handles_no_data():
     body = {"mission":{"name":"ODYSSEY-26","day":184,
-         "destination":"mars_surface","gravity_g_reference":0.378,
-         "context_source_url":"https://nssdc.gsfc.nasa.gov/planetary/factsheet/",
+         "destination":"mars_surface","gravity_g_reference":0.38,
+         "context_source_url":"https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html",
          "demo_only":True},
         "astronauts":[],"environment":{"co2_ppm":None,
         "cabin_temp_c":None,"measured_at":None,"measurement_zone":"habitat"},

@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { nasaReferenceUrl } from './api';
 import { ActionButton, Card, DataTable, Details, SelectField, SourceBadge } from './design-system';
-import type { DashboardResponse, NASAHistoricalObservation, NASAReferenceResponse } from './types';
+import type {
+  DashboardResponse, NASACo2Context, NASAHistoricalObservation, NASARadiationSeries, NASAReferenceResponse,
+} from './types';
 
 const METRICS = {
   co2_ppm: 'Carbon dioxide',
@@ -111,7 +113,109 @@ function HistoricalSeries({ history }: { history: NASAHistoricalObservation[] })
   </div>;
 }
 
-export function NasaReferences({ mission }: { mission?: DashboardResponse['mission'] }) {
+const HAZARDS_URL = 'https://www.nasa.gov/hrp/hazards/';
+const day = new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeZone: 'UTC' });
+
+function dayLabel(value: string) {
+  const parsed = Date.parse(`${value}T00:00:00Z`);
+  return Number.isFinite(parsed) ? day.format(parsed) : value;
+}
+
+/** Daily ISS cabin radiation during RR-1. Historical context only: never used by the detector or alerts. */
+export function RadiationPanel({ series, status }: { series?: NASARadiationSeries | null; status?: string }) {
+  const days = series?.days.filter(row => Number.isFinite(Date.parse(`${row.date}T00:00:00Z`))
+    && [row.gcr_mgy_per_day, row.saa_mgy_per_day, row.total_mgy_per_day, row.accumulated_mgy].every(Number.isFinite)) ?? [];
+  return <div className="nasa-history nasa-radiation">
+    <h3>ISS cabin radiation during NASA Rodent Research-1 (2014) — historical context, not crew dose</h3>
+    <SourceBadge source="nasa_historical" />
+    {status !== 'imported' || !series || days.length === 0
+      ? <p role="status">The RR-1 radiation excerpt has not been imported. No radiation values are shown or estimated.</p>
+      : <>
+        <p>{series.context} These values are not used by the detector or by alerts, and they are not doses for the fictional crew.
+          {' '}Related NASA hazard: <a href={HAZARDS_URL}>Space radiation (NASA HRP)</a>.</p>
+        <RadiationChart days={days} />
+        <details className="nasa-observations">
+          <summary>View {days.length} daily values</summary>
+          <DataTable label="RR-1 daily radiation" caption="RR-1 cabin radiation, daily values">
+            <thead><tr>
+              <th scope="col">Date (UTC)</th><th scope="col">GCR dose (mGy/day)</th><th scope="col">SAA dose (mGy/day)</th>
+              <th scope="col">Total dose (mGy/day)</th><th scope="col">Accumulated dose (mGy, cumulative)</th>
+            </tr></thead>
+            <tbody>{days.map(row => <tr key={row.date}>
+              <td><time dateTime={row.date}>{dayLabel(row.date)}</time></td>
+              <td>{numbers.format(row.gcr_mgy_per_day)}</td><td>{numbers.format(row.saa_mgy_per_day)}</td>
+              <td>{numbers.format(row.total_mgy_per_day)}</td><td>{numbers.format(row.accumulated_mgy)}</td>
+            </tr>)}</tbody>
+          </DataTable>
+        </details>
+        {(() => {
+          const link = nasaReferenceUrl(series.source_url);
+          return <p>Source: {link ? <a href={link}>{series.source}</a> : series.source} · Rodent Research-1 radiation table export.</p>;
+        })()}
+      </>}
+  </div>;
+}
+
+function RadiationChart({ days }: { days: NASARadiationSeries['days'] }) {
+  const values = days.map(row => row.total_mgy_per_day);
+  const low = Math.min(0, ...values);
+  const high = Math.max(...values);
+  const left = 68, right = 538, top = 14, bottom = 156;
+  const points = days.map((row, index) => ({
+    x: days.length > 1 ? left + (right - left) * index / (days.length - 1) : (left + right) / 2,
+    y: high > low ? bottom - (bottom - top) * (row.total_mgy_per_day - low) / (high - low) : (top + bottom) / 2,
+  }));
+  const axis = high > low ? [high, (low + high) / 2, low] : [high];
+  return <svg viewBox="0 0 560 186" className="nasa-chart" role="img"
+    aria-label={`Total daily radiation dose, mGy per day. ${days.length} days from ${dayLabel(days[0].date)} to ${dayLabel(days[days.length - 1].date)}, ${numbers.format(Math.min(...values))} to ${numbers.format(high)} mGy per day. Values are in the table below.`}>
+    {axis.map((value, index) => {
+      const y = axis.length === 1 ? (top + bottom) / 2 : top + (bottom - top) * index / 2;
+      return <g key={index}>
+        <line className="nasa-chart-rule" x1={left} x2={right} y1={y} y2={y} />
+        <text x={left - 9} y={y} dy=".32em" textAnchor="end">{numbers.format(value)}</text>
+      </g>;
+    })}
+    {points.length > 1 ? <polyline className="nasa-chart-line" points={points.map(({ x, y }) => `${x.toFixed(2)},${y.toFixed(2)}`).join(' ')} />
+      : <circle className="nasa-chart-dot" cx={points[0].x} cy={points[0].y} r={4} />}
+    <text x={left} y={177}>{dayLabel(days[0].date)}</text>
+    <text x={right} y={177} textAnchor="end">{dayLabel(days[days.length - 1].date)} · mGy/day</text>
+  </svg>;
+}
+
+/** Full-series ISS CO₂ from RR-1 next to the fictional habitat's latest reading. */
+export function Co2ContextPanel({ context, status, current }: {
+  context?: NASACo2Context | null; status?: string; current?: { value: number | null; measured_at: string | null };
+}) {
+  if (status !== 'imported' || !context) {
+    return <div className="nasa-history nasa-co2">
+      <h3>ISS CO₂ range during RR-1 — historical context, not a safety limit</h3>
+      <p role="status">The RR-1 CO₂ summary has not been imported. No range is shown or estimated.</p>
+    </div>;
+  }
+  const link = nasaReferenceUrl(context.source_url);
+  return <div className="nasa-history nasa-co2">
+    <h3>ISS CO₂ range during RR-1 — historical context, not a safety limit</h3>
+    <SourceBadge source="nasa_historical" />
+    <p>{context.context} It describes the 2014 experiment's cabin and does not define an acceptable range for the fictional habitat.</p>
+    <DataTable label="RR-1 CO₂ context" caption="Full-series ISS CO₂ (ppm) versus the fictional habitat reading">
+      <thead><tr><th scope="col">Measure</th><th scope="col">Value (ppm)</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Mean</th><td>{numbers.format(context.mean_ppm)}</td></tr>
+        <tr><th scope="row">Median</th><td>{numbers.format(context.median_ppm)}</td></tr>
+        <tr><th scope="row">Minimum</th><td>{numbers.format(context.min_ppm)}</td></tr>
+        <tr><th scope="row">Maximum</th><td>{numbers.format(context.max_ppm)}</td></tr>
+        <tr><th scope="row">Readings</th><td>{context.sample_count.toLocaleString('en')} ({dayLabel(context.period_start)} – {dayLabel(context.period_end)})</td></tr>
+        <tr><th scope="row">ODYSSEY-26 habitat, latest reading (simulated)</th>
+          <td>{current && current.value !== null ? numbers.format(current.value) : 'No reading'}</td></tr>
+      </tbody>
+    </DataTable>
+    <p>Source: {link ? <a href={link}>{context.source}</a> : context.source}. Different populations, units and windows apply to the fictional mission.</p>
+  </div>;
+}
+
+export function NasaReferences({ mission, environment }: {
+  mission?: DashboardResponse['mission']; environment?: DashboardResponse['environment'];
+}) {
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<NASAReferenceResponse | 'loading' | 'error'>('loading');
   useEffect(() => {
@@ -139,7 +243,7 @@ export function NasaReferences({ mission }: { mission?: DashboardResponse['missi
       {mission && <div className="nasa-planet">
         <h3>Mission destination · Mars surface</h3>
         <SourceBadge source="nasa_reference" />
-        <p>Reference gravity: {mission.gravity_g_reference} g.
+        <p>Reference gravity: {mission.gravity_g_reference} g (3.73 m/s² Mars mean ÷ 9.82 m/s² Earth).
           {planetSource ? <> <a href={planetSource}>NASA planetary fact sheet</a>.</>
             : ' The planetary fact sheet link is unavailable.'}</p>
         <p>Mars has a thin, predominantly carbon-dioxide atmosphere. This describes the outdoor environment.
@@ -156,6 +260,9 @@ export function NasaReferences({ mission }: { mission?: DashboardResponse['missi
           return <li key={reference.url}>{url ? <a href={url}>{reference.title}</a> : reference.title}</li>;
         })}</ul>
         <HistoricalSeries history={state.historical_series} />
+        <RadiationPanel series={state.radiation} status={state.radiation_status} />
+        <Co2ContextPanel context={state.co2_context} status={state.co2_context_status}
+          current={environment ? { value: environment.co2_ppm, measured_at: environment.measured_at } : undefined} />
       </>}
     </Card>
   </div>;

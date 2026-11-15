@@ -118,8 +118,8 @@ export function BodyExplorer() {
           <p>{region.explanation}</p>
           <p><strong>Limit:</strong> {region.limitation}</p>
           <div className="badge-row">
-            <ActionLink href="#/historico">View History</ActionLink>
-            <ActionLink href="#/registrar">Register a measurement</ActionLink>
+            <ActionLink href="#/history">View History</ActionLink>
+            <ActionLink href="#/register">Register a measurement</ActionLink>
             <ActionLink href={region.source} target="_blank" rel="noopener noreferrer">NASA source<span className="sr-only"> (opens in a new tab)</span></ActionLink>
           </div>
         </section>
@@ -127,7 +127,7 @@ export function BodyExplorer() {
         <h3>Selected context: {environment.current.name}</h3>
         <p>{environment.current.implications}</p>
         <p>Reference gravity: {environment.current.gravity}.</p>
-        <p>The body map does not run the investigation engine. <a href="#/ambientes">Choose another hypothetical environment</a>.</p>
+        <p>The body map does not run the investigation engine. <a href="#/environments">Choose another hypothetical environment</a>.</p>
       </Card>
     </div>
   </div>;

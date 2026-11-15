@@ -1,6 +1,6 @@
 # AKM-23 — Próxima checagem informativa
 
-[Tarefa](https://app.notion.com/p/4189432b2222819bb36ce429bf9f873e) · [Arquitetura](https://app.notion.com/p/4189432b2222816494fdd66f32e11ec4) · [Pesquisa AKM-07](scientific-sources.md) · [Segurança AKM-08](akm-08-alert-safety.md)
+Tarefa (internal Notion page; Portuguese, not part of the submission) · Arquitetura (internal Notion page; Portuguese, not part of the submission) · [Pesquisa AKM-07](../scientific-sources.md) · [Segurança AKM-08](../akm-08-alert-safety.md)
 
 `prioritize_next_check` em `backend/app/next_check.py` é uma função pura. Recebe snapshot individual ou coletivo, versão de regras, catálogo explícito de recursos, configuração do detector e, opcionalmente, um protocolo validado informado pelo chamador. Reutiliza as AKM-21/22 e devolve **uma** checagem viável ou uma explicação para não selecionar nenhuma. Não acessa banco, arquivos, rede ou relógio, não cria follow-ups nem altera alertas.
 

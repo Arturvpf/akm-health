@@ -4,7 +4,7 @@ The API now connects the AKM-21/22 detectors and AKM-23 prioritization to the fo
 
 ## HTTP workflow
 
-Run the API as described in the README. The canonical architecture remains [the Notion specification](https://app.notion.com/p/4189432b2222816494fdd66f32e11ec4).
+Run the API as described in the README. The canonical architecture remains the Notion specification (internal Notion page; Portuguese, not part of the submission).
 
 1. `POST /api/investigations/run` with `{"scope":"crew"}` or `{"scope":"individual","astronaut_id":"A1"}` returns HTTP 200 and the canonical `InvestigationResult`.
 2. Repeat with unchanged inputs: HTTP 200, same ID and creation time, `reused:true`. The stored response itself always has `reused:false`.

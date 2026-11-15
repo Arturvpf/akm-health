@@ -1,16 +1,16 @@
 # EP-01 · Fundação e arquitetura
 
-O P0 da ODYSSEY-26 prevê uma missão fictícia em um habitat de Marte, quatro perfis e quatro telas. A jornada planejada passa por Dashboard, Registrar, Histórico e Investigação para registrar medições, comparar evidências, recomendar uma checagem e reanalisar após seu registro. A demonstração usa observações manuais ou sintéticas, hipóteses não confirmadas e revisão humana conforme o protocolo. A AKM-35 prevê múltiplos ambientes como complemento P1. [Épico EP-01](https://app.notion.com/p/4189432b222281faa3c7e4e27ef1c37a) · [PRD v0.1 e adendo NASA](https://app.notion.com/p/4189432b222281b29830e44286432ac0) · [Arquitetura v2.0 e adendo v2.1](https://app.notion.com/p/4189432b2222816494fdd66f32e11ec4)
+O P0 da ODYSSEY-26 prevê uma missão fictícia em um habitat de Marte, quatro perfis e quatro telas. A jornada planejada passa por Dashboard, Registrar, Histórico e Investigação para registrar medições, comparar evidências, recomendar uma checagem e reanalisar após seu registro. A demonstração usa observações manuais ou sintéticas, hipóteses não confirmadas e revisão humana conforme o protocolo. A AKM-35 prevê múltiplos ambientes como complemento P1. Épico EP-01 (internal Notion page; Portuguese, not part of the submission) · PRD v0.1 e adendo NASA (internal Notion page; Portuguese, not part of the submission) · Arquitetura v2.0 e adendo v2.1 (internal Notion page; Portuguese, not part of the submission)
 
 ## Evidência das tarefas de fundação
 
 | Tarefa | Entrega verificável | Evidência |
 | --- | --- | --- |
-| [AKM-01](https://app.notion.com/p/4189432b2222815b875bc6f8f203f94b) | Escopo P0 do produto, requisitos funcionais e não funcionais, cenário, proveniência, limites e riscos. | [PRD versionado](https://app.notion.com/p/4189432b222281b29830e44286432ac0) · [Cenário sintético](synthetic-data.md) · [Segurança](akm-08-alert-safety.md) |
-| [AKM-02](https://app.notion.com/p/4189432b2222812abb6ce12e75d60571) | Componentes, stack, fronteiras e procedimento de execução local no navegador e servidor. | [Arquitetura canônica](https://app.notion.com/p/4189432b2222816494fdd66f32e11ec4) · [Procedimento local](#verificação-local) · [PR #1](https://github.com/Arturvpf/akm-health/pull/1) |
-| [AKM-03](https://app.notion.com/p/4189432b22228173b63ff6b7fe553ffb) | Modelo relacional, erros, contratos Python e TypeScript e dez operações HTTP especificadas. | [Contrato v2](contracts-v2-review.md) · [Pydantic](../backend/app/schemas.py) · [TypeScript](../frontend/src/types.ts) · [Testes de schemas](../backend/tests/test_response_contracts.py) |
-| [AKM-04](https://app.notion.com/p/4189432b222281f2b34dca5762ce083b) | Fluxograma, transições, reanálise, tratamento de dados insuficientes e encaminhamento manual. | [Fluxo e roteiro de aceite](akm-04-investigation-flow.md) · [PR #2](https://github.com/Arturvpf/akm-health/pull/2) |
-| [AKM-05](https://app.notion.com/p/4189432b222281ebb627fa7367d96bf8) | Estrutura, contribuição e checagem local reproduzível para cada PR. | [README](../README.md) · [Ruff, Pytest e TypeScript](../scripts/check.py) · [PR #2](https://github.com/Arturvpf/akm-health/pull/2) |
+| AKM-01 (internal Notion page; Portuguese, not part of the submission) | Escopo P0 do produto, requisitos funcionais e não funcionais, cenário, proveniência, limites e riscos. | PRD versionado (internal Notion page; Portuguese, not part of the submission) · [Cenário sintético](synthetic-data.md) · [Segurança](../akm-08-alert-safety.md) |
+| AKM-02 (internal Notion page; Portuguese, not part of the submission) | Componentes, stack, fronteiras e procedimento de execução local no navegador e servidor. | Arquitetura canônica (internal Notion page; Portuguese, not part of the submission) · [Procedimento local](#verificação-local) · [PR #1](https://github.com/Arturvpf/akm-health/pull/1) |
+| AKM-03 (internal Notion page; Portuguese, not part of the submission) | Modelo relacional, erros, contratos Python e TypeScript e dez operações HTTP especificadas. | [Contrato v2](../contracts-v2-review.md) · [Pydantic](../../backend/app/schemas.py) · [TypeScript](../../frontend/src/types.ts) · [Testes de schemas](../../backend/tests/test_response_contracts.py) |
+| AKM-04 (internal Notion page; Portuguese, not part of the submission) | Fluxograma, transições, reanálise, tratamento de dados insuficientes e encaminhamento manual. | [Fluxo e roteiro de aceite](akm-04-investigation-flow.md) · [PR #2](https://github.com/Arturvpf/akm-health/pull/2) |
+| AKM-05 (internal Notion page; Portuguese, not part of the submission) | Estrutura, contribuição e checagem local reproduzível para cada PR. | [README](../../README.md) · [Ruff, Pytest e TypeScript](../../scripts/check.py) · [PR #2](https://github.com/Arturvpf/akm-health/pull/2) |
 
 ## Componentes e integrações
 
@@ -35,7 +35,7 @@ flowchart LR
 | Investigação determinística em Python | Detectores individual e coletivo, seleção da próxima checagem e apresentação de alertas podem ser exercitados diretamente. A AKM-20 liga os resultados à API e persiste investigação e verificação na mesma transação. A AKM-25 integra a rotina de acompanhamento. |
 | Proveniência NASA separada | O catálogo NASA HRP responde localmente. A série histórica RR-1 foi verificada na fonte e a importação fica na AKM-39, com unidade, horário, missão e origem próprios. A evidência da tripulação usa somente medições da missão fictícia. |
 
-[SQLite e migração](database.md) · [Próxima checagem](akm-23-next-check.md) · [Apresentação de alertas](akm-24-alert-presentation.md) · [Proveniência NASA](ep-05-scientific-foundation-and-safety.md#proveniência-rr-1)
+[SQLite e migração](../database.md) · [Próxima checagem](akm-23-next-check.md) · [Apresentação de alertas](akm-24-alert-presentation.md) · [Proveniência NASA](ep-05-scientific-foundation-and-safety.md#proveniência-rr-1)
 
 ## Operações do contrato
 
@@ -56,7 +56,7 @@ O OpenAPI local expõe sete operações canônicas. A tabela separa o que já é
 
 ## Verificação local
 
-Instale as dependências conforme o [README](../README.md). Este procedimento usa um SQLite temporário no Windows e o mesmo `AKM_DB_PATH` para o seed e o servidor.
+Instale as dependências conforme o [README](../../README.md). Este procedimento usa um SQLite temporário no Windows e o mesmo `AKM_DB_PATH` para o seed e o servidor.
 
 ```powershell
 $env:AKM_DB_PATH = Join-Path ([System.IO.Path]::GetTempPath()) "akm-ep01-$([guid]::NewGuid()).db"
@@ -68,6 +68,6 @@ python scripts/check.py
 python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
 ```
 
-A primeira carga deve inserir quatro perfis e 29 medições. A segunda deve inserir zero. Consulte `/api/health`, `/openapi.json` e `/api/measurements` na porta local. Use o [exemplo de registro](contracts-v2-review.md#registering-a-measurement) para conferir criação, horário UTC e recuperação do histórico depois de reiniciar com o mesmo banco. O teste de tipos checa os cinco pares métrica/unidade, o alvo do tripulante e a nulabilidade no habitat. [Teste TypeScript](../frontend/src/measurement-contract.test.ts) · [Testes HTTP](../backend/tests/test_history_api.py)
+A primeira carga deve inserir quatro perfis e 29 medições. A segunda deve inserir zero. Consulte `/api/health`, `/openapi.json` e `/api/measurements` na porta local. Use o [exemplo de registro](../contracts-v2-review.md#registering-a-measurement) para conferir criação, horário UTC e recuperação do histórico depois de reiniciar com o mesmo banco. O teste de tipos checa os cinco pares métrica/unidade, o alvo do tripulante e a nulabilidade no habitat. [Teste TypeScript](../../frontend/src/measurement-contract.test.ts) · [Testes HTTP](../../backend/tests/test_history_api.py)
 
 Após a instalação, a API e o SQLite operam por loopback. O HTML do Swagger carrega recursos de CDN, enquanto `/openapi.json` é servido localmente. A prova no navegador com o frontend do produto pertence à AKM-30. A AKM-05 usa `python scripts/check.py` localmente antes de cada PR, com comandos e resultados registrados na descrição do PR.

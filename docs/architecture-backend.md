@@ -1,6 +1,6 @@
 # Executable architecture — canonical v2 contract
 
-This document maps the canonical [Notion v2.0/v2.1 contract](https://app.notion.com/p/4189432b2222816494fdd66f32e11ec4) to implemented files. The application is a local modular monolith, with separate frontend and API development processes; no microservice, external queue or paid LLM is required.
+This document maps the canonical Notion v2.0/v2.1 contract (internal Notion page; Portuguese, not part of the submission) to implemented files. The application is a local modular monolith, with separate frontend and API development processes; no microservice, external queue or paid LLM is required.
 
 ~~~mermaid
 flowchart LR
@@ -71,4 +71,4 @@ NASA HRP references and RR-1 archive are served by nasa_reference.py without mis
 
 ## Verification boundaries
 
-[AKM-31 verification](akm-31-verification.md) records executed commands, not a blanket certification. [AKM-29](akm-29-investigation-engine-validation.md) covers rule tests. Full browser/assistive-technology acceptance and Research/Safety approval are separate work. Do not infer merge or deployment from a passing build.
+[AKM-31 verification](akm-31-verification.md) records executed commands, not a blanket certification. AKM-29 covers rule tests. Full browser/assistive-technology acceptance and Research/Safety approval are separate work. Do not infer merge or deployment from a passing build.

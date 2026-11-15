@@ -14,7 +14,7 @@ const labels = { sleep_hours: 'Sleep', heart_rate_bpm: 'Heart rate', mood_score:
 
 export function MissionPreview({ page }: { page: Exclude<PageId, 'dashboard'> }) {
   switch (page) {
-    case 'registrar':
+    case 'register':
       return <Card heading="Registration example">
         <Details items={[
           { label: 'Metric', value: labels[example.kind] },
@@ -24,11 +24,10 @@ export function MissionPreview({ page }: { page: Exclude<PageId, 'dashboard'> })
           { label: 'Observed', value: <time dateTime={example.measured_at}>Nov 14, 2026, 07:00 UTC</time> },
           { label: 'Source', value: <SourceBadge source={example.source} /> },
         ]} />
-        <p>Use the wireframe to try the registration form with in-memory data.</p>
       </Card>;
-    case 'historico':
+    case 'history':
       return <MeasurementHistory />;
-    case 'investigacao':
+    case 'investigation':
       return <InvestigationPage />;
   }
 }

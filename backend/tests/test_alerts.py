@@ -22,9 +22,9 @@ def context(**updates):
 
 
 @pytest.mark.parametrize("status, color, icon, label", [
-    ("normal", "green", "circle-check", "Sem padrão pela regra da demo"),
-    ("attention", "yellow", "triangle-alert", "Padrão experimental a verificar"),
-    ("insufficient_data", "gray", "info", "Dados insuficientes"),
+    ("normal", "green", "circle-check", "No pattern under the demo rule"),
+    ("attention", "yellow", "triangle-alert", "Experimental pattern to check"),
+    ("insufficient_data", "gray", "info", "Insufficient data"),
 ])
 def test_status_always_has_text_icon_and_color(status, color, icon, label):
     result = present_alert(context(status=status))
@@ -39,7 +39,7 @@ def test_red_is_reproducible_in_the_legend_and_never_a_synthetic_alert():
     styles = alert_legend()
     red = styles[-1]
     assert red.status == "critical" and red.color == "red" and red.legend_only
-    assert red.icon == "siren" and "protocolo" in red.label
+    assert red.icon == "siren" and "protocol" in red.label
     with pytest.raises(ValidationError):
         context(status="critical")
     with pytest.raises(ValidationError):
@@ -79,19 +79,19 @@ def test_new_measurements_only_add_update_message_and_preserve_confirmed_status(
     assert after.context.status == before.context.status
     assert after.style == before.style and after.explanation == before.explanation
     assert before.update_message is None
-    assert after.update_message == "Novas medições disponíveis — atualizar investigação"
+    assert after.update_message == "New measurements available — update the investigation"
 
 
 def test_collective_context_preserves_coverage_and_explicit_uncertainty():
     result = present_alert(context(
         scope="crew", astronaut_id=None, status="attention",
         evaluated_astronaut_ids=("A1", "A2", "A3"),
-        findings=("Padrão coletivo experimental.", "Coincidência ambiental não confirmada."),
-        limitations=("A coincidência não demonstra causalidade.",),
+        findings=("Experimental crew pattern.", "Environmental overlap is unconfirmed."),
+        limitations=("The overlap does not demonstrate causality.",),
     ))
     assert result.context.scope == "crew" and result.evaluated_profile_count == 3
-    assert "não confirmada" in result.explanation
-    assert result.context.limitations == ("A coincidência não demonstra causalidade.",)
+    assert "unconfirmed" in result.explanation
+    assert result.context.limitations == ("The overlap does not demonstrate causality.",)
     assert result.context.as_of == AS_OF
 
 

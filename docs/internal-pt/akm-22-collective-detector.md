@@ -1,6 +1,6 @@
 # AKM-22 — Padrões coletivos e ambiente
 
-[Tarefa](https://app.notion.com/p/4189432b2222812badaae0da3c4ea775) · [Arquitetura](https://app.notion.com/p/4189432b2222816494fdd66f32e11ec4) · [Matriz AKM-08](akm-08-alert-safety.md)
+Tarefa (internal Notion page; Portuguese, not part of the submission) · Arquitetura (internal Notion page; Portuguese, not part of the submission) · [Matriz AKM-08](../akm-08-alert-safety.md)
 
 `detect_collective_patterns` em `backend/app/rules.py` aplica DR-02/03/04 como função pura. Reutiliza a AKM-21, sem persistir dados ou adicionar endpoints. O snapshot contém perfis únicos ordenados por ID, histórico único ordenado por `(measured_at, id)` e `as_of` explícito em UTC. Cada perfil pode ter baseline ausente para que a insuficiência fique explícita.
 

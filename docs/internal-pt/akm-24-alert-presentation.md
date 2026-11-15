@@ -1,6 +1,6 @@
 # AKM-24 — Status e mensagens de alerta
 
-[Tarefa](https://app.notion.com/p/4189432b2222815fb962d6902f7a7696) · [Matriz AKM-08](akm-08-alert-safety.md) · [Arquitetura](https://app.notion.com/p/4189432b2222816494fdd66f32e11ec4)
+Tarefa (internal Notion page; Portuguese, not part of the submission) · [Matriz AKM-08](../akm-08-alert-safety.md) · Arquitetura (internal Notion page; Portuguese, not part of the submission)
 
 `backend/app/alerts.py` apresenta um status já calculado pelo motor. Não recebe valores brutos de sensores, não inventa limiares, não executa o motor e não grava dados. A função pura `present_individual_alert` traduz diretamente os resultados da AKM-21; `present_alert` recebe um `AlertContext` tipado para escopos individual ou coletivo.
 

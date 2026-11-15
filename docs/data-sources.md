@@ -1,6 +1,6 @@
 # Data sources and provenance
 
-This inventory describes the artifacts used by the current application, not every source proposed in earlier plans. See [AKM-39](akm-39-nasa-references.md) and the [AKM-38 audit](https://app.notion.com/p/4189432b2222817c8ebdc3a1be168b8a).
+This inventory describes the artifacts used by the current application, not every source proposed in earlier plans. See [AKM-39](akm-39-nasa-references.md) and the AKM-38 audit (internal Notion page; Portuguese, not part of the submission).
 
 | Category | Local artifact / origin | Purpose |
 | --- | --- | --- |
@@ -8,7 +8,7 @@ This inventory describes the artifacts used by the current application, not ever
 | Mission manual | POST /api/measurements → SQLite | User-entered observations of the fictional mission, never real patient data |
 | NASA reference | backend/data/nasa/hrp_catalog.json | Three NASA HRP links: hazards, risks and ongoing research; no quantitative patient data |
 | NASA historical | backend/data/nasa/reference.json | Read-only RR-1 ISS environmental archive, outside the mission tables and rule inputs |
-| Planetary context | backend/app/mission_environment.json | Fictional destination mars_surface; static NASA gravity reference 0.378 Earth g, not measured gravity |
+| Planetary context | backend/app/mission_environment.json | Fictional destination mars_surface; static NASA gravity reference 0.38 Earth g (Mars mean 3.73 m/s² ÷ Earth 9.82 m/s², NASA NSSDCA Mars Fact Sheet, last updated 19 May 2025), not measured gravity. Lunar value 1.62 m/s² from the NSSDCA Moon Fact Sheet (last updated 11 January 2024) |
 
 ## Exact NASA historical resource
 
@@ -62,6 +62,26 @@ python scripts/import_rr1_reference.py <csv-path>
 5. To restore without reimporting, obtain these artifacts from a trusted checkout of the same repository revision; preserve local backups before replacing files.
 
 Missing/invalid historical JSON returns not_imported and an empty series, with no fabricated NASA values. Missing/invalid HRP catalog causes HTTP 503. Neither fallback inserts or changes mission measurements. No NASA request occurs on the API's critical read path.
+
+## RR-1 radiation and CO₂ context (historical, never detector input)
+
+Two additional local excerpts describe the same NASA OSDR EDA **Rodent Research-1** experiment. They are shown only in the NASA references panel and never feed the detector, alerts or any dose for the fictional crew.
+
+| Artifact | Source export (SHA-256) | Content | Transformation |
+| --- | --- | --- | --- |
+| `backend/data/nasa/radiation.json` | `RR-1_EDA_Radiation_table.csv` (`766555cabeb9c5bf101d542acfeb13cef2e9d1e20869908311d6045224095c2b`) | 39 daily rows, 21 September to 29 October 2014: `gcr_mgy_per_day`, `saa_mgy_per_day`, `total_mgy_per_day` (all mGy/day) and `accumulated_mgy` (**cumulative dose in mGy, not mGy/day**) | Column rename and ISO dates only; no interpolation or resampling |
+| `backend/data/nasa/co2_context.json` | `RR-1_EDA_Telemetry_table.csv` (`6f252984805e8e9a1e7d19927f88b70160ebc30fa3cd7e842572f2b806e5a805`, the audited export above) | Full-series ISS CO₂: mean 3197.27 ppm, median 3192, minimum 1862, maximum 4667, n = 12,087, 20 September to 1 November 2014 | Statistics recomputed from the telemetry export; the importer refuses to write unless they reproduce the audited figures. `RR-1_EDA_Summary_table.csv` (`a1da2c751ef8b246832e131553d7fff4a229b36fe8c684960786aa784b4dc4c0`) was supplied by the team as the origin of these figures; the telemetry recomputation above is the independent check |
+
+Exact API URL: **not confirmed**. The EDA mission endpoint (`/eda/api/missions/RR-1/`) lists only metadata and a link to the OSDR payload page, with no radiation endpoint. The radiation table is therefore cited as the exportation of the RR-1 radiation table from the [EDA portal](https://visualization.osdr.nasa.gov/eda/). Access date of the export: **TODO: record the date the export was downloaded**.
+
+To import (the importer refuses any file whose SHA-256 differs, writes nothing unless every check passes, and fails with an explicit message if the export layout differs from the expected one):
+
+~~~sh
+# from the repository root, with the original exports
+python scripts/import_rr1_radiation.py <RR-1_EDA_Radiation_table.csv> --telemetry <RR-1_EDA_Telemetry_table.csv>
+~~~
+
+Until the files exist, `GET /api/nasa/references` returns `radiation_status: "not_imported"` and `co2_context_status: "not_imported"` with `radiation: null` and `co2_context: null`; the interface says so and shows no values. Do not use these numbers as a clinical or safety threshold.
 
 ## Reference and planetary links
 

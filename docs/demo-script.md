@@ -21,7 +21,7 @@ python scripts/demo_adaptive_routine.py exercises the optional windowed routine 
 7. Explicitly run again and inspect the new/reused result appropriate to its inputs. A persisted result is not a live clinical classification.
 8. In Dashboard/Investigation open the separate NASA section: HRP references and RR-1 2014 ISS history. Compare /api/nasa/references with /api/measurements; the archive is not mission telemetry.
 
-The seed dates are fixed (13–14 November 2026). The normal 48-hour detector window ages with the real clock. If samples are too old, expect insufficient_data/limited evidence. For an interactive collective pattern, deliberately register clearly simulated comparable sleep observations for at least two profiles on two distinct UTC dates within the active window, using the documented synthetic baseline rule. If suitable dates are not available, use the fixed-clock script above rather than falsifying times or expecting clinical significance.
+The seed follows the clock: by default `python -m app.seed` (from `backend/`) moves the synthetic observations so the latest one is about two minutes old, which keeps them inside the 48-hour detector window. A new database plus seed therefore shows the collective pattern (A1, A2, A3: lower sleep with a concurrent CO₂ change) at record time. The window still ages in real time, so record the demo within 48 hours of seeding. `python -m app.seed --fixed-dates` restores the original 13–14 November 2026 timestamps (expect `insufficient_data` once they age out). The seed is idempotent; to start over, point `AKM_DB_PATH` at a new database file. Use the fixed-clock script above only for reproducible command-line checks.
 
 ## Error and uncertainty checks
 

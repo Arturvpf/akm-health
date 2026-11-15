@@ -83,7 +83,7 @@ def test_weak_environment_prioritizes_a_new_cabin_observation(variant):
     result = prioritize_next_check(scenario(environment=variant), "demo-v1", resources())
     assert result.next_check.kind == "co2_ppm" and result.next_check.astronaut_id is None
     assert result.candidates[0].quality_need == 100
-    assert "qualidade" in result.next_check.reason
+    assert "quality" in result.next_check.reason
 
 
 def test_supported_collective_pattern_keeps_co2_priority_when_another_profile_lacks_data():
@@ -105,7 +105,7 @@ def test_unavailable_co2_uses_a_feasible_sleep_alternative_with_an_explanation()
     result = prioritize_next_check(scenario(), "demo-v1", resources(co2=False))
     assert result.status == "selected" and result.used_alternative
     assert result.next_check.kind == "sleep_hours"
-    assert "Alternativa" in result.next_check.reason
+    assert "next viable option" in result.next_check.reason
     assert result.candidates[0].availability_score == 0
     assert result.candidates[0].availability_reason
 
@@ -113,7 +113,7 @@ def test_unavailable_co2_uses_a_feasible_sleep_alternative_with_an_explanation()
 def test_temperature_is_a_contextual_alternative_not_a_replacement_for_co2():
     result = prioritize_next_check(scenario(), "demo-v1", resources(co2=False, sleep=False))
     assert result.used_alternative and result.next_check.kind == "cabin_temp_c"
-    assert "não substitui" in result.next_check.reason
+    assert "separate CO₂ reading is still needed" in result.next_check.reason
 
 
 def test_no_resources_or_all_unavailable_returns_no_fictitious_check():
@@ -154,7 +154,7 @@ def test_empty_history_with_known_baseline_recommends_new_sleep_data():
     data = IndividualSnapshot(astronaut_id="A1", baseline_sleep_hours=8, as_of=AS_OF)
     result = prioritize_next_check(data, "demo-v1", resources())
     assert result.next_check.kind == "sleep_hours" and result.next_check.astronaut_id == "A1"
-    assert "período distinto" in result.reason
+    assert "different period" in result.reason
 
 
 def test_missing_baseline_or_empty_roster_needs_context_instead_of_an_invented_target():
@@ -203,7 +203,7 @@ def test_individually_sufficient_but_unaligned_periods_recommend_new_distinct_sl
         astronauts=(CrewMember(id="A1", baseline_sleep_hours=8), CrewMember(id="A2", baseline_sleep_hours=8)))
     result = prioritize_next_check(data, "demo-v1", resources())
     assert result.detection_status == "insufficient_data"
-    assert result.next_check.kind == "sleep_hours" and "período distinto" in result.reason
+    assert result.next_check.kind == "sleep_hours" and "distinct period" in result.reason
 
 
 @pytest.mark.parametrize("incomplete_available", [False, None, True])
@@ -235,7 +235,7 @@ def test_crew_alignment_remains_an_alternative_to_collecting_a_missing_profile(i
     assert [candidate.target.astronaut_id for candidate in result.candidates] == ["A3", "A1", "A2"]
     assert result.candidates[1].score > result.candidates[0].score
     if not incomplete_available:
-        assert "Alternativa" in result.next_check.reason and "alinhar" in result.next_check.reason
+        assert "next viable option" in result.next_check.reason and "align" in result.next_check.reason
 
 
 def test_collective_normal_does_not_hide_a_persisting_individual_pattern():
@@ -275,7 +275,7 @@ def test_human_protocol_referral_does_not_wait_for_detection_or_a_measurement():
     result = prioritize_next_check(CrewSnapshot(as_of=AS_OF), "demo-v1", (), protocol=protocol)
     assert result.status == "protocol_referral" and result.detection_status is None
     assert result.next_check is None and result.candidates == ()
-    assert "sem aguardar" in result.reason and result.protocol_reference == protocol.reference
+    assert "without waiting" in result.reason and result.protocol_reference == protocol.reference
     # Resource configuration is irrelevant to a referral that requires no collection.
     assert prioritize_next_check(CrewSnapshot(as_of=AS_OF), "demo-v1", resources() * 2,
                                  protocol=protocol).status == "protocol_referral"

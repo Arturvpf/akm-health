@@ -120,12 +120,12 @@ def _sleep_gap(result: IndividualDetection) -> tuple[int, int, str] | None:
     if result.status == "insufficient_data":
         return (
             100 if len(result.evidence) == 1 else 80, 100,
-            "Registrar sono em um período distinto para reduzir a lacuna de evidência do perfil; "
-            "uma repetição do mesmo período não completa a cobertura.",
+            "Record sleep for a different period to fill the evidence gap. "
+            "Repeated readings for the same period add no coverage.",
         )
     if result.status == "attention":
         return 80, 40 if result.excluded_suspect_ids else 20, (
-            "Repetir o registro de sono e conferir horário/rotina de coleta para acompanhar o padrão individual experimental."
+            "Record another sleep period and check collection timing to follow up on the individual pattern."
         )
     return None
 
@@ -151,9 +151,9 @@ def prioritize_next_check(
         scope, subject = "crew", None
         known_subjects = {member.id for member in snapshot.astronauts}
     limitations = (
-        "Pontuação demonstrativa de software, não probabilidade clínica nem prescrição.",
-        "Disponibilidade e esforço são informados pelo chamador; recurso não informado não é considerado viável.",
-        "A seleção não grava tarefas nem executa medições. Hipóteses permanecem não confirmadas.",
+        "Demo software score; not a clinical probability or a prescription.",
+        "Availability and effort are supplied by the caller; a resource that is not reported is not treated as viable.",
+        "Selection neither saves tasks nor runs measurements. Hypotheses remain unconfirmed.",
     )
     base = dict(scope=scope, astronaut_id=subject, as_of=snapshot.as_of, rules_version=rules_version,
                 protocol_reference=protocol.reference if protocol else None)
@@ -165,8 +165,8 @@ def prioritize_next_check(
             return NextCheckSelection(
                 **base, status="protocol_referral", detection_status=None, next_check=None,
                 candidates=(), used_alternative=False,
-                reason="Seguir o encaminhamento humano do protocolo validado informado, sem aguardar nova coleta.",
-                limitations=limitations + ("A validação e a aplicação do protocolo pertencem à equipe responsável.",),
+                reason="Follow the human referral in the validated protocol without waiting for a new reading.",
+                limitations=limitations + ("Mission staff are responsible for validating and applying the protocol.",),
             )
 
     catalog = {_key(resource): resource for resource in resources}
@@ -184,7 +184,7 @@ def prioritize_next_check(
     alignment_alternatives: set[str] = set()
     if protocol is not None:
         proposals = [
-            (target, 100, 100, f"Checagem permitida pelo protocolo validado informado: {protocol.reference}.", rank)
+            (target, 100, 100, f"Check permitted by the validated protocol: {protocol.reference}.", rank)
             for rank, target in enumerate(protocol.permitted_checks)
         ]
     else:
@@ -193,10 +193,10 @@ def prioritize_next_check(
             missing = co2.baseline is None or len(co2.aligned_readings) < 2
             info, quality = (100, 50) if co2.consistent_shift else ((95, 100) if missing else (35, 10))
             proposals.append((CheckTarget(kind="co2_ppm"), info, quality,
-                "Confirmar nova leitura de CO₂ interno e conferir horário/qualidade da coleta; "
-                "a coincidência ambiental não demonstra causalidade.", None))
+                "Collect another cabin CO₂ reading and check its timestamp and quality. "
+                "The cause remains unconfirmed.", None))
             proposals.append((CheckTarget(kind="cabin_temp_c"), 25, 20,
-                "Obter contexto adicional da temperatura interna; não substitui a confirmação de CO₂.", None))
+                "Collect cabin temperature for additional context. A separate CO₂ reading is still needed for confirmation.", None))
         has_alignment_pair = sum(result.status != "insufficient_data" for result in individual_results) >= 2
         for result in individual_results:
             gap = _sleep_gap(result)
@@ -204,7 +204,7 @@ def prioritize_next_check(
                 gap = None
                 if has_alignment_pair:
                     info = 90 if result.evidence[-1].period < snapshot.as_of.date() else 70
-                    gap = (info, 80, "Registrar um novo período distinto de sono para alinhar a cobertura temporal coletiva.")
+                    gap = (info, 80, "Record sleep for another distinct period to align the crew observation windows.")
                     alignment_alternatives.add(result.astronaut_id)
             elif (gap is not None and scope == "crew"
                     and detection.status == "attention" and result.status == "insufficient_data"):
@@ -225,7 +225,7 @@ def prioritize_next_check(
             availability_score=100 if available else 0, effort=effort, effort_penalty=penalty,
             score=3 * info + quality - penalty, reason=reason, protocol_rank=rank,
             availability_reason=None if available else (
-                "Recurso não informado." if resource is None else "Recurso informado como indisponível."
+                "Resource not reported." if resource is None else "Resource reported as unavailable."
             ),
         ))
     ranked = tuple(sorted(scored, key=lambda candidate: (
@@ -239,13 +239,13 @@ def prioritize_next_check(
     if selected is None:
         if ranked:
             status = "unavailable"
-            reason = "Não há checagem relevante disponível; conferir recursos ou solicitar revisão humana, sem inventar uma alternativa."
+            reason = "No relevant check is available. Review resources or request human review."
         elif detection.status == "normal":
             status = "no_check_needed"
-            reason = "Sem checagem adicional pela regra da demo; as avaliações programadas continuam nas tarefas de rotina."
+            reason = "The demo rule suggests no additional check. Scheduled checks remain in the routine."
         else:
             status = "needs_context"
-            reason = "Conferir perfis, baselines e cobertura temporal: não há alvo adequado para uma nova coleta informativa."
+            reason = "Review crew profiles, baselines, and time coverage. There is no suitable target for an additional reading."
         return NextCheckSelection(
             **base, status=status, detection_status=detection.status, next_check=None,
             candidates=ranked, used_alternative=False, reason=reason,
@@ -254,7 +254,7 @@ def prioritize_next_check(
     fallback = ranked.index(selected) > 0
     reason = selected.reason
     if fallback:
-        reason += " Alternativa viável: as opções anteriores na priorização estão indisponíveis."
+        reason += " The higher-priority checks are unavailable. This check is the next viable option."
     return NextCheckSelection(
         **base, status="selected", detection_status=detection.status,
         next_check=SelectedCheck(kind=selected.target.kind, astronaut_id=selected.target.astronaut_id,

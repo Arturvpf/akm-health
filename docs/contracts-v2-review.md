@@ -1,6 +1,6 @@
 # AKM Health — AKM-03 | Technical contracts reviewed, v2.0
 
-Canonical architecture: https://app.notion.com/p/4189432b2222816494fdd66f32e11ec4
+Canonical architecture: the team's internal Notion workspace (Portuguese, not part of the submission)
 
 ## Four tables; no extra NASA data table
 
@@ -31,7 +31,7 @@ Measurement timestamps use ISO 8601 with `Z` or an explicit UTC offset such as `
 
 ### Registering a measurement
 
-With the API running, send this JSON to `POST /api/measurements` using [Swagger UI](http://127.0.0.1:8000/docs). Run the [seed](synthetic-data.md) first if you want to register a crew measurement for A1–A4. The example uses the habitat and also works on an empty database.
+With the API running, send this JSON to `POST /api/measurements` using [Swagger UI](http://127.0.0.1:8000/docs). Run the seed first if you want to register a crew measurement for A1–A4. The example uses the habitat and also works on an empty database.
 
 ```json
 {
@@ -59,7 +59,7 @@ No clinical diagnosis, use synthetic heuristics and mark all demonstration data.
 
 ## Implemented vs pending
 
-The foundation provides Pydantic and TypeScript contracts, the SQLModel schema and the synthetic seed. The API serves health, astronaut profiles, measurement writes and history, dashboard snapshots, persisted follow-up listings and NASA references with an empty historical series. Investigation creation and retrieval, follow-up completion, the React application and historical NASA import are planned. The detectors and presentation functions can be exercised separately through local scripts and tests. See the [EP-01 operations table](ep-01-foundation-and-architecture.md#operações-do-contrato).
+The foundation provides Pydantic and TypeScript contracts, the SQLModel schema and the synthetic seed. The API serves health, astronaut profiles, measurement writes and history, dashboard snapshots, persisted follow-up listings and NASA references with an empty historical series. Investigation creation and retrieval, follow-up completion, the React application and historical NASA import are planned. The detectors and presentation functions can be exercised separately through local scripts and tests. See the EP-01 operations table.
 
 The TypeScript `MeasurementCreate` contract requires the unit associated with each `kind` and the correct `astronaut_id` for its zone. The server also validates finite values and ranges, parses timestamps and checks that the astronaut exists.
 

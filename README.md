@@ -41,7 +41,7 @@ Keep the API running. In a **second terminal**, at the repository root:
 npm --prefix frontend run dev -- --port 5173 --strictPort
 ```
 
-Open [AKM Health](http://127.0.0.1:5173/#/dashboard). All four mission screens use the API. Route identifiers remain dashboard, registrar, historico, investigacao. The main interface labels and built-in investigation narratives are in English following merged PR #29; route identifiers remain unchanged. The separate interactive wireframe is an older Portuguese-language reference.
+Open [AKM Health](http://127.0.0.1:5173/#/dashboard). All four mission screens use the API. Route identifiers are `dashboard`, `register`, `history` and `investigation` (plus `scenarios`, `environments`, `body` and `self-care`); earlier Portuguese hashes such as `#/registrar` redirect to them. The interface labels and the investigation narratives returned by the API are in English.
 
 Check [health](http://127.0.0.1:8000/api/health), [OpenAPI JSON](http://127.0.0.1:8000/openapi.json) and [NASA references](http://127.0.0.1:8000/api/nasa/references). Health returns status=ok and storage=sqlite_reachable. [Swagger UI](http://127.0.0.1:8000/docs) loads CDN assets and may not render offline.
 
@@ -63,7 +63,7 @@ python scripts/demo_investigation_flow.py
 
 It uses FastAPI TestClient, temporary SQLite and a frozen demo clock. It checks explicit investigation, reuse, recovery, completion with compatible measurement evidence and explicit reanalysis. Expect repeat_reused=true, new_data_requires_explicit_run=true and a new investigation ID. It restores its environment and does not modify the normal demo database. The recheck is inserted through SQLModel; this is not a browser or POST-registration acceptance test.
 
-**Time matters:** seed dates are 13–14 November 2026, while the normal API uses the current clock. The default 48-hour window can exclude older samples. Insufficient data is valid; do not promise a collective/yellow result from an aged seed. See the [interactive demo walkthrough](docs/demo-script.md).
+**Time matters:** the seed follows the clock. `python -m app.seed` (run from `backend/`) shifts the synthetic 13–14 November 2026 observations so the latest one lands about two minutes before "now", keeping them inside the detector's default 48-hour window; a new database plus the seed therefore shows the collective attention scenario (A1, A2, A3) immediately. `--fixed-dates` reproduces the original 13–14 November 2026 timestamps (they age out of the 48-hour window, so expect `insufficient_data` later). The seed is idempotent: to start over, use a new database file (a new `AKM_DB_PATH`). Details are in the [interactive demo walkthrough](docs/demo-script.md).
 
 ## Data, NASA and limitations
 
@@ -83,7 +83,7 @@ Windows commands, repository root. On Bash/Zsh replace the Python prefix with py
 
 ```powershell
 .\.venv\Scripts\python.exe scripts/check.py
-node --test frontend/scripts/test-dashboard.cjs frontend/scripts/test-history.cjs frontend/scripts/test-investigation-api.cjs frontend/scripts/test-registration.cjs frontend/scripts/test-wireframe.cjs
+node --test frontend/scripts/test-dashboard.cjs frontend/scripts/test-nasa-panels.cjs frontend/scripts/test-history.cjs frontend/scripts/test-investigation-api.cjs frontend/scripts/test-registration.cjs
 npm --prefix frontend run test:navigation
 npm --prefix frontend run build
 ```
@@ -93,7 +93,7 @@ scripts/check.py covers Ruff, backend tests and TypeScript, **not** the complete
 ## Space Apps 2026 submission and acceptance
 
 - [Requirements-to-evidence audit](docs/space-apps-2026-final-audit.md) distinguishes verified functionality from pending scientific sign-off and official submission; its status update covers PRs #33 and #34.
-- [AKM-30 acceptance](docs/akm-30-acceptance.md) records T01–T15; an English screen-reader walkthrough and a visual focus check of date/time inputs still need a person. The [AKM-32 submission task](https://app.notion.com/p/4189432b2222816dbad1d27d8ba2071d) must be completed with evidence; a merged PR or passing unit tests alone are not the final event submission.
+- [AKM-30 acceptance](docs/akm-30-acceptance.md) records T01–T15; an English screen-reader walkthrough and a visual focus check of date/time inputs still need a person. The AKM-32 submission task (tracked in the team's internal Notion workspace, which is in Portuguese and not part of the submission) must be completed with evidence; a merged PR or passing unit tests alone are not the final event submission.
 - The GitHub Actions workflow in `.github/workflows/ci.yml` is manual only (`workflow_dispatch`); it does not run on pull requests or pushes.
 - The 2026 NASA Space Apps submission deadline is November 15 at 11:59 PM in the applicable event's local time: [official event page](https://www.spaceappschallenge.org/2026/). Check the team's Project tab and any earlier local deadline. Do not claim the project has been submitted without confirmation.
 - The challenge's complete Resources tab and exact project-form requirements still require verification in the signed-in Space Apps platform. The credited NASA RR-1 historical excerpt is an input for contextual visualization, not a real clinical astronaut dataset or a medical threshold.
@@ -108,9 +108,10 @@ scripts/check.py covers Ruff, backend tests and TypeScript, **not** the complete
 | backend/data/nasa/ | Credited HRP catalog and read-only RR-1 excerpt |
 | frontend/src/ | React/TypeScript/Vite interface and API clients |
 | scripts/ | Checks, isolated demos and audited-CSV importer |
-| docs/ | Contracts, sources, feature records and verification |
+| docs/ | Contracts, sources, feature records and verification (English) |
+| docs/internal-pt/ | Internal working records kept in Portuguese; not part of the submission documentation |
 
-Start a task branch from main. Consult the [Notion architecture](https://app.notion.com/p/4189432b2222816494fdd66f32e11ec4) and task before changing contracts; compare plans with code and OpenAPI. Review PRs and record tests/limitations before closing tasks. Do not add the assistant as commit coauthor.
+Start a task branch from main. Consult the [executable architecture](docs/architecture-backend.md) and the task description before changing contracts; compare plans with code and OpenAPI. Review PRs and record tests/limitations before closing tasks. Do not add the assistant as commit coauthor.
 
 [Measurement protocol](docs/akm-06-measurement-protocol.md) · [Safety matrix](docs/akm-08-alert-safety.md) · [Guidance](docs/akm-09-guidance-library.md) · [Scientific sources](docs/scientific-sources.md) · [NASA feature evidence](docs/akm-39-nasa-references.md)
 

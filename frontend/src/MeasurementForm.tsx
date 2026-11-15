@@ -106,7 +106,7 @@ export function MeasurementFormView({ context, registration, draft, errors, onCh
         <ActionButton onClick={onNew}>Register another measurement</ActionButton>
       </div>}
       {registration.phase === 'uncertain' && <div className="status-actions">
-        <ActionLink href="#/historico" target="_blank" rel="noopener noreferrer">Check History in a new tab</ActionLink>
+        <ActionLink href="#/history" target="_blank" rel="noopener noreferrer">Check History in a new tab</ActionLink>
         <ActionButton onClick={onUnlock}>I checked History and the reading is missing. Enable resubmission.</ActionButton>
         <p>The previous attempt may have saved the reading. Check History before resubmitting to avoid a duplicate. Your draft remains available.</p>
       </div>}
@@ -121,7 +121,7 @@ export function MeasurementFormView({ context, registration, draft, errors, onCh
         ]} />
         <p>Measurement saved. Run an investigation to analyze it. Pending checks require a separate confirmation.</p>
         <p>Review saved readings in History before registering another observation.</p>
-        <div className="badge-row"><ActionLink href="#/dashboard">View updated Dashboard</ActionLink><ActionLink href="#/historico">View History</ActionLink><ActionLink href="#/investigacao">Go to Investigation</ActionLink><ActionButton onClick={onNew}>Register another measurement</ActionButton></div>
+        <div className="badge-row"><ActionLink href="#/dashboard">View updated Dashboard</ActionLink><ActionLink href="#/history">View History</ActionLink><ActionLink href="#/investigation">Go to Investigation</ActionLink><ActionButton onClick={onNew}>Register another measurement</ActionButton></div>
       </Card>}
     </div>
     {!receipt && <div className="measurement-grid">

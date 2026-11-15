@@ -27,21 +27,21 @@ class AlertStyle(StrictModel):
 
 _STYLES = MappingProxyType({
     "normal": AlertStyle(
-        status="normal", label="Sem padrão pela regra da demo", color="green", icon="circle-check",
-        attention_level="routine", action_text="Veja a janela e os dados efetivamente avaliados.",
+        status="normal", label="No pattern under the demo rule", color="green", icon="circle-check",
+        attention_level="routine", action_text="Review the observation window and the data actually evaluated.",
     ),
     "attention": AlertStyle(
-        status="attention", label="Padrão experimental a verificar", color="yellow", icon="triangle-alert",
-        attention_level="verify", action_text="Consulte o achado e as verificações disponíveis na investigação.",
+        status="attention", label="Experimental pattern to check", color="yellow", icon="triangle-alert",
+        attention_level="verify", action_text="Review the finding and the checks available in the investigation.",
     ),
     "insufficient_data": AlertStyle(
-        status="insufficient_data", label="Dados insuficientes", color="gray", icon="info",
-        attention_level="missing_data", action_text="Consulte a lacuna informada e as instruções de coleta.",
+        status="insufficient_data", label="Insufficient data", color="gray", icon="info",
+        attention_level="missing_data", action_text="Review the reported gap and the collection instructions.",
     ),
     "critical": AlertStyle(
-        status="critical", label="Seguir protocolo da missão", color="red", icon="siren",
+        status="critical", label="Follow mission protocol", color="red", icon="siren",
         attention_level="reserved_protocol", legend_only=True,
-        action_text="Estado reservado a protocolo autorizado; nenhuma regra da demo o aciona automaticamente.",
+        action_text="Reserved for an authorized protocol; no demo rule triggers it automatically.",
     ),
 })
 
@@ -113,7 +113,7 @@ class AlertPresentation(StrictModel):
     explanation: str
     evaluated_profile_count: int
     update_message: str | None
-    disclaimer: str = "Investigação preventiva experimental; não é diagnóstico nem declaração de segurança."
+    disclaimer: str = "Experimental preventive investigation; not a diagnosis or a statement of safety."
     demo_only: Literal[True] = True
 
 
@@ -127,7 +127,7 @@ def present_alert(context: AlertContext) -> AlertPresentation:
     return AlertPresentation(
         context=context, style=_STYLES[context.status], explanation=" ".join(context.findings),
         evaluated_profile_count=len(context.evaluated_astronaut_ids),
-        update_message=("Novas medições disponíveis — atualizar investigação"
+        update_message=("New measurements available — update the investigation"
                         if context.has_unanalyzed_measurements else None),
     )
 

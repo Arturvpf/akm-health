@@ -1,6 +1,6 @@
 # AKM Health — AKM-02 | Local execution evidence (2026-11-14)
 
-This is the historical smoke run from commit `aa14050`. For the current procedure, see [EP-01 local verification](ep-01-foundation-and-architecture.md#verificação-local), the [README](../README.md), and the [database notes](database.md).
+This is the historical smoke run from commit `aa14050`. For the current procedure, see EP-01 local verification, the [README](../README.md), and the [database notes](database.md).
 
 Scope: architecture smoke test only. This does not mean the full MVP is implemented.
 

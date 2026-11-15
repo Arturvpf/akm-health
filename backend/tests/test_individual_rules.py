@@ -98,7 +98,7 @@ def test_suspect_observations_are_excluded_with_an_explicit_limitation():
     assert result.status == "insufficient_data"
     assert result.excluded_suspect_ids == (2,)
     assert [row.measurement_id for row in result.evidence] == [1]
-    assert any("suspeitas" in text for text in result.limitations)
+    assert any("Suspect readings" in text for text in result.limitations)
 
 
 def test_suspect_repeat_does_not_replace_a_usable_observation():

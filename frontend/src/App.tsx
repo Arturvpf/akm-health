@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
-import { NAVIGATION, EXPERIMENTAL_NAVIGATION, ALL_NAVIGATION, pageHref, parsePage, type PageId } from './navigation';
+import { NAVIGATION, EXPERIMENTAL_NAVIGATION, ALL_NAVIGATION, legacyRedirect, pageHref, parsePage, type PageId } from './navigation';
 import { Dashboard } from './Dashboard';
 import { MeasurementForm } from './MeasurementForm';
 import { MissionPreview } from './MissionPreview';
@@ -17,46 +17,46 @@ type Section = {
   next: PageId;
 };
 
-const EXPLORATORY: PageId[] = ['comparador', 'ambientes', 'corpo', 'autocuidado'];
+const EXPLORATORY: PageId[] = ['scenarios', 'environments', 'body', 'self-care'];
 
 const SECTIONS: Record<PageId, Section> = {
   dashboard: {
     eyebrow: 'Demo mission · API summary',
     heading: 'Mission dashboard',
     intro: 'Crew readings, cabin conditions, and pending checks.',
-    next: 'registrar',
+    next: 'register',
   },
-  registrar: {
+  register: {
     eyebrow: 'Guided collection',
     heading: 'Register a measurement',
     intro: 'Record sleep, heart rate, emotional well-being, cabin CO₂, or cabin temperature.',
-    next: 'historico',
+    next: 'history',
   },
-  historico: {
+  history: {
     eyebrow: 'Measurement records',
     heading: 'Measurement history',
     intro: 'View crew and cabin trends, including the source and quality of each reading.',
-    next: 'investigacao',
+    next: 'investigation',
   },
-  investigacao: {
+  investigation: {
     eyebrow: 'Experimental analysis',
     heading: 'Investigation and follow-up',
     intro: 'Review evidence, unconfirmed hypotheses, and requested follow-up checks.',
     next: 'dashboard',
   },
-  comparador: {
+  scenarios: {
     eyebrow: 'AKM-34 · Assumption analysis', heading: 'Hypothetical scenario comparator',
-    intro: 'Compare simulated values. This page does not predict health risks or clinical outcomes.', next: 'ambientes',
+    intro: 'Compare simulated values. This page does not predict health risks or clinical outcomes.', next: 'environments',
   },
-  ambientes: {
+  environments: {
     eyebrow: 'AKM-35 · NASA physical context', heading: 'Mission environments',
-    intro: 'Explore hypothetical conditions. The recorded mission and its rules stay unchanged.', next: 'corpo',
+    intro: 'Explore hypothetical conditions. The recorded mission and its rules stay unchanged.', next: 'body',
   },
-  corpo: {
+  body: {
     eyebrow: 'AKM-36 · Accessible exploration', heading: 'Interactive body map',
-    intro: 'Explore educational links between MVP metrics and NASA research.', next: 'autocuidado',
+    intro: 'Explore educational links between MVP metrics and NASA research.', next: 'self-care',
   },
-  autocuidado: {
+  'self-care': {
     eyebrow: 'AKM-37 · Participation', heading: 'Self-care journey',
     intro: 'Track completed routine activities. Points reward participation, never health results.', next: 'dashboard',
   },
@@ -67,7 +67,12 @@ export function App() {
   const previousPage = useRef(page);
 
   useEffect(() => {
-    const onHashChange = () => setPage(parsePage(window.location.hash));
+    const onHashChange = () => {
+      const redirect = legacyRedirect(window.location.hash);
+      if (redirect) window.history.replaceState(null, '', redirect);
+      setPage(parsePage(window.location.hash));
+    };
+    onHashChange();
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
@@ -126,20 +131,16 @@ export function App() {
           <h1>{view.heading}</h1>
           <p className="lead">{view.intro}</p>
 
-          {page === 'dashboard' ? <Dashboard /> : page === 'registrar' ? <MeasurementForm /> : page === 'comparador' ? <ScenarioComparator /> : page === 'ambientes' ? <EnvironmentSelector /> : page === 'corpo' ? <BodyExplorer /> : page === 'autocuidado' ? <SelfCareJourney /> : <>
+          {page === 'dashboard' ? <Dashboard /> : page === 'register' ? <MeasurementForm /> : page === 'scenarios' ? <ScenarioComparator /> : page === 'environments' ? <EnvironmentSelector /> : page === 'body' ? <BodyExplorer /> : page === 'self-care' ? <SelfCareJourney /> : <>
           <SimulationNotice />
 
-          <section className="panels" aria-label={page === 'historico' ? 'History and navigation' : 'Investigation and navigation'}>
-            <MissionPreview page={page as 'registrar' | 'historico' | 'investigacao'} />
+          <section className="panels" aria-label={page === 'history' ? 'History and navigation' : 'Investigation and navigation'}>
+            <MissionPreview page={page as 'register' | 'history' | 'investigation'} />
             <Card heading="Next step">
               <div className="journey-actions">
                 <ActionLink variant="primary" href={pageHref(view.next)}>
                   Go to {NAVIGATION.find((item) => item.id === view.next)?.label}
                   <span aria-hidden="true">→</span>
-                </ActionLink>
-                <ActionLink href="akm-10-wireframe.html" target="_blank" rel="noopener noreferrer">
-                  Open the interactive wireframe (Portuguese) <span aria-hidden="true">↗</span>
-                  <span className="sr-only">(opens in a new tab)</span>
                 </ActionLink>
               </div>
               <nav className="links" aria-label="Other pages">

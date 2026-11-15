@@ -67,7 +67,7 @@ function MeasurementLinkForm({ check, locked, saving, complete }: {
         ) : null}
       </div>
       <div className="investigation-actions">
-        <ActionLink href={pageHref('registrar')}>Register measurement</ActionLink>
+        <ActionLink href={pageHref('register')}>Register measurement</ActionLink>
         <ActionButton onClick={reload} disabled={locked || state === 'loading'}>
           {state === 'error' ? 'Retry loading measurements' : 'Refresh measurements'}
         </ActionButton>

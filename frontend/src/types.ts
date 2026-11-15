@@ -79,8 +79,27 @@ export type NASAHistoricalObservation = {
   | { observed_at: string; mars_sol?: number | null }
   | { observed_at?: string | null; mars_sol: number }
 );
+export interface NASARadiationDay {
+  date: string;
+  gcr_mgy_per_day: number; saa_mgy_per_day: number; total_mgy_per_day: number;
+  /** Cumulative dose in mGy (not mGy/day). */
+  accumulated_mgy: number;
+}
+export interface NASARadiationSeries {
+  mission_id: string; source: string; source_url: string; context: string; days: NASARadiationDay[];
+}
+export interface NASACo2Context {
+  mission_id: string; source: string; source_url: string; context: string;
+  period_start: string; period_end: string; sample_count: number;
+  mean_ppm: number; median_ppm: number; min_ppm: number; max_ppm: number;
+}
 export interface NASAReferenceResponse {
   scientific_references: Array<{ source: string; title: string; url: string; type: 'research_reference' }>;
   historical_series: NASAHistoricalObservation[];
   historical_data_status: 'not_imported' | 'imported';
+  /** Optional so responses from earlier API versions stay valid. */
+  radiation?: NASARadiationSeries | null;
+  radiation_status?: 'not_imported' | 'imported';
+  co2_context?: NASACo2Context | null;
+  co2_context_status?: 'not_imported' | 'imported';
 }

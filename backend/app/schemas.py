@@ -1,5 +1,5 @@
 """AKM Health API contracts (AKM-03). Data persistence belongs to AKM-17/20."""
-from datetime import datetime, timezone
+from datetime import date as date_type, datetime, timezone
 from enum import Enum
 import re
 from typing import Literal
@@ -379,10 +379,67 @@ class NASAHistoricalObservation(StrictModel):
             raise ValueError("Historical observation requires source-native timestamp or mars_sol")
         return self
 
+class NASARadiationDay(StrictModel):
+    """One day of ISS cabin radiation during RR-1. Units are explicit per field; nothing is interpolated."""
+    date: date_type
+    gcr_mgy_per_day: float = Field(ge=0, allow_inf_nan=False)
+    saa_mgy_per_day: float = Field(ge=0, allow_inf_nan=False)
+    total_mgy_per_day: float = Field(ge=0, allow_inf_nan=False)
+    accumulated_mgy: float = Field(ge=0, allow_inf_nan=False)  # cumulative dose in mGy, not mGy/day
+
+
+class NASARadiationSeries(StrictModel):
+    mission_id: str = Field(min_length=1)
+    source: str = Field(min_length=1)
+    source_url: str = Field(min_length=10)
+    context: str = Field(min_length=1)
+    days: list[NASARadiationDay] = Field(min_length=1)
+
+    @field_validator("source_url")
+    @classmethod
+    def validate_https_source(cls, value: str) -> str:
+        if not value.startswith("https://"):
+            raise ValueError("Historical NASA data require an HTTPS source URL")
+        return value
+
+
+class NASACo2Context(StrictModel):
+    """Full-series ISS CO₂ statistics from RR-1: historical context, not a safety limit."""
+    mission_id: str = Field(min_length=1)
+    source: str = Field(min_length=1)
+    source_url: str = Field(min_length=10)
+    context: str = Field(min_length=1)
+    period_start: str
+    period_end: str
+    sample_count: int = Field(gt=0)
+    mean_ppm: float = Field(ge=0, allow_inf_nan=False)
+    median_ppm: float = Field(ge=0, allow_inf_nan=False)
+    min_ppm: float = Field(ge=0, allow_inf_nan=False)
+    max_ppm: float = Field(ge=0, allow_inf_nan=False)
+
+    @field_validator("source_url")
+    @classmethod
+    def validate_https_source(cls, value: str) -> str:
+        if not value.startswith("https://"):
+            raise ValueError("Historical NASA data require an HTTPS source URL")
+        return value
+
+    @model_validator(mode="after")
+    def check_order(self):
+        if not self.min_ppm <= self.median_ppm <= self.max_ppm or not self.min_ppm <= self.mean_ppm <= self.max_ppm:
+            raise ValueError("CO₂ statistics must satisfy min <= mean/median <= max")
+        return self
+
+
 class NASAReferenceResponse(StrictModel):
     scientific_references: list[ScientificReference]
     historical_series: list[NASAHistoricalObservation]
     historical_data_status: Literal["not_imported", "imported"]
+    # Added after the first contract: defaults keep earlier clients and fixtures valid.
+    radiation: NASARadiationSeries | None = None
+    radiation_status: Literal["not_imported", "imported"] = "not_imported"
+    co2_context: NASACo2Context | None = None
+    co2_context_status: Literal["not_imported", "imported"] = "not_imported"
 
     @model_validator(mode="after")
     def check_history_status(self):
@@ -390,6 +447,10 @@ class NASAReferenceResponse(StrictModel):
             raise ValueError("Cannot label existing NASA series not_imported")
         if self.historical_data_status == "imported" and not self.historical_series:
             raise ValueError("Imported status requires verified observations")
+        for status, value, name in ((self.radiation_status, self.radiation, "radiation"),
+                                    (self.co2_context_status, self.co2_context, "co2_context")):
+            if (status == "imported") != (value is not None):
+                raise ValueError(f"{name} status must match whether verified values are present")
         return self
 
 

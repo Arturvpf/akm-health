@@ -57,7 +57,7 @@ const HistoryResults = memo(function HistoryResults({ filters, profile, onRetry 
         </div>
       )}
       {result.status === 'ready' && rows.length === 0 && (
-        <div className="status-actions"><ActionLink href={pageHref('registrar')}>Go to Register</ActionLink></div>
+        <div className="status-actions"><ActionLink href={pageHref('register')}>Go to Register</ActionLink></div>
       )}
       {rows[0] && (
         <HistoryTrend rows={rows as [MeasurementRead, ...MeasurementRead[]]} filters={filters} target={target} baseline={baseline} />

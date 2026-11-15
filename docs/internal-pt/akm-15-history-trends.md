@@ -1,6 +1,6 @@
 # AKM-15 · Histórico e tendências
 
-[Tarefa AKM-15](https://app.notion.com/p/4189432b2222810da191dca4810335cf) · [Contrato de leitura AKM-19](akm-19-read-apis.md)
+Tarefa AKM-15 (internal Notion page; Portuguese, not part of the submission) · [Contrato de leitura AKM-19](../akm-19-read-apis.md)
 
 O Histórico carrega os perfis e a base individual de sono por `GET /api/astronauts`. A primeira consulta mostra o sono do primeiro perfil disponível. Se a lista estiver vazia, começa pelo CO₂ do habitat. Em cada consulta, o indicador acompanha o alvo selecionado. Sono, frequência cardíaca e humor usam o ID do tripulante. CO₂ e temperatura usam o indicador do habitat. O cliente lê as páginas de `GET /api/measurements` em ordem até receber uma página curta.
 

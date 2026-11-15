@@ -67,10 +67,10 @@ export function ResultDetails({ result, profiles, check, openCheck }: {
   const scope = result.scope === 'crew' ? 'Crew · ODYSSEY-26' : targetName(result.astronaut_id, profiles);
   const nasa = explanation?.references.filter(isNasaReference) ?? [];
   const otherReferences = explanation?.references.filter(reference => !isNasaReference(reference)) ?? [];
-  const displayedLimitations = new Set(explanation?.limitations.map(limitation => `Limitação: ${limitation}`));
+  const displayedLimitations = new Set(explanation?.limitations.flatMap(limitation => [`Limitation: ${limitation}`, `Limitação: ${limitation}`]));
   const findings = result.findings.filter(finding =>
     finding !== decision?.reason && !displayedLimitations.has(finding)
-    && !(coverage && finding.startsWith('Janela observada: ')));
+    && !(coverage && (finding.startsWith('Observation window: ') || finding.startsWith('Janela observada: '))));
 
   return (
     <div className="investigation-details">
@@ -91,7 +91,7 @@ export function ResultDetails({ result, profiles, check, openCheck }: {
         {findings.length ? (
           <ul>{findings.map((finding, i) => <li key={i}>{englishMissionCopy(finding)}</li>)}</ul>
         ) : <p>This saved result has no findings.</p>}
-        {result.status === 'insufficient_data' ? <ActionLink href={pageHref('registrar')}>Add measurement</ActionLink> : null}
+        {result.status === 'insufficient_data' ? <ActionLink href={pageHref('register')}>Add measurement</ActionLink> : null}
       </section>
       <section>
         <h3>Coverage</h3>

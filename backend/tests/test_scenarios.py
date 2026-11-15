@@ -81,7 +81,7 @@ def test_scenario_investigation_and_dashboard(client, scenario):
     assert result["demo_only"] is True
     assert result["reused"] is False
     assert result["findings"]
-    assert any("Limitação:" in finding for finding in result["findings"])
+    assert any("Limitation:" in finding for finding in result["findings"])
     assert set(item["quality"] for item in result["evidence"]) == {"ok"}
     check = result["next_check"]
     assert {key: check[key] for key in expected["next_check"]} == expected["next_check"]
@@ -94,11 +94,11 @@ def test_scenario_investigation_and_dashboard(client, scenario):
 
     if expected["environmental_hypothesis"]:
         coincident, alternative = result["hypotheses"]
-        assert "CO₂ interno" in coincident["label"]
+        assert "cabin CO₂" in coincident["label"]
         assert coincident["certainty"] == alternative["certainty"] == expected["environmental_hypothesis"]
-        assert "não demonstram causalidade" in coincident["explanation"]
-        assert "alternativas" in alternative["label"]
-        assert "não distinguem" in alternative["explanation"]
+        assert "remains unconfirmed" in coincident["explanation"]
+        assert "alternative explanations" in alternative["label"]
+        assert "cannot distinguish" in alternative["explanation"]
         comparison = next(item for item in detection["environment"] if item["kind"] == "co2_ppm")
         assert comparison["baseline"]["value"] == 680
         assert [item["value"] for item in comparison["aligned_readings"]] == [950, 980]
@@ -149,8 +149,8 @@ def test_uncertain_environment_preserves_collective_sleep_and_limits_hypotheses(
     assert comparison["baseline"] is None
     assert comparison["aligned_readings"] == []
     alternative, = result["hypotheses"]
-    assert alternative["certainty"] == "unconfirmed" and "alternativas" in alternative["label"]
-    assert any("Qualidade suspeita" in finding for finding in result["findings"])
+    assert alternative["certainty"] == "unconfirmed" and "alternative explanations" in alternative["label"]
+    assert any("Suspect readings" in finding for finding in result["findings"])
     assert result["next_check"]["kind"] == "co2_ppm"
     assert result["next_check"]["astronaut_id"] is None
-    assert "qualidade" in result["next_check"]["reason"]
+    assert "quality" in result["next_check"]["reason"]

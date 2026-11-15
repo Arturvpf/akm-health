@@ -1,6 +1,6 @@
 # AKM-04 · Fluxo ponta a ponta da investigação
 
-Esta especificação acompanha a [arquitetura v2.0 e o adendo v2.1](https://app.notion.com/p/4189432b2222816494fdd66f32e11ec4). Usa as evidências e limites da [AKM-07](scientific-sources.md) para definir como a tripulação fictícia da ODYSSEY-26 registra, interpreta, verifica e reanalisa uma observação.
+Esta especificação acompanha a arquitetura v2.0 e o adendo v2.1 (internal Notion page; Portuguese, not part of the submission). Usa as evidências e limites da [AKM-07](../scientific-sources.md) para definir como a tripulação fictícia da ODYSSEY-26 registra, interpreta, verifica e reanalisa uma observação.
 
 ## Fluxograma
 
@@ -75,5 +75,5 @@ Esta é uma conferência de mesa dos cenários e transições. A execução no n
 1. Use as duas noites distintas de sono acima com qualidade `ok`. Inclua os registros de CO₂ interno de 680, 950 e 980 ppm na janela da demo. Execute uma investigação coletiva. Confira `attention`, padrão em A1/A2/A3, coincidência temporal com incerteza explícita e follow-up de CO₂ da cabine.
 2. Repita com as mesmas entradas. Confira o mesmo ID e o mesmo follow-up. Em seguida, tente concluir o follow-up sem medição ou com tipo diferente, horário de registro anterior à solicitação ou qualidade `suspect`. Confira erro e permanência de `pending`.
 3. Registre uma nova leitura sintética `co2_ppm` do habitat, qualidade `ok`, após a solicitação. Use o ID retornado para concluir. Confira o vínculo, repita o PATCH com o mesmo ID e verifique que a conclusão permanece a mesma. Execute nova investigação e confira que a evidência nova altera a fingerprint. O resultado decorre das janelas e dados atualizados, podendo manter a hipótese em aberto.
-4. Confira as variantes da [matriz AKM-07](scientific-sources.md#conferência-com-a-odyssey-26). Com ambiente ausente, suspeito ou fora da janela, há achado de sono sem hipótese ambiental sustentada. Com menos de dois perfis com leituras suficientes no escopo coletivo, o retorno é `insufficient_data`. Com registros válidos suficientes e somente A1 abaixo da referência, o achado pode ser individual e a regra coletiva fica sem padrão.
+4. Confira as variantes da [matriz AKM-07](../scientific-sources.md#conferência-com-a-odyssey-26). Com ambiente ausente, suspeito ou fora da janela, há achado de sono sem hipótese ambiental sustentada. Com menos de dois perfis com leituras suficientes no escopo coletivo, o retorno é `insufficient_data`. Com registros válidos suficientes e somente A1 abaixo da referência, o achado pode ser individual e a regra coletiva fica sem padrão.
 5. Simule uma falha do servidor durante o registro e uma falha de rede após o PATCH. Confira preservação do formulário, do último resultado conhecido e revalidação do estado antes de reenviar.

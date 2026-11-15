@@ -13,13 +13,14 @@ from .schemas import AstronautRead, Kind, MeasurementCreate
 
 
 PROFILES = (
-    AstronautRead(id="A1", name="Aurora", role="Comando", baseline_sleep_hours=8.0),
-    AstronautRead(id="A2", name="Orion", role="Engenharia", baseline_sleep_hours=7.5),
-    AstronautRead(id="A3", name="Vega", role="Pesquisa", baseline_sleep_hours=8.0),
-    AstronautRead(id="A4", name="Lyra", role="Operações", baseline_sleep_hours=7.8),
+    AstronautRead(id="A1", name="Aurora", role="Commander", baseline_sleep_hours=8.0),
+    AstronautRead(id="A2", name="Orion", role="Engineering", baseline_sleep_hours=7.5),
+    AstronautRead(id="A3", name="Vega", role="Research", baseline_sleep_hours=8.0),
+    AstronautRead(id="A4", name="Lyra", role="Operations", baseline_sleep_hours=7.8),
 )
 NIGHT_1 = datetime(2026, 11, 13, 7, tzinfo=timezone.utc)
 NIGHT_2 = datetime(2026, 11, 14, 7, tzinfo=timezone.utc)
+DEMO_ANCHOR = datetime(2026, 11, 14, 8, tzinfo=timezone.utc)
 
 
 def observations() -> list[MeasurementCreate]:
@@ -92,8 +93,13 @@ def insert_observation(
     return True
 
 
-def seed(engine: Engine, *, with_recheck: bool = False) -> tuple[int, int]:
-    data = observations()
+def seed(
+    engine: Engine, *, with_recheck: bool = False, shift: timedelta = timedelta(0),
+) -> tuple[int, int]:
+    def moved(payload: MeasurementCreate) -> MeasurementCreate:
+        return payload.model_copy(update={"measured_at": payload.measured_at + shift})
+
+    data = [moved(payload) for payload in observations()]
     migrate(engine)
     profiles_added = 0
     observations_added = 0
@@ -110,17 +116,29 @@ def seed(engine: Engine, *, with_recheck: bool = False) -> tuple[int, int]:
                 session, payload, recorded_at=payload.measured_at + timedelta(minutes=5),
             )
         if with_recheck:
-            observations_added += insert_observation(session, RECHECK)
+            observations_added += insert_observation(session, moved(RECHECK))
     return profiles_added, observations_added
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--with-recheck", action="store_true", help="Also register the optional CO₂ recheck.")
+    parser.add_argument("--fixed-dates", action="store_true",
+                        help="Keep the original 13-14 November 2026 timestamps instead of moving them next to the current clock.")
     args = parser.parse_args()
     engine = make_engine()
     try:
-        profiles, measurements = seed(engine, with_recheck=args.with_recheck)
+        migrate(engine)
+        shift = timedelta(0)
+        if not args.fixed_dates:
+            with Session(engine) as session:
+                seeded = session.exec(select(Measurement.id).where(Measurement.source == "synthetic").limit(1)).first()
+            if seeded is not None:
+                print("ODYSSEY-26 (simulated): synthetic observations already present; nothing added.")
+                return
+            now = datetime.now(timezone.utc).replace(microsecond=0)
+            shift = now - timedelta(minutes=2) - DEMO_ANCHOR
+        profiles, measurements = seed(engine, with_recheck=args.with_recheck, shift=shift)
     finally:
         engine.dispose()
     print(f"ODYSSEY-26 (simulated): added {profiles} profiles and {measurements} measurements.")
