@@ -47,7 +47,11 @@ export async function saveMeasurement(payload: MeasurementCreate, signal: AbortS
       headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
   } catch { throw new RegistrationError(UNCERTAIN, true); }
   if (response.status === 404 || response.status === 422) {
-    throw rejectionError(response.status, await response.json().catch(() => null));
+    let body: unknown = null;
+    if (response.status === 422) {
+      try { body = await response.json(); } catch { /* A confirmed validation rejection is safe to correct even without its body. */ }
+    }
+    throw rejectionError(response.status, body);
   }
   // Any unexpected response can follow a committed write; never retry automatically.
   if (response.status !== 201) throw new RegistrationError(UNCERTAIN, true);
