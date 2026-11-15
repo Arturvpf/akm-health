@@ -73,7 +73,7 @@ It uses FastAPI TestClient, temporary SQLite and a frozen demo clock. It checks 
 - [Exact sources, hashes, transformations, reuse terms and import](docs/data-sources.md), [third-party notices](docs/third-party-notices.md), [AI assistance disclosure](docs/ai-usage.md).
 - The engine is deterministic Python, not an LLM service. Only POST /api/investigations/run executes investigation; GET does not run rules. Recording does not automatically complete follow-ups or reclassify saved results.
 - Demo thresholds are software parameters, not clinical thresholds. No automatic critical medical alarm or proven causal relation is produced. Missing/suspect evidence and uncertainty remain explicit.
-- Local offline use requires installed packages and local NASA files. This guide does not claim mobile PWA persistence/sync, connected sensors, authentication or production deployment. Keep loopback bindings: there is no authentication layer.
+- Local offline use requires installed packages and local NASA files. New measurements can be queued offline in the browser and synced later (AKM-33); investigations still need the API. This guide does not claim a full mobile offline app, connected sensors, authentication or production deployment. Keep loopback bindings: there is no authentication layer.
 
 ## Check the checkout
 
@@ -92,8 +92,9 @@ scripts/check.py covers Ruff, backend tests and TypeScript, **not** the complete
 
 ## Space Apps 2026 submission and acceptance
 
-- [Current requirements-to-evidence audit](docs/space-apps-2026-final-audit.md) distinguishes verified functionality from pending scientific sign-off, full AKM-30 acceptance and official submission.
-- [AKM-30 acceptance task](https://app.notion.com/p/4189432b222281b799e9ca40f6f3ec9c) and [AKM-32 submission task](https://app.notion.com/p/4189432b2222816dbad1d27d8ba2071d) must be completed with evidence; a merged PR or passing unit tests alone are not the final event submission.
+- [Requirements-to-evidence audit](docs/space-apps-2026-final-audit.md) distinguishes verified functionality from pending scientific sign-off and official submission; its status update covers PRs #33 and #34.
+- [AKM-30 acceptance](docs/akm-30-acceptance.md) records T01–T15; an English screen-reader walkthrough and a visual focus check of date/time inputs still need a person. The [AKM-32 submission task](https://app.notion.com/p/4189432b2222816dbad1d27d8ba2071d) must be completed with evidence; a merged PR or passing unit tests alone are not the final event submission.
+- The GitHub Actions workflow in `.github/workflows/ci.yml` is manual only (`workflow_dispatch`); it does not run on pull requests or pushes.
 - The 2026 NASA Space Apps submission deadline is November 15 at 11:59 PM in the applicable event's local time: [official event page](https://www.spaceappschallenge.org/2026/). Check the team's Project tab and any earlier local deadline. Do not claim the project has been submitted without confirmation.
 - The challenge's complete Resources tab and exact project-form requirements still require verification in the signed-in Space Apps platform. The credited NASA RR-1 historical excerpt is an input for contextual visualization, not a real clinical astronaut dataset or a medical threshold.
 
@@ -133,7 +134,7 @@ These additions are experimental and do not change the P0 investigation engine. 
 - [AKM-36 · Interactive body map](docs/akm-36-body-explorer.md): keyboard-accessible schematic showing the latest stored reading per region; not a diagnostic instrument.
 - AKM-37 · Self-care journey: participation points from stored readings and completed follow-ups; values never change points. See [ZIP, Figma Make and design-document integration](docs/akm-36-37-figma-integration.md).
 
-**Use a separate database for this branch.** AKM-33 adds a `sync_operations` table and migrates `PRAGMA user_version` from 1 to 2. The migration is forward-only: code without AKM-33 refuses a version-2 file (`Unsupported AKM database schema version: 2`). Point `AKM_DB_PATH` at a separate file (for example `work/p1p2.db`) and keep the P0 demo database untouched. The service worker only caches the production build served from a secure origin (localhost or HTTPS): `npm --prefix frontend run build && npm --prefix frontend run preview`. Extra checks: `npm --prefix frontend run test:p2` and `npm --prefix frontend run test:offline`. See the [AKM-33–36 verification record](docs/akm-33-36-verification.md).
+**Back up existing SQLite files.** AKM-33 adds a `sync_operations` table and migrates `PRAGMA user_version` from 1 to 2 on first start. The migration is forward-only: commits older than PR #33 refuse a version-2 file (`Unsupported AKM database schema version: 2`), so do not reuse a migrated file with an older checkout. The service worker only caches the production build served from a secure origin (localhost or HTTPS): `npm --prefix frontend run build && npm --prefix frontend run preview`. Extra checks: `npm --prefix frontend run test:p2` and `npm --prefix frontend run test:offline`. See the [AKM-33–36 verification record](docs/akm-33-36-verification.md).
 
 ## License
 

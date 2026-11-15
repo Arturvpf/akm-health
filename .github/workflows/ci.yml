@@ -1,9 +1,9 @@
 name: AKM Health quality gates
 
+# Manual only: this workflow never runs automatically on pull requests or pushes.
+# Start it from the GitHub Actions tab ("Run workflow") when a hosted check is wanted.
 on:
-  pull_request:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read

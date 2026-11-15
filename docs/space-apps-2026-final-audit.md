@@ -2,6 +2,18 @@
 
 **Audit basis:** GitHub `main` at `5645a03dc8f6301df67984c6d49c4c72038debf8`, Notion AKM Health canonical architecture and backlog, project documentation, and publicly retrievable 2026 Space Apps materials. Prepared on **15 November 2026**. This is a **read-only conformance assessment plus proposed CI/documentation fixes**, not NASA certification, medical validation, full local rerun, or a successful Project submission.
 
+## Status update — after PRs #33 and #34 (15 November 2026, afternoon)
+
+This audit was written against `5645a03`. Since then `main` gained PR #33 (AKM-33 to AKM-37 exploratory tools) and PR #34 (AKM-30 acceptance). Where this update and the original text below disagree, this update wins:
+
+- **AKM-30 (T01–T15):** executed on `main` + PR #32 + PR #34 and recorded in [AKM-30 acceptance](akm-30-acceptance.md). T01–T13 pass; T14 automated checks pass (axe at 320/1280 px, keyboard, text + icon). An English screen-reader walkthrough and a visual focus check of the date/time inputs still need a person. T15 passed as browser-level isolation (no external requests), not with the operating system's network turned off. AKM-30 is marked Concluído in Notion with those items recorded as pending.
+- **Counts on the integrated tree:** 348 backend tests, 48/48 frontend node tests, 11/11 browser scenario groups, 23 axe audits with 0 violations.
+- **Idempotency:** new registrations go through `POST /api/sync/measurements` with a client `operation_id`; a replay returns the original receipt and a different body returns 409. The original `POST /api/measurements` still has no idempotency key.
+- **Offline and P1/P2 tools now on `main`:** IndexedDB outbox for new measurements (investigations and follow-up completion still need the API), service worker for the production build, scenario comparator, mission environments, body map and self-care journey — eight routes in total. They are exploratory and secondary to the investigation loop.
+- **Schema:** AKM-33 migrates SQLite from `user_version` 1 to 2, forward-only.
+- **CI:** the workflow added by this PR is **manual only** (`workflow_dispatch`); it does not run on pull requests or pushes. Local commands in section 6 remain the reference verification.
+- **Judging criteria:** the official judging guide names the first criterion **Influence**; "Impact" appears in award names.
+
 ## 0. Verdict and non-negotiable next steps
 
 **Substantial implementation exists, but 100% compliance is NOT established.** The software corresponds to the 2026 challenge theme: it records fictional crew observations, displays history, explicitly runs deterministic investigations, suggests a check, links actual new evidence to follow-ups, and can reanalyze. The source also ships a credited NASA OSDR RR-1 environmental excerpt. The remaining high-impact risks are **full acceptance of the integrated checkout (AKM-30), final submission material and Project submission (AKM-32), source eligibility from the exact challenge Resources tab, and human science/AI disclosures**.
@@ -41,7 +53,7 @@ Before the event deadline:
 | AI transparency | `docs/ai-usage.md` | **Partial** | It admits model/version/tool use is incomplete for other contributors |
 | Accessibility | React ARIA labels, text+icons with color, keyboard flows; [PR #29](https://github.com/Arturvpf/akm-health/pull/29) reports Chromium/axe checks | **Partial verification** | Narrator in **English**, other states and AKM-30 matrix |
 | Local/offline operation | Local FastAPI/SQLite/Vite, bundled NASA JSON and seed; README | **Local-only after installation** | Not full independent mobile browser/PWA offline; T15 sign-off |
-| Continuous integration / reproducible verification | Existing tests and `scripts/check.py`; no workflow directory in `main` tree at audit SHA | **Gap; workflow proposed in this PR** | Check GitHub Actions completion on this PR/main |
+| Continuous integration / reproducible verification | Existing tests and `scripts/check.py`; `.github/workflows/ci.yml` added by this PR | **Manual workflow only** (`workflow_dispatch`) | Run it from the Actions tab when wanted; local commands remain the reference |
 | Actual 2026 Project submission | Notion AKM-32 (Backlog) | **Not verified** | Human team submission + confirmation required |
 
 ## 3. NASA historical data: what can and cannot be claimed
@@ -83,7 +95,7 @@ For every row, record **OS + browser + backend version + exact Git SHA + test st
 - AKM-30 full integrated acceptance and English screen-reader approval remain open.
 - Challenge Resources source eligibility is unconfirmed from accessible public challenge material.
 - Research/Safety sign-off and complete team AI-use inventory are incomplete.
-- No tracked CI workflow at audit baseline; this PR adds one, **whose success is not yet claimed**.
+- No tracked CI workflow at audit baseline; this PR adds one as a **manual-only** workflow (`workflow_dispatch`), so no automatic run is claimed.
 
 **P1 / important trade-offs to disclose:**
 - Runtime Python dependency ranges are not pinned with a full lock, so future clean installs may vary; compare actual versions and keep the verification record.
@@ -110,7 +122,7 @@ npm --prefix frontend run build
 python scripts/demo_investigation_flow.py
 ```
 
-The registration integration test accepts `PYTHON=python` when the environment is active; otherwise it looks for a repository-local virtualenv. The proposed GitHub Actions workflow runs lint, backend tests, TypeScript, frontend node tests, navigation and build. **Chromium browser, screen reader, offline runtime and NASA site submission remain separate manual gates**.
+The registration integration test accepts `PYTHON=python` when the environment is active; otherwise it looks for a repository-local virtualenv. The GitHub Actions workflow (manual trigger only) runs lint, backend tests, TypeScript, frontend node tests, navigation and build when started from the Actions tab. **Chromium browser, screen reader, offline runtime and NASA site submission remain separate manual gates**.
 
 Evidence already committed in prior revisions: [AKM-31 Windows clean install](akm-31-verification.md) reports Ruff + **338** pytest tests, frontend node tests and Vite build; [PR #29](https://github.com/Arturvpf/akm-health/pull/29) reports **40** frontend tests and exercised browser paths at 320/1280 with zero detected axe A/AA issues in those states. These are **their recorded test claims**, not tests independently rerun by this audit. GitHub Actions only listed older successful workflow runs at the time of this review; a successful CI run for the **current main baseline** was **not** established.
 
