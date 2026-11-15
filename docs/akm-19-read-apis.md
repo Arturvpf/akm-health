@@ -11,7 +11,7 @@ These endpoints read the existing four SQLite tables. They do not run the invest
 | `/api/astronauts` | JSON list of persisted profiles, ordered by ID, including role and synthetic sleep baseline. |
 | `/api/measurements` | JSON list of persisted observations, ordered by `measured_at` ascending and then ID. Includes units, source, quality, observation time and recording time. |
 | `/api/dashboard` | Existing mission snapshot from `mission_environment.json`, latest usable crew/habitat readings, pending follow-ups and investigation freshness. |
-| `/api/followups` | JSON list of persisted checks, ordered by creation time then ID; optional `astronaut_id` and `status=pending\|completed` filters. |
+| `/api/followups` | JSON list of persisted checks; optional `astronaut_id` and `status=pending\|completed` filters. Pending-only queries use AKM-25 priority; other queries retain creation time/ID order. |
 
 History supports combined optional `astronaut_id`, `kind`, `from` and `to` filters. Period boundaries are inclusive and apply to **observation time**, not recording time. `from` and `to` must be ISO 8601 datetimes with a timezone; offsets are normalized to UTC and `from <= to` is required. Response timestamps use UTC `Z`.
 
@@ -23,10 +23,11 @@ An omitted astronaut filter includes crew and habitat observations. Habitat-only
 
 - History includes `quality=suspect` samples so clients can display gaps and quality explicitly. Dashboard metrics use only `quality=ok` samples, selecting each metric by observation time then ID. This quality denotes technical usability, not clinical safety.
 - CO₂ and temperature may have different observation times. `environment.measured_at` is the most recent usable environmental observation, not a claim that both sensors were sampled together. Missing values stay null and a real zero remains zero.
-- `last_investigation_at` refers to the latest persisted **crew** investigation. A newer individual investigation does not clear outstanding data for the crew dashboard.
-- `has_unanalyzed_measurements` is true when an `ok` measurement was recorded after that crew investigation, or when usable observations exist but no crew investigation exists. A delayed observation counts as new by its recording time. An empty or suspect-only database returns false. This preserves the existing AKM-18 freshness convention.
+- `last_investigation_at` includes valid individual investigations. As delivered by AKM-20, freshness compares usable measurement IDs with the latest relevant snapshot separately for each astronaut and the habitat. An individual analysis never consumes another astronaut's new measurements. An empty or suspect-only database returns false; legacy crew rows without an audit retain their recording-time fallback.
 - GET requests do not write or execute the motor. With no result projection from the investigation tasks, astronaut status remains `insufficient_data` and `alerts` remains empty; readings alone never create a classification. Persisting/projecting investigation alerts belongs to the investigation work, not this read API.
 - The agenda endpoint and dashboard return checks already persisted in `followups`. Creating adaptive checks and completing them remain separate tasks.
+
+The [AKM-25 routine](akm-25-adaptive-routine.md) orders pending checks by explicit protocol priority, investigative checks, then periodic deadline/creation time/ID. It schedules only during an explicit investigation POST, with configured demonstration windows; the GET endpoints remain read-only.
 
 ## Reproduce locally
 

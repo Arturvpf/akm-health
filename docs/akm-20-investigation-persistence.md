@@ -33,6 +33,8 @@ The invocation clock is recorded in the audit but excluded from the fingerprint.
 
 ## Configuration and uncertainty
 
+With the optional [AKM-25 routine](akm-25-adaptive-routine.md), the logical collection window is also a scheduling input to the fingerprint. A new window can produce a new explicit assessment without new measurements. Within the same window, replay stays idempotent. Without configured routine checks, AKM-20 fingerprints and historical replay behavior are preserved.
+
 `backend/app/investigation_config.json` explicitly declares the **simulated** resources for A1–A4 and the habitat. Set `AKM_INVESTIGATION_CONFIG` to another JSON path before startup to change availability, effort, rule settings or an approved protocol; invalid or missing required configuration fails startup. Profiles absent from the resource catalog are not presumed to have a measurement resource. No protocol is authorized by default.
 
 Empty storage or incomplete coverage yields `insufficient_data` with the detector's limitation and, where feasible, a data-collection check. An empty crew has no invented subject. When all relevant resources are unavailable, `next_check` and `followup_id` are null and findings explain the missing alternative. Environmental hypotheses retain `certainty:"unconfirmed"`; `guidance` stays empty, `demo_only` stays true, and the demo never emits automatic `critical` status or a medical diagnosis.

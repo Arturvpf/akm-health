@@ -16,6 +16,7 @@ from sqlmodel import Session, select
 from starlette.concurrency import run_in_threadpool
 
 from .dashboard import build_dashboard
+from .agenda import pending_followups
 from .db import make_engine, migrate
 from .investigations import (
     InvestigationSettings, complete_followup, get_investigation, load_settings, run_investigation,
@@ -154,8 +155,10 @@ def followups(
     astronaut_id: Annotated[str | None, Query(min_length=1)] = None,
     status: Literal["pending", "completed"] | None = None,
 ):
-    """Read the persisted agenda; scheduling and completion are separate tasks."""
+    """Read persisted checks; the pending view follows protocol/adaptive/routine priority."""
     require_astronaut(session, astronaut_id)
+    if status == "pending":
+        return pending_followups(session, astronaut_id)
     statement = select(Followup)
     if astronaut_id is not None:
         statement = statement.where(Followup.astronaut_id == astronaut_id)
