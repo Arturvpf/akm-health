@@ -38,4 +38,4 @@ Source of truth: https://app.notion.com/p/4189432b2222815fb561ed1894b96750
 - NASA physiology risks: https://www.nasa.gov/hrp/risks/
 - NASA EDA/OSDR historical ISS environmental telemetry: https://visualization.osdr.nasa.gov/eda/
 
-These sources justify indicator relevance, **not** the synthetic 20% sleep change or any medical threshold. AKM-38 must validate exact exported dataset, units, mission, dates, instrument, license and evidence of download. Check challenge-specific Resources at submission.
+These sources establish why the project tracks each indicator. The 20% sleep change is a synthetic parameter of the demonstration. AKM-38 verified the RR-1 exports, and the [EP-05 evidence](ep-05-scientific-foundation-and-safety.md#proveniência-rr-1) records the source, context, units, file checks and metadata limits.
