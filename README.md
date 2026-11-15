@@ -161,7 +161,7 @@ scripts/check.py covers Ruff, backend tests and TypeScript, **not** the complete
 | frontend/src/ | React/TypeScript/Vite interface and API clients |
 | scripts/ | Checks, isolated demos and audited-CSV importer |
 | docs/ | Contracts, sources, feature records and verification (English) |
-| docs/internal-pt/ | Internal working records kept in Portuguese; not part of the submission documentation |
+| docs/internal-records/ | Internal working records (translated to English); not part of the submission documentation |
 
 Start a task branch from main. Consult the [executable architecture](docs/architecture-backend.md) and the task description before changing contracts; compare plans with code and OpenAPI. Review PRs and record tests/limitations before closing tasks.
 
