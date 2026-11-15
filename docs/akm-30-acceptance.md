@@ -9,7 +9,9 @@ The acceptance suite exercises the fictional mission and existing contracts. It 
 Install dependencies from the README. Run from the repository root, using the virtual environment interpreter on Windows (or python in an activated environment):
 
 ~~~powershell
-.\.venv\Scripts\python.exe -m pytest -q backend/tests/test_mvp_acceptance.py
+Push-Location backend
+..\.venv\Scripts\python.exe -m pytest -q tests/test_mvp_acceptance.py
+Pop-Location
 npm --prefix frontend run build
 npm --prefix frontend run test:mvp:install
 npm --prefix frontend run test:mvp
