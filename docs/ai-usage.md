@@ -8,4 +8,4 @@ The running investigation engine uses deterministic Python rules, not an LLM API
 
 Mission profiles/readings are fictional synthetic demonstration data or manually entered fictional records. NASA historical values must come from the credited audited source, not generated guesses. AI-generated output is not a medical/scientific validation or proof of NASA endorsement.
 
-PR authors and human reviewers remain responsible for correctness, source/license checks and final approval. The assistant is not a commit coauthor. Contributor acknowledgments, final licensing choice and event-specific disclosure belong to the team.
+PR authors and human reviewers remain responsible for correctness, source/license checks and final approval. The assistant is not a commit coauthor. The requester subsequently authorized the [Apache-2.0 project license](../LICENSE). Contributor acknowledgments and event-specific disclosure remain team responsibilities.

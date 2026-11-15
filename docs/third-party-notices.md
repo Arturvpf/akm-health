@@ -4,7 +4,7 @@ This is an attribution/inventory document, not a replacement for upstream licens
 
 ## Project code and assets
 
-No root LICENSE file was present in the AKM-31 base checkout (main 19c7b4e). The team still needs to select/authorize a project license before promising an open-source grant or completing a submission that requires one. Public GitHub visibility is not itself a license. This task does not unilaterally assign rights.
+The original AKM Health source code and documentation are licensed under [Apache-2.0](../LICENSE), as authorized by the project requester after AKM-31. See [NOTICE](../NOTICE) for project attribution. Individual contributors retain copyright in their contributions. This project license does not replace licenses or terms for third-party dependencies, NASA data, external content or marks.
 
 The interface uses CSS/system-font fallbacks and text symbols. The font stack begins with Inter but no Inter font file is included or downloaded by this checkout. No NASA logo, external photograph, video or separately packaged icon/font asset was found in the tracked application assets. Versioned evidence PNGs are captures of the fictional application. Do not infer rights for future assets from this inventory.
 

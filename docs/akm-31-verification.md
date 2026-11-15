@@ -64,4 +64,4 @@ This task did not repeat complete visual, screen-reader, keyboard or offline acc
 
 The README's deterministic script uses TestClient and a frozen clock; its recheck is inserted through SQLModel. It is not proof of the browser registration journey. Normal UI results depend on the real clock, the 48-hour window, quality and actual observations.
 
-Remaining team decisions: root project LICENSE, full contributor/tool disclosure, Research/Safety approval and event-specific submission requirements. Do not interpret documentation, passing checks or a PR as merge, deployment, clinical validation or submission.
+At the time of the AKM-31 verification, the root project license was undecided. The requester subsequently authorized applying [Apache-2.0](../LICENSE); see [NOTICE](../NOTICE). Remaining team decisions/reviews: full contributor/tool disclosure, Research/Safety approval and event-specific submission requirements. Do not interpret documentation, passing checks or a PR as merge, deployment, clinical validation or submission.
