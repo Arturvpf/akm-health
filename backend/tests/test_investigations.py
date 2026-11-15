@@ -293,6 +293,76 @@ def test_latest_individual_analysis_overrides_only_its_profile(seeded):
     assert [row["status"] for row in dashboard["astronauts"]] == ["insufficient_data", "attention", "attention", "normal"]
 
 
+@pytest.mark.parametrize("days_later", [0, 1])
+def test_new_crew_assessment_removes_superseded_individual_alert(seeded, days_later):
+    individual = run(seeded, "A1")
+    assert individual["status"] == "attention"
+    seeded.clock[0] += timedelta(days=days_later)
+    for subject in ("A1", "A2", "A3", "A4"):
+        response = seeded.post("/api/measurements", json={
+            "astronaut_id": subject, "kind": "sleep_hours", "value": 8, "unit": "h",
+            "measured_at": (seeded.clock[0] - timedelta(hours=1)).isoformat(), "source": "synthetic",
+        })
+        assert response.status_code == 201
+    crew = run(seeded)
+    assert crew["status"] == "normal"
+    dashboard = seeded.get("/api/dashboard").json()
+    assert all(row["status"] == "normal" for row in dashboard["astronauts"])
+    assert dashboard["alerts"] == []
+    assert seeded.get(f'/api/investigations/{individual["id"]}').json() == individual
+
+
+def test_newer_individual_alert_is_preserved_when_crew_assessment_is_older(seeded):
+    run(seeded)
+    # Timestamps tie: the higher investigation ID still wins for the subject.
+    individual = run(seeded, "A1")
+    dashboard = seeded.get("/api/dashboard").json()
+    assert individual["id"] in {alert["id"] for alert in dashboard["alerts"]}
+    assert dashboard["astronauts"][0]["status"] == individual["status"]
+
+
+def test_individual_assessment_clears_only_measurements_in_its_scope(client):
+    with Session(app.state.engine) as session:
+        session.add_all([
+            Astronaut(id="A1", name="One", baseline_sleep_hours=8),
+            Astronaut(id="A2", name="Two", baseline_sleep_hours=8),
+        ])
+        session.commit()
+    measure(client, kind="sleep_hours", subject="A1")
+    measure(client)
+    first = run(client, "A1")
+    dashboard = client.get("/api/dashboard").json()
+    assert dashboard["last_investigation_at"] == first["created_at"]
+    assert dashboard["has_unanalyzed_measurements"] is False
+    client.clock[0] += timedelta(minutes=1)
+    measure(client, kind="sleep_hours", subject="A2")
+    run(client, "A1")  # Replaying A1 cannot consume an unassessed A2 sample.
+    assert client.get("/api/dashboard").json()["has_unanalyzed_measurements"] is True
+    second = run(client, "A2")
+    dashboard = client.get("/api/dashboard").json()
+    assert dashboard["has_unanalyzed_measurements"] is False
+    assert dashboard["last_investigation_at"] == second["created_at"]
+    client.clock[0] += timedelta(minutes=1)
+    measure(client, kind="sleep_hours", subject="A1")
+    assert client.get("/api/dashboard").json()["has_unanalyzed_measurements"] is True
+    run(client, "A1")
+    assert client.get("/api/dashboard").json()["has_unanalyzed_measurements"] is False
+
+
+def test_newer_individual_audit_covers_new_data_after_crew_assessment(seeded):
+    run(seeded)
+    seeded.clock[0] += timedelta(minutes=1)
+    measure(seeded, kind="sleep_hours", subject="A1")
+    measure(seeded)
+    individual = run(seeded, "A1")
+    dashboard = seeded.get("/api/dashboard").json()
+    assert dashboard["has_unanalyzed_measurements"] is False
+    assert dashboard["last_investigation_at"] == individual["created_at"]
+    # Equal registration time must not hide an ID absent from the newest scope snapshot.
+    measure(seeded, kind="sleep_hours", subject="A2")
+    assert seeded.get("/api/dashboard").json()["has_unanalyzed_measurements"] is True
+
+
 def test_concurrent_identical_runs_create_exactly_one_analysis_and_followup(seeded):
     with ThreadPoolExecutor(max_workers=4) as executor:
         results = list(executor.map(lambda _: run(seeded), range(4)))

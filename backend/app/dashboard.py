@@ -1,6 +1,7 @@
 """Read the current mission snapshot without running an investigation."""
 
 from collections import defaultdict
+from datetime import datetime
 from pathlib import Path
 
 from sqlalchemy import func
@@ -28,47 +29,71 @@ MISSION = MissionContext.model_validate_json(
 
 
 def build_dashboard(session: Session) -> DashboardResponse:
+    astronauts = session.exec(select(Astronaut).order_by(Astronaut.id)).all()
     analyses = session.exec(select(Investigation).order_by(
         Investigation.created_at.desc(), Investigation.id.desc(),
     )).all()
-    latest_crew = next((row for row in analyses if row.scope == "crew"), None)
-    latest_crew_analysis = latest_crew.created_at if latest_crew else None
     statuses = {}
     alerts = []
-    seen_scopes = set()
-    audited_ids = None
+    seen_crew = False
+    last_investigation_at = None
+    coverage: dict[str | None, set[int] | datetime] = {}
     styles = {style.status: style for style in alert_legend()}
     for row in analyses:
         try:
             result, audit = stored_document(row)
         except (ValueError, KeyError, TypeError):
             # Older development fixtures have no result payload to project.
-            continue
-        if row is latest_crew and "snapshot" in audit:
-            audited_ids = {sample["id"] for sample in audit["snapshot"]["measurements"]
-                           if sample["quality"] == "ok"}
-        key = (row.scope, row.astronaut_id)
-        if key not in seen_scopes:
-            seen_scopes.add(key)
-            if result.status != "normal":
-                alerts.append(DashboardAlert(
-                    id=result.id, level=result.status, label=styles[result.status].label,
-                    explanation=" ".join(result.findings),
-                ))
+            result, audit = None, {}
+            if row.scope == "individual":
+                continue
+        if last_investigation_at is None:
+            last_investigation_at = row.created_at
+        snapshot = audit.get("snapshot")
         if row.scope == "individual":
+            targets = (row.astronaut_id, None)
+        else:
+            subjects = (member["id"] for member in snapshot["astronauts"]) if snapshot else (
+                astronaut.id for astronaut in astronauts
+            )
+            targets = (*subjects, None)
+        # The first entry for each target is its newest relevant input snapshot.
+        # Individual analysis covers its subject and the habitat, never other crew.
+        if snapshot is not None:
+            audited_ids = defaultdict(set)
+            for sample in snapshot["measurements"]:
+                if sample["quality"] == "ok":
+                    audited_ids[sample["astronaut_id"]].add(sample["id"])
+            for target in targets:
+                coverage.setdefault(target, audited_ids[target])
+        else:
+            # Legacy records have no IDs; keep their registration-time comparison.
+            for target in targets:
+                coverage.setdefault(target, row.created_at)
+        if result is None:
+            continue
+        if row.scope == "individual":
+            active_alert = row.astronaut_id not in statuses
             statuses.setdefault(row.astronaut_id, result.status)
         else:
+            active_alert = not seen_crew
+            seen_crew = True
             # A collective status is not the status of every crew member.
             for subject in audit.get("detection", {}).get("individual_results", []):
                 statuses.setdefault(subject["astronaut_id"], subject["status"])
-    new_measurement = select(Measurement.id).where(Measurement.quality == "ok")
-    if latest_crew_analysis is not None:
-        new_measurement = new_measurement.where(Measurement.recorded_at > latest_crew_analysis)
-    if audited_ids is not None:
-        # Also catches late commits and equal timestamps that were absent from the snapshot.
-        new_measurement = select(Measurement.id).where(
-            Measurement.quality == "ok", Measurement.id.not_in(audited_ids),
-        )
+        if active_alert and result.status != "normal":
+            alerts.append(DashboardAlert(
+                id=result.id, level=result.status, label=styles[result.status].label,
+                explanation=" ".join(result.findings),
+            ))
+    has_unanalyzed = False
+    for id, target, recorded_at in session.exec(select(
+        Measurement.id, Measurement.astronaut_id, Measurement.recorded_at,
+    ).where(Measurement.quality == "ok")):
+        covered = coverage.get(target)
+        if covered is None or (recorded_at > covered if isinstance(covered, datetime) else id not in covered):
+            has_unanalyzed = True
+            break
 
     ranked = select(
         Measurement,
@@ -94,7 +119,7 @@ def build_dashboard(session: Session) -> DashboardResponse:
                 id=astronaut.id, name=astronaut.name, latest_metrics=snapshots[astronaut.id],
                 status=statuses.get(astronaut.id, "insufficient_data"),
             )
-            for astronaut in session.exec(select(Astronaut).order_by(Astronaut.id))
+            for astronaut in astronauts
         ],
         environment=HabitatSnapshot(
             co2_ppm=co2.value if co2 else None,
@@ -109,6 +134,6 @@ def build_dashboard(session: Session) -> DashboardResponse:
                 select(Followup).where(Followup.status == "pending").order_by(Followup.id)
             )
         ],
-        last_investigation_at=latest_crew_analysis,
-        has_unanalyzed_measurements=session.exec(new_measurement.limit(1)).first() is not None,
+        last_investigation_at=last_investigation_at,
+        has_unanalyzed_measurements=has_unanalyzed,
     )
