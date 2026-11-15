@@ -8,6 +8,7 @@ import { EnvironmentSelector } from './EnvironmentView';
 import { BodyExplorer } from './BodyExplorer';
 import { SelfCareJourney } from './SelfCareJourney';
 import { OfflineStatus } from './OfflineStatus';
+import { Landing } from './Landing';
 import { ActionLink, Card, SimulationNotice } from './design-system';
 
 type Section = {
@@ -18,8 +19,18 @@ type Section = {
 };
 
 const EXPLORATORY: PageId[] = ['scenarios', 'environments', 'body', 'self-care'];
+/** Short tab captions so every tab fits on one header row. The full label stays as the accessible name. */
+const TAB_LABELS: Partial<Record<PageId, string>> = {
+  scenarios: 'Scenarios', environments: 'Environments', body: 'Body map', 'self-care': 'Self-care',
+};
 
 const SECTIONS: Record<PageId, Section> = {
+  home: {
+    eyebrow: 'NASA Space Apps Challenge 2026',
+    heading: 'AKM Health',
+    intro: 'Catch crew health patterns early, then verify them.',
+    next: 'dashboard',
+  },
   dashboard: {
     eyebrow: 'Demo mission · API summary',
     heading: 'Mission dashboard',
@@ -62,23 +73,6 @@ const SECTIONS: Record<PageId, Section> = {
   },
 };
 
-function MissionClock() {
-  const [now, setNow] = useState(() => new Date());
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(new Date()), 1000);
-    return () => window.clearInterval(timer);
-  }, []);
-  const time = now.toISOString().slice(11, 19);
-  const date = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' });
-  return (
-    <div className="utc" aria-hidden="true">
-      <small>UTC</small>
-      <strong>{time}</strong>
-      <span>{date}</span>
-    </div>
-  );
-}
-
 export function App() {
   const [page, setPage] = useState<PageId>(() => parsePage(window.location.hash));
   const previousPage = useRef(page);
@@ -96,10 +90,11 @@ export function App() {
 
   const view = SECTIONS[page];
   useEffect(() => {
-    document.title = `${view.heading} | AKM Health`;
+    document.title = page === 'home' ? 'AKM Health · Space health monitoring' : `${view.heading} | AKM Health`;
     if (previousPage.current !== page) {
       previousPage.current = page;
-      document.getElementById('main-content')?.focus();
+      window.scrollTo({ top: 0 });
+      document.getElementById('main-content')?.focus({ preventScroll: true });
     }
   }, [page, view.heading]);
 
@@ -111,39 +106,36 @@ export function App() {
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main-content" onClick={skipToContent}>Skip to content</a>
-      <header className="mission-header">
-        <a className="brand" href={pageHref('dashboard')} aria-label="AKM Health, home">
-          <span aria-hidden="true" className="brand-mark"><img src="/akm-mark.svg" alt="" width="32" height="26" /></span>
-          <span className="brand-lockup"><strong>AKM Health</strong><small>Space health monitoring</small></span>
-        </a>
-        <div className="mission-id">
-          <small>Mission</small>
-          <strong>ODYSSEY-26</strong>
-          <span><i aria-hidden="true" />Simulated crew</span>
+      <header className="site-header">
+        <div className="site-header-inner">
+          <a className="brand" href={pageHref('home')} aria-label="AKM Health, home">
+            <span aria-hidden="true" className="brand-mark"><img src="/akm-mark.svg" alt="" width="30" height="24" /></span>
+            <span><strong>AKM Health</strong><small>Space Health Monitoring</small></span>
+          </a>
+          <nav className="tab-nav tab-nav-main" aria-label="Main navigation">
+            {NAVIGATION.map(item => (
+              <a key={item.id} href={pageHref(item.id)}
+                aria-current={page === item.id ? 'page' : undefined} className="tab-link">
+                {item.label}
+              </a>
+            ))}
+          </nav>
+          <nav className="tab-nav tab-nav-labs" aria-label="Exploratory tools">
+            <span className="tab-group-label" aria-hidden="true">Labs</span>
+            {EXPERIMENTAL_NAVIGATION.map(item => (
+              <a key={item.id} href={pageHref(item.id)} aria-current={page === item.id ? 'page' : undefined}
+                title={item.label} className="tab-link">{TAB_LABELS[item.id] ?? item.label}</a>
+            ))}
+          </nav>
+          <span className="version-chip">{EXPLORATORY.includes(page) ? 'Exploratory · P1/P2' : 'Simulated mission'}</span>
         </div>
-        <nav className="main-nav" aria-label="Main navigation">
-          {NAVIGATION.map(item => (
-            <a key={item.id} href={pageHref(item.id)}
-              aria-current={page === item.id ? 'page' : undefined} className="nav-link">
-              <span>{item.label}</span>
-            </a>
-          ))}
-        </nav>
-        <MissionClock />
       </header>
-      <div className="tools-bar">
-        <span className="tools-label">Exploratory tools (P1/P2)</span>
-        <nav className="tools-nav" aria-label="Exploratory tools">
-          {EXPERIMENTAL_NAVIGATION.map(item => (
-            <a key={item.id} href={pageHref(item.id)} aria-current={page === item.id ? 'page' : undefined} className="nav-link">{item.label}</a>
-          ))}
-        </nav>
-        <span className="version-chip">{EXPLORATORY.includes(page) ? 'Exploratory · P1/P2' : 'Local API'}</span>
-      </div>
       <div className="content-shell">
         <OfflineStatus />
-        <main id="main-content" className="main-area" tabIndex={-1}>
+        <main id="main-content" className={page === 'home' ? 'main-area main-home' : 'main-area'} tabIndex={-1}>
           <div aria-live="polite" className="sr-only">Current page: {view.heading}</div>
+
+          {page === 'home' ? <Landing /> : <>
           <div className="eyebrow">{view.eyebrow}</div>
           <h1>{view.heading}</h1>
           <p className="lead">{view.intro}</p>
@@ -156,7 +148,7 @@ export function App() {
             <Card heading="Next step">
               <div className="journey-actions">
                 <ActionLink variant="primary" href={pageHref(view.next)}>
-                  Go to {NAVIGATION.find((item) => item.id === view.next)?.label}
+                  Go to {ALL_NAVIGATION.find((item) => item.id === view.next)?.label}
                   <span aria-hidden="true">→</span>
                 </ActionLink>
               </div>
@@ -172,8 +164,12 @@ export function App() {
             <ActionLink href={pageHref(view.next)}>Next area: {ALL_NAVIGATION.find(item => item.id === view.next)?.label}</ActionLink>
           </section>}
           <p className="disclaimer">The mission and crew are fictional. Investigation results are experimental. Clinical assessment and live sensor monitoring are outside the scope of this demo.</p>
+          </>}
         </main>
-        <footer className="footer">AKM Health · NASA Space Apps Challenge 2026 · P0 interface + exploratory P1/P2 tools</footer>
+        <footer className="footer">
+          <span>AKM Health · NASA Space Apps Challenge 2026 · P0 interface + exploratory P1/P2 tools</span>
+          <span className="footer-status">Simulated mission · not a medical device</span>
+        </footer>
       </div>
     </div>
   );

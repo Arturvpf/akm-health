@@ -17,8 +17,10 @@ try {
   for (const item of nav.NAVIGATION) {
     assert.equal(nav.parsePage(nav.pageHref(item.id)), item.id);
   }
-  assert.equal(nav.parsePage('#/unknown'), 'dashboard');
-  assert.equal(nav.parsePage(''), 'dashboard');
+  assert.equal(nav.parsePage('#/unknown'), 'home');
+  assert.equal(nav.parsePage(''), 'home');
+  assert.equal(nav.parsePage('#/home'), 'home');
+  assert.equal(nav.parsePage('#/dashboard'), 'dashboard');
   assert.equal(nav.parsePage('#/history/'), 'history');
   for (const [legacy, current] of Object.entries({registrar: 'register', historico: 'history', investigacao: 'investigation',
     comparador: 'scenarios', ambientes: 'environments', corpo: 'body', autocuidado: 'self-care'})) {
