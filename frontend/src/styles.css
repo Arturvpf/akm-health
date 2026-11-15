@@ -472,3 +472,22 @@ button, select { font: inherit; }
   .side-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ds-details > div { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* AKM-14 guided registration */
+input { font: inherit; min-width: 0; }
+.measurement-page { display: grid; gap: var(--space-5); min-width: 0; }
+.measurement-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(15rem, 1fr); gap: var(--space-5); align-items: start; }
+.measurement-fields { display: grid; gap: var(--space-4); padding: 0; margin: 0 0 var(--space-5); border: 0; min-width: 0; }
+.measurement-fields legend { margin-bottom: var(--space-4); font-size: var(--text-small); }
+.measurement-fields p { margin: 0; }
+.measurement-time-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(7rem, 1fr); gap: var(--space-3); }
+.measurement-steps { padding-left: var(--space-5); color: var(--text-muted); font-size: var(--text-small); }
+.measurement-steps li + li { margin-top: var(--space-3); }
+.measurement-page time, .measurement-page p, .measurement-page a { overflow-wrap: anywhere; }
+.form-error { font-weight: 650; color: var(--caution-text); }
+.ds-control[aria-invalid="true"] { border: 2px solid var(--caution-border); }
+.registration-feedback:empty { display: none; }
+.registration-feedback:focus { outline: 3px solid var(--focus); outline-offset: 3px; }
+.measurement-page button:disabled { opacity: 0.65; cursor: default; }
+@media (max-width: 1040px) { .measurement-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 600px) { .measurement-time-grid { grid-template-columns: minmax(0, 1fr); } }
