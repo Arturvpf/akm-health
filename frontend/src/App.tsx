@@ -62,6 +62,23 @@ const SECTIONS: Record<PageId, Section> = {
   },
 };
 
+function MissionClock() {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const time = now.toISOString().slice(11, 19);
+  const date = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  return (
+    <div className="utc" aria-hidden="true">
+      <small>UTC</small>
+      <strong>{time}</strong>
+      <span>{date}</span>
+    </div>
+  );
+}
+
 export function App() {
   const [page, setPage] = useState<PageId>(() => parsePage(window.location.hash));
   const previousPage = useRef(page);
@@ -94,13 +111,17 @@ export function App() {
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main-content" onClick={skipToContent}>Skip to content</a>
-      <aside className="sidebar" aria-label="Application information">
-        <div className="brand">
+      <header className="mission-header">
+        <a className="brand" href={pageHref('dashboard')} aria-label="AKM Health, home">
           <span aria-hidden="true" className="brand-mark"><img src="/akm-mark.svg" alt="" width="32" height="26" /></span>
-          <div><strong>AKM Health</strong><small>Space Health Monitoring</small></div>
+          <span className="brand-lockup"><strong>AKM Health</strong><small>Space health monitoring</small></span>
+        </a>
+        <div className="mission-id">
+          <small>Mission</small>
+          <strong>ODYSSEY-26</strong>
+          <span><i aria-hidden="true" />Simulated crew</span>
         </div>
-        <p className="nav-heading">Mission pages</p>
-        <nav className="side-nav" aria-label="Main navigation">
+        <nav className="main-nav" aria-label="Main navigation">
           {NAVIGATION.map(item => (
             <a key={item.id} href={pageHref(item.id)}
               aria-current={page === item.id ? 'page' : undefined} className="nav-link">
@@ -108,23 +129,19 @@ export function App() {
             </a>
           ))}
         </nav>
-        <p className="nav-heading" style={{ marginTop: '1.5rem' }}>Exploratory tools (P1/P2)</p>
-        <nav className="side-nav" aria-label="Exploratory tools">
+        <MissionClock />
+      </header>
+      <div className="tools-bar">
+        <span className="tools-label">Exploratory tools (P1/P2)</span>
+        <nav className="tools-nav" aria-label="Exploratory tools">
           {EXPERIMENTAL_NAVIGATION.map(item => (
             <a key={item.id} href={pageHref(item.id)} aria-current={page === item.id ? 'page' : undefined} className="nav-link">{item.label}</a>
           ))}
         </nav>
-        <div className="sidebar-note">
-          Simulated mission
-          <small>For demonstration purposes.</small>
-        </div>
-      </aside>
+        <span className="version-chip">{EXPLORATORY.includes(page) ? 'Exploratory · P1/P2' : 'Local API'}</span>
+      </div>
       <div className="content-shell">
         <OfflineStatus />
-        <header className="topbar">
-          <div><small>AKM HEALTH / MVP P0</small><strong>{view.heading}</strong></div>
-          <span className="version-chip">{EXPLORATORY.includes(page) ? 'Exploratory · P1/P2' : 'Local API'}</span>
-        </header>
         <main id="main-content" className="main-area" tabIndex={-1}>
           <div aria-live="polite" className="sr-only">Current page: {view.heading}</div>
           <div className="eyebrow">{view.eyebrow}</div>
