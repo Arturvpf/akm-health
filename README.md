@@ -67,4 +67,6 @@ Start a topic branch from `main`. Group commits by deliverable and open a PR wit
 
 [Alert and safety criteria](docs/akm-08-alert-safety.md) · [Educational guidance and measurement copy](docs/akm-09-guidance-library.md)
 
+[EP-05 scientific foundation and safety evidence, including NASA RR-1 provenance](docs/ep-05-scientific-foundation-and-safety.md)
+
 [AKM-24 alert presentation](docs/akm-24-alert-presentation.md) describes status labels, icons, colors and the reserved red legend (`python scripts/demo_alerts.py`).
