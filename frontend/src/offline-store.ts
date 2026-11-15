@@ -17,7 +17,7 @@ export type OutboxEntry = {
 
 export function openOfflineDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    if (!('indexedDB' in globalThis)) { reject(new Error('IndexedDB indisponível')); return; }
+    if (!('indexedDB' in globalThis)) { reject(new Error('IndexedDB is unavailable')); return; }
     const request = indexedDB.open(DATABASE, VERSION);
     request.onupgradeneeded = () => {
       const db = request.result;
@@ -26,7 +26,7 @@ export function openOfflineDb(): Promise<IDBDatabase> {
     };
     request.onerror = () => reject(request.error ?? new Error('Falha de armazenamento local'));
     request.onsuccess = () => resolve(request.result);
-    request.onblocked = () => reject(new Error('Feche outras abas com uma versão antiga do aplicativo'));
+    request.onblocked = () => reject(new Error('Close other tabs running an older version of the app'));
   });
 }
 
@@ -38,15 +38,15 @@ async function operation<T>(storeName: string, mode: IDBTransactionMode, run: (s
     const request = run(tx.objectStore(storeName));
     request.onsuccess = () => { value = request.result; };
     tx.oncomplete = () => { db.close(); resolve(value); };
-    tx.onerror = () => { db.close(); reject(tx.error ?? new Error('Erro na persistência local')); };
-    tx.onabort = () => { db.close(); reject(tx.error ?? new Error('Transação local abortada')); };
+    tx.onerror = () => { db.close(); reject(tx.error ?? new Error('Local storage error')); };
+    tx.onabort = () => { db.close(); reject(tx.error ?? new Error('Local transaction aborted')); };
   });
 }
 
 function notify() { window.dispatchEvent(new Event('akm-outbox-change')); }
 
 export async function enqueueMeasurement(payload: MeasurementCreate): Promise<OutboxEntry> {
-  if (!globalThis.crypto?.randomUUID) throw new Error('Este navegador não suporta identificadores seguros para sincronização.');
+  if (!globalThis.crypto?.randomUUID) throw new Error('This browser cannot generate secure sync identifiers.');
   const entry: OutboxEntry = {
     id: crypto.randomUUID(), payload, createdAt: new Date().toISOString(), attempts: 0, status: 'pending', error: null,
   };
@@ -123,13 +123,13 @@ async function deliver(signal?: AbortSignal): Promise<SyncReport> {
           || body.measurement.measurement_zone !== (entry.payload.astronaut_id == null ? 'habitat' : 'astronaut')
           || !Number.isFinite(Date.parse(body.measurement.measured_at))
           || Date.parse(body.measurement.measured_at) !== Date.parse(entry.payload.measured_at)
-          || !Number.isFinite(Date.parse(body.measurement.recorded_at))) throw new Error('Recibo incompatível');
+          || !Number.isFinite(Date.parse(body.measurement.recorded_at))) throw new Error('Incompatible receipt');
         confirmed[entry.id] = body.measurement;
         await removeOutbox(entry.id);
       } catch { break; } // Unreadable receipt: operation stays queued, never duplicate.
     } else if ([404, 409, 422].includes(response.status)) {
       await updateOutbox({ ...entry, status: 'conflict', attempts: entry.attempts + 1,
-        error: `Servidor rejeitou a operação (HTTP ${response.status}); revise antes de descartar.` });
+        error: `Server rejected the operation (HTTP ${response.status}); review it before discarding.` });
     } else { break; } // 5xx or network: retry later with stable operation ID.
   }
   const items = await listOutbox();

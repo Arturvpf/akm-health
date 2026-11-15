@@ -14,21 +14,21 @@ export function useSelectedEnvironment() {
 export function EnvironmentSelector() {
   const { current, id, select } = useSelectedEnvironment();
   return <div className="experiment-stack">
-    <InformationNotice label="AKM-35 · Comparação de contexto, não mudança real de missão">
-      A missão persistida continua ODYSSEY-26 (Marte). Alterar o ambiente muda apenas os textos e o contexto demonstrativo, nunca as medições ou regras clínicas.
+    <InformationNotice label="AKM-35 · Context comparison, not a real mission change">
+      The stored mission remains ODYSSEY-26 (Mars). Changing the environment only changes the explanatory context, never measurements or rules.
     </InformationNotice>
-    <Card heading="Contexto de missão selecionado">
-      <label className="ds-field" htmlFor="environment-choice">Ambiente hipotético
+    <Card heading="Selected mission context">
+      <label className="ds-field" htmlFor="environment-choice">Hypothetical environment
         <select className="ds-control" id="environment-choice" value={id} onChange={event => select(event.target.value as EnvironmentId)}>
           {ENVIRONMENTS.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
         </select>
       </label>
-      <dl className="experiment-details"><dt>Cenário</dt><dd>{current.setting}</dd><dt>Referência gravitacional</dt><dd>{current.gravity}</dd></dl>
-      <h3>Fatores contextuais documentados</h3>
+      <dl className="experiment-details"><dt>Setting</dt><dd>{current.setting}</dd><dt>Reference gravity</dt><dd>{current.gravity}</dd></dl>
+      <h3>Documented context factors</h3>
       <ul>{current.factors.map(factor => <li key={factor}>{factor}</li>)}</ul>
-      <p><strong>Interpretação:</strong> {current.implications}</p>
-      <p><strong>Limitação:</strong> {current.limitations}</p>
-      <p><strong>Fontes NASA:</strong> {current.sources.map((source, i) => <span key={source.url}>{i > 0 ? ' · ' : ''}<a href={source.url} target="_blank" rel="noopener noreferrer">{source.title}</a></span>)}</p>
+      <p><strong>Interpretation:</strong> {current.implications}</p>
+      <p><strong>Limitation:</strong> {current.limitations}</p>
+      <p><strong>NASA sources:</strong> {current.sources.map((source, i) => <span key={source.url}>{i > 0 ? ' · ' : ''}<a href={source.url} target="_blank" rel="noopener noreferrer">{source.title}</a></span>)}</p>
     </Card>
   </div>;
 }

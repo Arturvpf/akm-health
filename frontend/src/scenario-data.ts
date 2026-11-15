@@ -9,16 +9,16 @@ export const SAMPLE_PROFILES: SimulatedProfile[] = [
 ];
 export const SAMPLE_HABITAT = { co2_ppm: 980, cabin_temp_c: 22.2 } as const;
 export const DISPLAY_METRICS: readonly { id: Kind; label: string; unit: string; min: number; max: number; step: number }[] = [
-  { id: 'sleep_hours', label: 'Sono (estimativa)', unit: 'h', min: 0, max: 24, step: 0.1 },
-  { id: 'heart_rate_bpm', label: 'Frequência cardíaca pontual', unit: 'bpm', min: 1, max: 300, step: 1 },
-  { id: 'mood_score', label: 'Bem-estar autorrelatado', unit: '1–5', min: 1, max: 5, step: 1 },
-  { id: 'co2_ppm', label: 'CO₂ interno do habitat', unit: 'ppm', min: 0, max: 10_000, step: 1 },
-  { id: 'cabin_temp_c', label: 'Temperatura interna', unit: '°C', min: -50, max: 80, step: 0.1 },
+  { id: 'sleep_hours', label: 'Sleep (estimate)', unit: 'h', min: 0, max: 24, step: 0.1 },
+  { id: 'heart_rate_bpm', label: 'Heart rate (spot reading)', unit: 'bpm', min: 1, max: 300, step: 1 },
+  { id: 'mood_score', label: 'Self-reported well-being', unit: '1–5', min: 1, max: 5, step: 1 },
+  { id: 'co2_ppm', label: 'Habitat CO₂', unit: 'ppm', min: 0, max: 10_000, step: 1 },
+  { id: 'cabin_temp_c', label: 'Cabin temperature', unit: '°C', min: -50, max: 80, step: 0.1 },
 ];
 export type Comparison = { baseline: number | null; hypothetical: number | null; difference: number | null; unit: string };
 export function compareMetric(kind: Kind, baseline: number | null | undefined, hypothetical: number | null | undefined): Comparison {
   const definition = DISPLAY_METRICS.find(item => item.id === kind);
-  if (!definition) throw new Error('Indicador desconhecido');
+  if (!definition) throw new Error('Unknown metric');
   const valid = (number: number | null | undefined) =>
     number !== null && number !== undefined && Number.isFinite(number) && number >= definition.min
     && number <= definition.max && (kind !== 'mood_score' || Number.isInteger(number));

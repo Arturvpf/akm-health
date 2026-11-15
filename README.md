@@ -114,14 +114,15 @@ Start a task branch from main. Consult the [Notion architecture](https://app.not
 - **Schema error:** check AKM_DB_PATH and [database notes](docs/database.md). Back up data; do not delete the database as a first response.
 - **NASA unavailable:** missing/invalid history yields not_imported without fabricated values; a broken HRP catalog yields 503. Restore trusted artifacts using the [data guide](docs/data-sources.md).
 
-## Exploratory P1/P2 tools (AKM-33 to AKM-36)
+## Exploratory P1/P2 tools (AKM-33 to AKM-37)
 
 These additions are experimental and do not change the P0 investigation engine. Open them from **Exploratory tools (P1/P2)** in the sidebar.
 
 - [AKM-33 · Offline persistence and sync conflicts](docs/akm-33-offline-sync.md): new manual measurements are queued in IndexedDB with a stable UUID and sent to `POST /api/sync/measurements`, which is idempotent and returns 409 on a conflicting body. Only **new measurements** are queued offline; investigations and follow-up completion still need the API online.
 - [AKM-34 · Hypothetical scenarios](docs/akm-34-hypothetical-scenarios.md): arithmetic comparison over immutable synthetic seed values, with assumptions shown.
 - [AKM-35 · Mission environments](docs/akm-35-environments.md): four hypothetical contexts with NASA gravity references; switching does not alter health states.
-- [AKM-36 · Interactive body map](docs/akm-36-body-explorer.md): keyboard-accessible schematic, not a diagnostic instrument.
+- [AKM-36 · Interactive body map](docs/akm-36-body-explorer.md): keyboard-accessible schematic showing the latest stored reading per region; not a diagnostic instrument.
+- AKM-37 · Self-care journey: participation points from stored readings and completed follow-ups; values never change points. See [ZIP, Figma Make and design-document integration](docs/akm-36-37-figma-integration.md).
 
 **Back up an existing SQLite file first.** AKM-33 adds a `sync_operations` table and migrates `PRAGMA user_version` from 1 to 2. The service worker only caches the production build served from a secure origin (localhost or HTTPS): `npm --prefix frontend run build && npm --prefix frontend run preview`. Extra checks: `npm --prefix frontend run test:p2` and `npm --prefix frontend run test:offline`. See the [AKM-33–36 verification record](docs/akm-33-36-verification.md).
 

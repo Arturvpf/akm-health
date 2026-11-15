@@ -6,6 +6,7 @@ import { MissionPreview } from './MissionPreview';
 import { ScenarioComparator } from './ScenarioComparator';
 import { EnvironmentSelector } from './EnvironmentView';
 import { BodyExplorer } from './BodyExplorer';
+import { SelfCareJourney } from './SelfCareJourney';
 import { OfflineStatus } from './OfflineStatus';
 import { ActionLink, Card, SimulationNotice } from './design-system';
 
@@ -16,7 +17,7 @@ type Section = {
   next: PageId;
 };
 
-const EXPLORATORY: PageId[] = ['comparador', 'ambientes', 'corpo'];
+const EXPLORATORY: PageId[] = ['comparador', 'ambientes', 'corpo', 'autocuidado'];
 
 const SECTIONS: Record<PageId, Section> = {
   dashboard: {
@@ -53,7 +54,11 @@ const SECTIONS: Record<PageId, Section> = {
   },
   corpo: {
     eyebrow: 'AKM-36 · Accessible exploration', heading: 'Interactive body map',
-    intro: 'Explore educational links between MVP metrics and NASA research.', next: 'dashboard',
+    intro: 'Explore educational links between MVP metrics and NASA research.', next: 'autocuidado',
+  },
+  autocuidado: {
+    eyebrow: 'AKM-37 · Participation', heading: 'Self-care journey',
+    intro: 'Track completed routine activities. Points reward participation, never health results.', next: 'dashboard',
   },
 };
 
@@ -86,7 +91,7 @@ export function App() {
       <a className="skip-link" href="#main-content" onClick={skipToContent}>Skip to content</a>
       <aside className="sidebar" aria-label="Application information">
         <div className="brand">
-          <span aria-hidden="true" className="brand-mark">A</span>
+          <span aria-hidden="true" className="brand-mark"><img src="/akm-mark.svg" alt="" width="32" height="26" /></span>
           <div><strong>AKM Health</strong><small>Space Health Monitoring</small></div>
         </div>
         <p className="nav-heading">Mission pages</p>
@@ -121,7 +126,7 @@ export function App() {
           <h1>{view.heading}</h1>
           <p className="lead">{view.intro}</p>
 
-          {page === 'dashboard' ? <Dashboard /> : page === 'registrar' ? <MeasurementForm /> : page === 'comparador' ? <ScenarioComparator /> : page === 'ambientes' ? <EnvironmentSelector /> : page === 'corpo' ? <BodyExplorer /> : <>
+          {page === 'dashboard' ? <Dashboard /> : page === 'registrar' ? <MeasurementForm /> : page === 'comparador' ? <ScenarioComparator /> : page === 'ambientes' ? <EnvironmentSelector /> : page === 'corpo' ? <BodyExplorer /> : page === 'autocuidado' ? <SelfCareJourney /> : <>
           <SimulationNotice />
 
           <section className="panels" aria-label={page === 'historico' ? 'History and navigation' : 'Investigation and navigation'}>

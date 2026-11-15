@@ -9,12 +9,12 @@ export function OfflineStatus() {
   const [cached, setCached] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const refresh = useCallback(() => {
-    void listOutbox().then(setEntries).catch(() => setError('Armazenamento local indisponível. Não registre medições sem confirmar a persistência.'));
+    void listOutbox().then(setEntries).catch(() => setError('Local storage is unavailable. Do not register measurements until storage is confirmed.'));
   }, []);
   const sync = useCallback(async () => {
     setBusy(true);
     try { await synchronizeOutbox(); refresh(); }
-    catch { setError('Não foi possível sincronizar. As operações permaneceram no dispositivo.'); }
+    catch { setError('Sync failed. Queued operations remain on this device.'); }
     finally { setBusy(false); }
   }, [refresh]);
   useEffect(() => {
@@ -47,19 +47,19 @@ export function OfflineStatus() {
     const link = document.createElement('a'); link.href = href; link.download = 'akm-offline-outbox-backup.json';
     link.click(); URL.revokeObjectURL(href);
   }
-  return <aside className="offline-banner" aria-label="Estado da sincronização">
-    <div role="status"><strong>{cached ? 'Usando cópia local (pode estar desatualizada)' : online ? 'Rede detectada' : 'Sem rede'}</strong> · {pending.length} pendente(s) · {conflicts.length} conflito(s)
-      {(!online || pending.length > 0) && <span> · Dados locais podem estar desatualizados</span>}
+  return <aside className="offline-banner" aria-label="Sync status">
+    <div role="status"><strong>{cached ? 'Showing cached copy (may be out of date)' : online ? 'Online' : 'Offline'}</strong> · {pending.length} pending · {conflicts.length} conflict(s)
+      {(!online || pending.length > 0) && <span> · Local data may be out of date</span>}
     </div>
     <div className="offline-actions">
       <button type="button" onClick={() => void sync()} disabled={busy || pending.length === 0}>
-        {busy ? 'Sincronizando…' : 'Sincronizar agora'}
+        {busy ? 'Syncing…' : 'Sync now'}
       </button>
-      {entries.length > 0 && <button type="button" onClick={exportQueue}>Exportar fila</button>}
+      {entries.length > 0 && <button type="button" onClick={exportQueue}>Export queue</button>}
     </div>
     {error && <p role="alert">{error}</p>}
-    {conflicts.length > 0 && <details><summary>Conflitos precisam de revisão ({conflicts.length})</summary>
-      <p>Nenhuma operação com conflito é descartada automaticamente. Exporte a fila e consulte os dados no servidor antes de corrigir.</p>
+    {conflicts.length > 0 && <details><summary>Conflicts need review ({conflicts.length})</summary>
+      <p>Conflicting operations are never discarded automatically. Export the queue and check the server data before correcting.</p>
       <ul>{conflicts.map(item => <li key={item.id}><code>{item.id}</code>: {item.error}</li>)}</ul>
     </details>}
   </aside>;

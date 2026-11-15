@@ -5,7 +5,7 @@ import { SAMPLE_PROFILES, SAMPLE_HABITAT, DISPLAY_METRICS, compareMetric } from 
 import type { Kind } from './types';
 import './experiments.css';
 
-const print = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2, signDisplay: 'exceptZero' });
+const print = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2, signDisplay: 'exceptZero' });
 export function ScenarioComparator() {
   const [person, setPerson] = useState('A1');
   const [overrides, setOverrides] = useState<Partial<Record<Kind, string>>>({});
@@ -18,35 +18,35 @@ export function ScenarioComparator() {
     return { metric, result: compareMetric(metric.id, baseline, value) };
   }), [profile, overrides]);
   return <div className="experiment-stack">
-    <InformationNotice label="AKM-34 · Simulação hipotética">
-      Referência: seed fictício da ODYSSEY-26 (segunda noite), não dados de saúde reais. Valores alternativos são hipóteses digitadas. Diferenças numéricas não indicam risco, benefício, diagnóstico ou previsão.
+    <InformationNotice label="AKM-34 · Hypothetical simulation">
+      Baseline: fictional ODYSSEY-26 seed (second night), not real health data. Alternative values are typed hypotheses. Numeric differences do not indicate risk, benefit, diagnosis or prediction.
     </InformationNotice>
-    <Card heading="Premissas do comparador">
-      <label className="ds-field" htmlFor="compare-profile">Perfil sintético da referência
+    <Card heading="Comparator assumptions">
+      <label className="ds-field" htmlFor="compare-profile">Synthetic baseline profile
         <select id="compare-profile" className="ds-control" value={person} onChange={event => { setPerson(event.target.value); setOverrides({}); }}>
           {SAMPLE_PROFILES.map(item => <option key={item.id} value={item.id}>{item.name} · {item.id}</option>)}
         </select>
       </label>
-      <p>O indicador de sono representa horas estimadas de um período; a FC é pontual; humor é ordinal. CO₂ e temperatura referem-se à cabine, não ao corpo. Dados ausentes permanecem ausentes, não viram zero.</p>
-      <p><strong>Origem:</strong> `backend/app/seed.py` — registros `source=synthetic`, não medidos pela NASA.</p>
+      <p>Sleep is estimated hours for one period; heart rate is a spot reading; mood is ordinal. CO₂ and temperature describe the cabin, not the body. Missing data stay missing; they are never treated as zero.</p>
+      <p><strong>Source:</strong> <code>backend/app/seed.py</code> — <code>source=synthetic</code> records, not measured by NASA.</p>
     </Card>
-    <Card heading="Comparação de observações">
+    <Card heading="Observation comparison">
       <div className="table-scroll"><table className="scenario-table">
-        <caption>Referência simulada versus hipótese manual, sem escore clínico</caption>
-        <thead><tr><th scope="col">Indicador</th><th scope="col">Referência</th><th scope="col">Hipótese editável</th><th scope="col">Diferença</th></tr></thead>
+        <caption>Simulated baseline versus manual hypothesis, with no clinical score</caption>
+        <thead><tr><th scope="col">Metric</th><th scope="col">Baseline</th><th scope="col">Editable hypothesis</th><th scope="col">Difference</th></tr></thead>
         <tbody>{comparisons.map(({ metric, result }) => <tr key={metric.id}>
           <th scope="row">{metric.label}<small> {metric.unit}</small></th>
-          <td>{result.baseline === null ? 'Não medido' : `${result.baseline.toLocaleString('pt-BR')} ${metric.unit}`}</td>
-          <td><label className="sr-only" htmlFor={`hypo-${metric.id}`}>Valor hipotético de {metric.label}</label>
+          <td>{result.baseline === null ? 'Not measured' : `${result.baseline.toLocaleString('en-US')} ${metric.unit}`}</td>
+          <td><label className="sr-only" htmlFor={`hypo-${metric.id}`}>Hypothetical value for {metric.label}</label>
             <input id={`hypo-${metric.id}`} className="ds-control" inputMode="decimal" type="number"
               min={metric.min} max={metric.max} step={metric.step} value={overrides[metric.id] ?? result.baseline ?? ''}
               onChange={event => setOverrides(previous => ({ ...previous, [metric.id]: event.target.value }))} />
           </td>
-          <td>{result.difference === null ? 'Indisponível' : `${print.format(result.difference)} ${metric.unit}`}</td>
+          <td>{result.difference === null ? 'Unavailable' : `${print.format(result.difference)} ${metric.unit}`}</td>
         </tr>)}</tbody>
       </table></div>
-      <div className="experiment-actions"><button type="button" className="ds-action" onClick={() => setOverrides({})}>Restaurar referência</button></div>
-      <p><strong>Limite:</strong> esses valores não são parâmetros para recomendar condutas ou emitir alertas. O motor médico do projeto não é chamado por esta página.</p>
+      <div className="experiment-actions"><button type="button" className="ds-action" onClick={() => setOverrides({})}>Reset to baseline</button></div>
+      <p><strong>Limit:</strong> these values are not used to recommend actions or raise alerts. This page does not call the investigation engine.</p>
     </Card>
     <EnvironmentSelector />
   </div>;

@@ -61,10 +61,10 @@ export async function durableSaveMeasurement(payload: MeasurementCreate, signal:
   try {
     saved = await storeThenSync(payload, signal);
   } catch (error) {
-    throw new RegistrationError(`Não foi possível confirmar o armazenamento local: ${error instanceof Error ? error.message : 'erro desconhecido'}. A medição NÃO foi enviada.`, false);
+    throw new RegistrationError(`Could not confirm local storage: ${error instanceof Error ? error.message : 'unknown error'}. The measurement was NOT sent.`, false);
   }
   if (!saved.receipt) throw new RegistrationError(
-    `Medição preservada no dispositivo, operação ${saved.operationId}. Sincronize quando a API estiver acessível; não a registre novamente.`,
+    `Measurement kept on this device (operation ${saved.operationId}). Sync when the API is reachable; do not register it again.`,
     false, {}, false, true,
   );
   const result = parseMeasurement(saved.receipt);
@@ -72,7 +72,7 @@ export async function durableSaveMeasurement(payload: MeasurementCreate, signal:
     || result.astronaut_id !== (payload.astronaut_id ?? null) || result.source !== payload.source
     || result.quality !== (payload.quality ?? 'ok') || Date.parse(result.measured_at) !== Date.parse(payload.measured_at)) {
     // The browser outbox has already received a matching transport receipt; this is a contract error.
-    throw new RegistrationError('Recibo do servidor incompatível; confira o histórico.', true);
+    throw new RegistrationError('Incompatible server receipt; check History.', true);
   }
   return result;
 }
