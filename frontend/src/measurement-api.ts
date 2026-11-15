@@ -1,8 +1,9 @@
+import { storeThenSync } from './offline-store';
 import { FORM_METRICS, type FieldErrors } from './measurement-form';
 import type { MeasurementCreate, MeasurementRead } from './types';
 
 export class RegistrationError extends Error {
-  constructor(message: string, public uncertain: boolean, public fields: FieldErrors = {}, public missingAstronaut = false) { super(message); }
+  constructor(message: string, public uncertain: boolean, public fields: FieldErrors = {}, public missingAstronaut = false, public queued = false) { super(message); }
 }
 const UNCERTAIN = 'Não foi possível confirmar o registro. Confira se a medição aparece no histórico antes de reenviar.';
 
@@ -54,14 +55,36 @@ export async function saveMeasurement(payload: MeasurementCreate, signal: AbortS
   } catch { throw new RegistrationError(UNCERTAIN, true); }
 }
 
+
+export async function durableSaveMeasurement(payload: MeasurementCreate, signal: AbortSignal): Promise<MeasurementRead> {
+  let saved;
+  try {
+    saved = await storeThenSync(payload, signal);
+  } catch (error) {
+    throw new RegistrationError(`Não foi possível confirmar o armazenamento local: ${error instanceof Error ? error.message : 'erro desconhecido'}. A medição NÃO foi enviada.`, false);
+  }
+  if (!saved.receipt) throw new RegistrationError(
+    `Medição preservada no dispositivo, operação ${saved.operationId}. Sincronize quando a API estiver acessível; não a registre novamente.`,
+    false, {}, false, true,
+  );
+  const result = parseMeasurement(saved.receipt);
+  if (result.kind !== payload.kind || result.unit !== payload.unit || result.value !== payload.value
+    || result.astronaut_id !== (payload.astronaut_id ?? null) || result.source !== payload.source
+    || result.quality !== (payload.quality ?? 'ok') || Date.parse(result.measured_at) !== Date.parse(payload.measured_at)) {
+    // The browser outbox has already received a matching transport receipt; this is a contract error.
+    throw new RegistrationError('Recibo do servidor incompatível; confira o histórico.', true);
+  }
+  return result;
+}
+
 export interface RegistrationState {
-  phase: 'idle' | 'saving' | 'saved' | 'error' | 'uncertain';
+  phase: 'idle' | 'saving' | 'saved' | 'error' | 'uncertain' | 'queued';
   receipt: MeasurementRead | null; error: string | null; fields: FieldErrors; missingAstronaut: boolean;
 }
 export const INITIAL_REGISTRATION: RegistrationState = { phase: 'idle', receipt: null, error: null, fields: {}, missingAstronaut: false };
 
 /** Single flight, no retries, bounded waiting, and no late updates after timeout/unmount. */
-export function createRegistrationController(save = saveMeasurement, timeoutMs = 10_000) {
+export function createRegistrationController(save = durableSaveMeasurement, timeoutMs = 10_000) {
   let state = INITIAL_REGISTRATION;
   let disposed = false;
   let sequence = 0;
@@ -74,7 +97,7 @@ export function createRegistrationController(save = saveMeasurement, timeoutMs =
     subscribe(listener: (state: RegistrationState) => void) { listeners.add(listener); return () => { listeners.delete(listener); }; },
     reset() { if (!disposed && state.phase !== 'saving') publish(INITIAL_REGISTRATION); },
     async submit(payload: MeasurementCreate) {
-      if (disposed || state.phase === 'saving' || state.phase === 'saved' || state.phase === 'uncertain') return;
+      if (disposed || state.phase === 'saving' || state.phase === 'saved' || state.phase === 'uncertain' || state.phase === 'queued') return;
       const current = ++sequence;
       const controller = new AbortController(); active = controller;
       publish({ ...INITIAL_REGISTRATION, phase: 'saving' });
@@ -87,7 +110,7 @@ export function createRegistrationController(save = saveMeasurement, timeoutMs =
       } catch (error) {
         if (disposed || current !== sequence) return;
         const failure = error instanceof RegistrationError ? error : new RegistrationError(UNCERTAIN, true);
-        publish({ ...INITIAL_REGISTRATION, phase: failure.uncertain ? 'uncertain' : 'error', error: failure.message, fields: failure.fields, missingAstronaut: failure.missingAstronaut });
+        publish({ ...INITIAL_REGISTRATION, phase: failure.queued ? 'queued' : failure.uncertain ? 'uncertain' : 'error', error: failure.message, fields: failure.fields, missingAstronaut: failure.missingAstronaut });
       } finally { clearTimeout(timer); active = null; }
     },
     dispose() { disposed = true; ++sequence; active?.abort(); clearTimeout(timer); listeners.clear(); },

@@ -10,8 +10,14 @@ import type { Kind } from './types';
 export function MeasurementForm() {
   const [context, setContext] = useState(INITIAL_DASHBOARD_STATE);
   const [registration, setRegistration] = useState(INITIAL_REGISTRATION);
-  const [draft, setDraft] = useState<MeasurementDraft>({ ...EMPTY_DRAFT });
+  const [draft, setDraft] = useState<MeasurementDraft>(() => {
+    try { return { ...EMPTY_DRAFT, ...JSON.parse(localStorage.getItem('akm-measurement-draft-v1') ?? '{}') }; }
+    catch { return { ...EMPTY_DRAFT }; }
+  });
   const [errors, setErrors] = useState<FieldErrors>({});
+  useEffect(() => {
+    try { localStorage.setItem('akm-measurement-draft-v1', JSON.stringify(draft)); } catch { /* storage may be denied */ }
+  }, [draft]);
   const contextController = useRef<ReturnType<typeof createDashboardController> | null>(null);
   const registrationController = useRef<ReturnType<typeof createRegistrationController> | null>(null);
   useEffect(() => {
@@ -64,12 +70,12 @@ export function MeasurementFormView({ context, registration, draft, errors, onCh
   const previousPhase = useRef(registration.phase);
   useEffect(() => {
     if (Object.keys(errors).length) form.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
-    else if (registration.phase !== previousPhase.current && ['saved', 'error', 'uncertain'].includes(registration.phase)) feedback.current?.focus();
+    else if (registration.phase !== previousPhase.current && ['saved', 'error', 'uncertain', 'queued'].includes(registration.phase)) feedback.current?.focus();
     previousPhase.current = registration.phase;
   }, [errors, registration.phase]);
   const metric = FORM_METRICS[draft.kind];
   const busy = registration.phase === 'saving';
-  const locked = busy || registration.phase === 'uncertain';
+  const locked = busy || registration.phase === 'uncertain' || registration.phase === 'queued';
   const ready = context.phase === 'ready' && context.data !== null;
   const fields = (field: keyof MeasurementDraft, description?: string) => ({
     id: `measurement-${field}`, 'aria-invalid': errors[field] ? true as const : undefined,
@@ -93,7 +99,11 @@ export function MeasurementFormView({ context, registration, draft, errors, onCh
     </div>
     <div ref={feedback} tabIndex={-1} className="registration-feedback" role={registration.error ? 'alert' : 'status'}>
       {busy && <DataState kind="loading">Salvando uma medição. Aguarde a confirmação antes de sair desta tela.</DataState>}
-      {registration.error && <DataState kind="error">{registration.error}</DataState>}
+      {registration.error && (registration.phase === 'queued' ? <DataState kind="loading">{registration.error}</DataState> : <DataState kind="error">{registration.error}</DataState>)}
+      {registration.phase === 'queued' && <div className="status-actions">
+        <p>O registro está no dispositivo, não confirmado no servidor. A barra de sincronização mostrará pendências e conflitos. Não registre novamente a mesma leitura.</p>
+        <ActionButton onClick={onNew}>Registrar outra medição</ActionButton>
+      </div>}
       {registration.phase === 'uncertain' && <div className="status-actions">
         <ActionLink href="#/historico" target="_blank" rel="noopener noreferrer">Conferir histórico em nova aba</ActionLink>
         <ActionButton onClick={onUnlock}>Conferi o histórico: a medição não consta; liberar envio</ActionButton>
@@ -163,7 +173,7 @@ export function MeasurementFormView({ context, registration, draft, errors, onCh
       <Card heading="Como registrar">
         <section id="measurement-instructions" aria-live="polite"><h3>{METRIC_LABELS[draft.kind]} · {metric.displayUnit}</h3><p>{metric.instruction}</p><p>{metric.limit}</p></section>
         <ol className="measurement-steps"><li>Confira o indicador e o alvo.</li><li>Informe a leitura, o momento medido e o fuso.</li><li>Identifique origem e qualidade; revise antes de salvar.</li><li>Aguarde o número do registro confirmado.</li></ol>
-        <p>Os campos podem ser corrigidos antes do envio. A API atual não permite editar medições salvas.</p>
+        <p>O rascunho é preservado neste navegador. O envio usa uma fila local com ID estável, segura contra repetição de rede. A API não permite editar medições salvas.</p>
         <p>Referências NASA são contexto educativo. Dados históricos NASA pertencem à área de referências e não devem ser cadastrados como leitura desta missão.</p>
         <p><a href={metric.url}>Fonte contextual NASA · {metric.id}</a></p>
       </Card>

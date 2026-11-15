@@ -84,3 +84,35 @@ Start a topic branch from `main`. Group commits by deliverable and open a PR wit
 [AKM-23 next check](docs/akm-23-next-check.md) documents explainable scoring, resource availability, protocol priority and feasible alternatives (`python scripts/demo_next_check.py`).
 
 [AKM-26 investigation explanation](docs/akm-26-investigation-explanation.md) documents the API fields for coverage, reference links, uncertainty and human review, with a reproducible synthetic example.
+
+## AKM-33 a AKM-36 — Extensões P1/P2 experimentais
+
+Este pacote acrescenta persistência local para novos registros fictícios, sincronização idempotente de medições, cenários hipotéticos, ambientes de missão selecionáveis e atlas corporal acessível. Use o menu **Recursos exploratórios P1/P2**. Consulte:
+
+- [AKM-33 · Persistência offline e conflitos](docs/akm-33-offline-sync.md)
+- [AKM-34 · Cenários hipotéticos](docs/akm-34-hypothetical-scenarios.md)
+- [AKM-35 · Ambientes de missão](docs/akm-35-environments.md)
+- [AKM-36 · Corpo humano interativo](docs/akm-36-body-explorer.md)
+
+**Antes de iniciar pela primeira vez com SQLite preexistente:** feche o servidor e copie `backend/akm.db` para um backup. A AKM-33 adiciona a tabela auxiliar `sync_operations` e migra `PRAGMA user_version` de 1 para 2. O endpoint original `/api/measurements` segue disponível; a interface nova usa `/api/sync/measurements` para garantir idempotência do reenvio. O serviço offline usa IndexedDB e o shell é armazenado pelo Service Worker apenas no build de produção servido em origem segura (localhost ou HTTPS).
+
+**Instalação da cópia completa:**
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r backend/requirements-dev.txt
+cd backend && python -m app.seed && cd ..
+python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
+```
+
+Em outro terminal:
+
+```bash
+cd frontend
+npm ci
+npm run build
+npm run preview
+```
+
+Verificações: `python -m pytest -q backend`; `npm --prefix frontend run typecheck`; `npm --prefix frontend run test:p2`. A investigação clínica e o acompanhamento continuam requerendo o servidor online; **apenas novas medições são automaticamente enfileiradas offline nesta versão**, e essa limitação faz parte dos critérios de revisão da AKM-33. Não utilize dados reais de saúde, nem interprete o comparador como dispositivo médico.

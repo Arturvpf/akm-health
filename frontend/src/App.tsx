@@ -1,9 +1,14 @@
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
-import { NAVIGATION, pageHref, parsePage, type PageId } from './navigation';
-import { MissionPreview } from './MissionPreview';
+import { NAVIGATION, EXPERIMENTAL_NAVIGATION, ALL_NAVIGATION, pageHref, parsePage, type PageId } from './navigation';
 import { Dashboard } from './Dashboard';
 import { MeasurementForm } from './MeasurementForm';
-import { ActionLink, Card, SimulationNotice } from './design-system';
+import { MeasurementHistory } from './MeasurementHistory';
+import { InvestigationPage } from './InvestigationPage';
+import { ScenarioComparator } from './ScenarioComparator';
+import { EnvironmentSelector } from './EnvironmentView';
+import { BodyExplorer } from './BodyExplorer';
+import { OfflineStatus } from './OfflineStatus';
+import { ActionLink, SimulationNotice } from './design-system';
 
 type Section = {
   eyebrow: string;
@@ -36,6 +41,18 @@ const SECTIONS: Record<PageId, Section> = {
     heading: 'Investigação e acompanhamento',
     intro: 'Fluxo de evidências, hipóteses não confirmadas e solicitações de nova verificação.',
     next: 'dashboard',
+  },
+  comparador: {
+    eyebrow: 'AKM-34 · análise de premissas', heading: 'Comparador de cenários hipotéticos',
+    intro: 'Compare valores simulados sem prever riscos de saúde ou resultados clínicos.', next: 'ambientes',
+  },
+  ambientes: {
+    eyebrow: 'AKM-35 · contexto físico NASA', heading: 'Ambientes de missão',
+    intro: 'Explore condições hipotéticas mantendo a missão registrada e suas regras intactas.', next: 'corpo',
+  },
+  corpo: {
+    eyebrow: 'AKM-36 · exploração acessível', heading: 'Corpo humano interativo',
+    intro: 'Navegue por associações educativas entre indicadores do MVP e pesquisas da NASA.', next: 'dashboard',
   },
 };
 
@@ -80,15 +97,22 @@ export function App() {
             </a>
           ))}
         </nav>
+        <p className="nav-heading" style={{ marginTop: '1.5rem' }}>Recursos exploratórios P1/P2</p>
+        <nav className="side-nav" aria-label="Ferramentas exploratórias">
+          {EXPERIMENTAL_NAVIGATION.map(item => (
+            <a key={item.id} href={pageHref(item.id)} aria-current={page === item.id ? 'page' : undefined} className="nav-link">{item.label}</a>
+          ))}
+        </nav>
         <div className="sidebar-note">
           Fluxo de demonstração fictício
           <small>Não representa monitoramento real ou validação clínica.</small>
         </div>
       </aside>
       <div className="content-shell">
+        <OfflineStatus />
         <header className="topbar">
           <div><small>AKM HEALTH / MVP P0</small><strong>{view.heading}</strong></div>
-          <span className="version-chip">{page === 'dashboard' || page === 'registrar' ? 'API local' : 'Demonstração local'}</span>
+          <span className="version-chip">{['comparador', 'ambientes', 'corpo'].includes(page) ? 'Exploração P2' : 'API local · demo'}</span>
         </header>
         <main id="main-content" className="main-area" tabIndex={-1}>
           <div aria-live="polite" className="sr-only">Página atual: {view.heading}</div>
@@ -96,33 +120,19 @@ export function App() {
           <h1>{view.heading}</h1>
           <p className="lead">{view.intro}</p>
 
-          {page === 'dashboard' ? <Dashboard /> : page === 'registrar' ? <MeasurementForm /> : <>
-          <SimulationNotice />
-
-          <section className="panels" aria-label={page === 'historico' ? 'Histórico e navegação' : 'Dados de exemplo e navegação'}>
-            <MissionPreview page={page} />
-            <Card heading="Próxima etapa da jornada">
-              <div className="journey-actions">
-                <ActionLink variant="primary" href={pageHref(view.next)}>
-                  Ir para {NAVIGATION.find((item) => item.id === view.next)?.label}
-                  <span aria-hidden="true">→</span>
-                </ActionLink>
-                <ActionLink href="akm-10-wireframe.html" target="_blank" rel="noopener noreferrer">
-                  Abrir wireframe interativo <span aria-hidden="true">↗</span>
-                  <span className="sr-only">(abre em nova aba)</span>
-                </ActionLink>
-              </div>
-              <div className="links" aria-label="Outras áreas">
-                {NAVIGATION.filter((item) => item.id !== page && item.id !== view.next).map((item) => (
-                  <ActionLink variant="quiet" href={pageHref(item.id)} key={item.id}>{item.label}</ActionLink>
-                ))}
-              </div>
-            </Card>
+          {page === 'dashboard' && <Dashboard />}
+          {page === 'registrar' && <MeasurementForm />}
+          {page === 'historico' && <><SimulationNotice /><MeasurementHistory /></>}
+          {page === 'investigacao' && <><SimulationNotice /><InvestigationPage /></>}
+          {page === 'comparador' && <ScenarioComparator />}
+          {page === 'ambientes' && <EnvironmentSelector />}
+          {page === 'corpo' && <BodyExplorer />}
+          <section className="journey-actions" aria-label="Próximas áreas" style={{ marginTop: '1.5rem' }}>
+            <ActionLink href={pageHref(view.next)}>Próxima área: {ALL_NAVIGATION.find(item => item.id === view.next)?.label}</ActionLink>
           </section>
-          </>}
           <p className="disclaimer">Missão e tripulação fictícias. Os estados são experimentais; esta demonstração não realiza avaliações médicas nem consulta sensores reais.</p>
         </main>
-        <footer className="footer">AKM Health · NASA Space Apps Challenge 2026 · Interface P0</footer>
+        <footer className="footer">AKM Health · NASA Space Apps Challenge 2026 · P0 + recursos experimentais P1/P2</footer>
       </div>
     </div>
   );

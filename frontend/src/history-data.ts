@@ -1,3 +1,4 @@
+import { cachedRead } from './offline-store';
 import type { AstronautRead, Kind, MeasurementRead } from './types';
 
 export const METRICS = {
@@ -22,11 +23,13 @@ const DAY_MS = 86_400_000;
 const PAGE_SIZE = 100;
 
 async function readList<T>(endpoint: string, signal: AbortSignal): Promise<T[]> {
-  const response = await fetch(endpoint, { signal, headers: { Accept: 'application/json' } });
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  const body: unknown = await response.json();
-  if (!Array.isArray(body)) throw new Error('Resposta inesperada');
-  return body as T[];
+  return cachedRead(`history:${endpoint}`, async () => {
+    const response = await fetch(endpoint, { signal, headers: { Accept: 'application/json' } });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const body: unknown = await response.json();
+    if (!Array.isArray(body)) throw new Error('Resposta inesperada');
+    return body as T[];
+  });
 }
 
 export function readProfiles(signal: AbortSignal) {

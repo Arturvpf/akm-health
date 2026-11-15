@@ -390,3 +390,16 @@ class NASAReferenceResponse(StrictModel):
         if self.historical_data_status == "imported" and not self.historical_series:
             raise ValueError("Imported status requires verified observations")
         return self
+
+
+# AKM-33: transport envelope is independent of the canonical measurement payload.
+from uuid import UUID
+
+class SyncMeasurementRequest(StrictModel):
+    operation_id: UUID
+    measurement: MeasurementCreate
+
+class SyncMeasurementReceipt(StrictModel):
+    operation_id: UUID
+    measurement: MeasurementRead
+    reused: bool

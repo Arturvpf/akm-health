@@ -11,7 +11,9 @@
     "test:navigation": "node scripts/test-navigation.cjs",
     "test:wireframe": "node --test scripts/test-wireframe.cjs",
     "test:dashboard": "node --test scripts/test-dashboard.cjs",
-    "test:registration": "node --test scripts/test-registration.cjs"
+    "test:registration": "node --test scripts/test-registration.cjs",
+    "test:p2": "node scripts/test-p2-experiments.cjs",
+    "test:offline": "node scripts/test-p2-offline.cjs"
   },
   "dependencies": {
     "react": "^19.2.0",
