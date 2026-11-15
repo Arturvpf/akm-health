@@ -1,7 +1,7 @@
 """AKM-20: real SQLite transactions, immutable results and follow-up completion."""
 
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 import json
 
 from fastapi.testclient import TestClient
@@ -9,26 +9,18 @@ import pytest
 from sqlalchemy import func
 from sqlmodel import Session, select
 
-from app import investigations, models
+from app import investigations, next_check
 from app.main import app
 from app.models import Astronaut, Followup, Investigation, Measurement
 from app.seed import seed
 
 
 @pytest.fixture
-def client(tmp_path, monkeypatch):
+def client(tmp_path, monkeypatch, investigation_clock):
     monkeypatch.setenv("AKM_DB_PATH", str(tmp_path / "investigations.db"))
-    clock = [datetime(2026, 11, 14, 8, tzinfo=timezone.utc)]
-    monkeypatch.setattr(investigations, "utc_now", lambda: clock[0])
-
-    class Clock(datetime):
-        @classmethod
-        def now(cls, tz=None):
-            return clock[0].astimezone(tz) if tz else clock[0].replace(tzinfo=None)
-
-    monkeypatch.setattr(models, "datetime", Clock)
+    monkeypatch.delenv("AKM_INVESTIGATION_CONFIG", raising=False)
     with TestClient(app) as client:
-        client.clock = clock
+        client.clock = investigation_clock
         yield client
 
 
@@ -105,10 +97,17 @@ def test_new_input_changes_fingerprint_but_reuses_pending_target(seeded):
     first = run(seeded)
     seeded.clock[0] += timedelta(minutes=1)
     measure(seeded)
+    dashboard = seeded.get("/api/dashboard").json()
+    assert dashboard["has_unanalyzed_measurements"] is True
+    assert dashboard["last_investigation_at"] == first["created_at"]
+    assert counts() == (1, 1)
     second = run(seeded)
     assert second["input_fingerprint"] != first["input_fingerprint"]
     assert second["followup_id"] == first["followup_id"]
     assert second["reused"] is False
+    dashboard = seeded.get("/api/dashboard").json()
+    assert dashboard["has_unanalyzed_measurements"] is False
+    assert [item["id"] for item in dashboard["pending_followups"]] == [first["followup_id"]]
     assert counts() == (2, 1)
 
 
@@ -163,7 +162,7 @@ def test_missing_resources_and_invalid_identifiers(client):
     for id in (0, -1, 2**63, "invalid"):
         assert client.get(f"/api/investigations/{id}").status_code == 422
         assert finish(client, id, 1).status_code == 422
-    for body in ({"status": "completed"}, {"status": "pending", "measurement_id": 1},
+    for body in ({"status": "pending", "measurement_id": 1},
                  {"status": "completed", "measurement_id": True},
                  {"status": "completed", "measurement_id": 2**63}):
         assert client.patch("/api/followups/1", json=body).status_code == 422
@@ -213,10 +212,13 @@ def test_completion_is_persisted_idempotent_and_original_analysis_is_immutable(s
     measurement = measure(seeded)
     first = finish(seeded, result["followup_id"], measurement["id"])
     assert first.status_code == 200, first.text
-    assert first.json()["completed_at"] is not None
-    assert first.json()["status"] == "completed"
+    completion = first.json()
+    assert completion["completed_at"] is not None
+    assert completion["status"] == "completed"
+    assert completion["measurement_id"] == measurement["id"]
+    assert seeded.get("/api/followups", params={"status": "completed"}).json() == [completion]
     seeded.clock[0] += timedelta(minutes=1)
-    assert finish(seeded, result["followup_id"], measurement["id"]).json() == first.json()
+    assert finish(seeded, result["followup_id"], measurement["id"]).json() == completion
     other = measure(seeded)
     assert finish(seeded, result["followup_id"], other["id"]).status_code == 409
     assert seeded.get("/api/followups", params={"status": "pending"}).json() == []
@@ -227,12 +229,14 @@ def test_completion_is_persisted_idempotent_and_original_analysis_is_immutable(s
     assert counts() == (2, 2)
 
 
-@pytest.mark.parametrize("case", ["old", "equal", "suspect", "kind", "subject", "future", "missing"])
+@pytest.mark.parametrize("case", ["old", "equal", "suspect", "kind", "subject", "future", "missing", "unlinked"])
 def test_completion_rejects_unusable_or_incompatible_measurement(seeded, case):
     result = run(seeded)
     seeded.clock[0] += timedelta(minutes=1)
-    if case == "missing":
-        id = 99999
+    if case == "unlinked":
+        response = seeded.patch(f'/api/followups/{result["followup_id"]}', json={"status": "completed"})
+    elif case == "missing":
+        response = finish(seeded, result["followup_id"], 99999)
     else:
         measurement = measure(seeded,
             kind="sleep_hours" if case == "subject" else ("cabin_temp_c" if case == "kind" else "co2_ppm"),
@@ -247,9 +251,11 @@ def test_completion_rejects_unusable_or_incompatible_measurement(seeded, case):
                 row.recorded_at = seeded.clock[0] - timedelta(minutes=1, seconds=1 if case == "old" else 0)
                 session.add(row)
                 session.commit()
-    assert finish(seeded, result["followup_id"], id).status_code == (404 if case == "missing" else 422)
-    pending = seeded.get("/api/followups", params={"status": "pending"}).json()
-    assert len(pending) == 1 and pending[0]["measurement_id"] is pending[0]["completed_at"] is None
+        response = finish(seeded, result["followup_id"], id)
+    assert response.status_code == (404 if case == "missing" else 422), response.text
+    pending, = seeded.get("/api/followups", params={"status": "pending"}).json()
+    assert pending["id"] == result["followup_id"]
+    assert pending["measurement_id"] is pending["completed_at"] is None
 
 
 def test_individual_completion_requires_same_astronaut(client):
@@ -464,3 +470,37 @@ def test_configuration_is_validated_and_missing_catalog_does_not_assume_availabi
     config.write_text(json.dumps({"rules_version": "demo-v1"}))
     with pytest.raises(ValueError):
         investigations.load_settings()
+
+
+def test_validated_protocol_controls_the_persisted_next_check(seeded):
+    settings = app.state.investigation_settings
+    pulse = next_check.CheckTarget(kind="heart_rate_bpm", astronaut_id="A1")
+    resource = next_check.CheckResource(
+        kind=pulse.kind, astronaut_id=pulse.astronaut_id, available=True, effort="high",
+    )
+    settings = settings.model_copy(update={"resources": settings.resources + (resource,)})
+    app.state.investigation_settings = settings
+    original = run(seeded)
+    assert original["next_check"]["kind"] == "co2_ppm"
+
+    protocol = next_check.ValidatedProtocol(
+        reference="qa-fixture/protocol-reviewed", validated=True, action="measurement",
+        permitted_checks=(pulse, next_check.CheckTarget(kind="co2_ppm")),
+    )
+    app.state.investigation_settings = settings.model_copy(update={"protocol": protocol})
+
+    result = run(seeded)
+    assert result["status"] == original["status"] == "attention"
+    assert result["input_fingerprint"] != original["input_fingerprint"]
+    check = result["next_check"]
+    assert (check["kind"], check["astronaut_id"], check["effort"]) == ("heart_rate_bpm", "A1", "high")
+    assert protocol.reference in check["reason"]
+    assert result["followup_id"] != original["followup_id"]
+
+    pending = seeded.get("/api/followups", params={"status": "pending"}).json()
+    pulse_check = next(item for item in pending if item["id"] == result["followup_id"])
+    assert (pulse_check["kind"], pulse_check["astronaut_id"], pulse_check["reason"]) == (
+        check["kind"], check["astronaut_id"], check["reason"],
+    )
+    assert run(seeded) == {**result, "reused": True}
+    assert counts() == (2, 2)
