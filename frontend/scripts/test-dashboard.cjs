@@ -261,3 +261,42 @@ test('a transport that ignores abort still times out without making up a respons
   assert.equal(controller.getState().data, null);
   controller.dispose();
 });
+
+test('a persisted dashboard summary translates an embedded observation window without changing timestamps', () => {
+  const data = snapshot();
+  const start = '2026-11-12T08:00:00.123456+00:00';
+  const end = '2026-11-14T08:00:00.123456+00:00';
+  data.alerts[0].explanation = 'Padrão experimental de sono compartilhado por 3 astronautas: A1, A2, A3. Janela observada: ' + start + ' a ' + end + '. Limitação: Regra experimental com tripulação fictícia; não é avaliação clínica nem diagnóstico.';
+  const html = render(data);
+  assert.ok(html.includes('Observation window: ' + start + ' to ' + end + '.'));
+  assert.ok(!html.includes('Janela observada:'));
+  assert.ok(html.includes('Clinical assessment and diagnosis are outside its scope.'));
+});
+
+test('a device copy served while the server fails is never announced as a confirmed refresh', async () => {
+  const savedAt = '2026-11-14T07:00:00.000Z';
+  const controller = createDashboardController(async (_signal, onCached) => { onCached(savedAt); return snapshot(); });
+  await controller.refresh();
+  const state = controller.getState();
+  assert.equal(state.phase, 'ready');
+  assert.equal(state.cachedAt, savedAt);
+  assert.equal(state.receivedAt, savedAt);
+  const html = render(state.data, state);
+  assert.ok(!html.includes('Dashboard updated.'));
+  assert.ok(!html.includes('Last confirmed refresh'));
+  assert.ok(html.includes('Could not get current data from the mission server.'));
+  assert.ok(html.includes('Saved on this device'));
+  assert.ok(html.includes(savedAt));
+  controller.dispose();
+});
+
+test('a live response clears the stale-copy marker', async () => {
+  let cached = true;
+  const controller = createDashboardController(async (_signal, onCached) => { if (cached) onCached('2026-11-14T07:00:00.000Z'); return snapshot(); });
+  await controller.refresh();
+  cached = false;
+  await controller.refresh();
+  assert.equal(controller.getState().cachedAt, null);
+  assert.ok(render(controller.getState().data, controller.getState()).includes('Dashboard updated.'));
+  controller.dispose();
+});

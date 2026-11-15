@@ -31,6 +31,16 @@ export const EMPTY_DRAFT: MeasurementDraft = {
   kind: 'sleep_hours', astronaut: '', value: '', localTime: '', offset: '+00:00', source: 'manual', quality: 'ok',
 };
 export type FieldErrors = Partial<Record<keyof MeasurementDraft, string>>;
+export const DRAFT_STORAGE_KEY = 'akm-measurement-draft-v1';
+
+/**
+ * Once a reading is confirmed by the server or held in the local outbox, its values must not
+ * linger as a persisted draft: reopening the form would offer the same reading for a second,
+ * non-idempotent submission. Keep only the selected metric.
+ */
+export function draftAfterSubmission(draft: MeasurementDraft): MeasurementDraft {
+  return { ...EMPTY_DRAFT, kind: draft.kind };
+}
 
 /** Explicit fixed UTC offset avoids ambiguous local/DST conversions. Calendar dates cannot roll over. */
 export function measurementTime(local: string, offset: string): string | null {

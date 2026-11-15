@@ -142,11 +142,11 @@ export function App() {
                   <span className="sr-only">(opens in a new tab)</span>
                 </ActionLink>
               </div>
-              <div className="links" aria-label="Other pages">
+              <nav className="links" aria-label="Other pages">
                 {NAVIGATION.filter((item) => item.id !== page && item.id !== view.next).map((item) => (
                   <ActionLink variant="quiet" href={pageHref(item.id)} key={item.id}>{item.label}</ActionLink>
                 ))}
-              </div>
+              </nav>
             </Card>
           </section>
           </>}

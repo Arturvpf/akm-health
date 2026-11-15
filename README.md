@@ -41,7 +41,7 @@ Keep the API running. In a **second terminal**, at the repository root:
 npm --prefix frontend run dev -- --port 5173 --strictPort
 ```
 
-Open [AKM Health](http://127.0.0.1:5173/#/dashboard). All four mission screens use the API. Route identifiers remain dashboard, registrar, historico, investigacao. Current main has Portuguese labels; a separate English-interface PR may change labels without changing route identifiers.
+Open [AKM Health](http://127.0.0.1:5173/#/dashboard). All four mission screens use the API. Route identifiers remain dashboard, registrar, historico, investigacao. The main interface labels and built-in investigation narratives are in English following merged PR #29; route identifiers remain unchanged. The separate interactive wireframe is an older Portuguese-language reference.
 
 Check [health](http://127.0.0.1:8000/api/health), [OpenAPI JSON](http://127.0.0.1:8000/openapi.json) and [NASA references](http://127.0.0.1:8000/api/nasa/references). Health returns status=ok and storage=sqlite_reachable. [Swagger UI](http://127.0.0.1:8000/docs) loads CDN assets and may not render offline.
 
@@ -76,6 +76,8 @@ It uses FastAPI TestClient, temporary SQLite and a frozen demo clock. It checks 
 - Local offline use requires installed packages and local NASA files. This guide does not claim mobile PWA persistence/sync, connected sensors, authentication or production deployment. Keep loopback bindings: there is no authentication layer.
 
 ## Check the checkout
+
+The canonical integration and accessibility matrix (T01–T15) and its browser suite are documented in [AKM-30 acceptance](docs/akm-30-acceptance.md); the suite uses a disposable fixture and a separately installed browser.
 
 Windows commands, repository root. On Bash/Zsh replace the Python prefix with python after activation:
 

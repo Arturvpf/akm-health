@@ -14,7 +14,7 @@ after(() => {
   fs.rmSync(output, { recursive: true, force: true });
 });
 execFileSync(process.execPath, [require.resolve('typescript/bin/tsc'), '--target', 'ES2022', '--module', 'CommonJS', '--moduleResolution', 'Node', '--jsx', 'react-jsx', '--esModuleInterop', '--skipLibCheck', '--strict', '--outDir', output, path.join(frontend, 'src/MeasurementForm.tsx')], { stdio: 'pipe' });
-const { validateDraft, measurementTime, EMPTY_DRAFT, FORM_METRICS } = require(path.join(output, 'measurement-form.js'));
+const { validateDraft, measurementTime, EMPTY_DRAFT, FORM_METRICS, draftAfterSubmission } = require(path.join(output, 'measurement-form.js'));
 const { saveMeasurement, parseMeasurement, createRegistrationController, INITIAL_REGISTRATION, RegistrationError } = require(path.join(output, 'measurement-api.js'));
 const { MeasurementFormView } = require(path.join(output, 'MeasurementForm.js'));
 const draft = (extra = {}) => ({ ...EMPTY_DRAFT, astronaut: 'A1', value: '5,2', localTime: '2026-11-14T11:00', offset: '-03:00', ...extra });
@@ -156,4 +156,19 @@ test('real API accepts frontend payloads, receipts render, history updates and n
     const html=render({registration:{...INITIAL_REGISTRATION,phase:'saved',receipt:saved}});
     assert.ok(html.includes('Measurement #'+saved.id+' confirmed'));assert.ok(html.includes(saved.measured_at));assert.ok(html.includes(saved.recorded_at));
   }
+});
+
+test('a submitted reading never survives as a reusable draft; only the metric is kept', () => {
+  const submitted = draft({ kind: 'co2_ppm', astronaut: '', value: '850', source: 'synthetic', quality: 'suspect' });
+  const next = draftAfterSubmission(submitted);
+  assert.deepEqual(next, { ...EMPTY_DRAFT, kind: 'co2_ppm' });
+  assert.equal(next.value, '');
+  assert.equal(next.localTime, '');
+  assert.equal(validateDraft(next, ['A1']).payload, null);
+});
+
+test('a server validation rejection is not labeled as a connection problem', () => {
+  const html = render({ registration: { ...INITIAL_REGISTRATION, phase: 'error', error: 'Review the highlighted field and try again.', fields: { quality: 'Check the quality.' } }, errors: { quality: 'Check the quality.' } });
+  assert.ok(html.includes('Review the highlighted field and try again.'));
+  assert.ok(!html.includes('Connection error'));
 });

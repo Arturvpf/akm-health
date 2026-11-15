@@ -12,6 +12,8 @@
     "test:wireframe": "node --test scripts/test-wireframe.cjs",
     "test:dashboard": "node --test scripts/test-dashboard.cjs",
     "test:registration": "node --test scripts/test-registration.cjs",
+    "test:mvp": "node scripts/test-mvp-browser.mjs",
+    "test:mvp:install": "playwright-core install chromium --only-shell",
     "test:p2": "node scripts/test-p2-experiments.cjs",
     "test:offline": "node scripts/test-p2-offline.cjs"
   },
@@ -23,6 +25,8 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.1.0",
+    "axe-core": "4.14.0",
+    "playwright-core": "1.65.1",
     "typescript": "5.9.3",
     "vite": "^7.2.0"
   },

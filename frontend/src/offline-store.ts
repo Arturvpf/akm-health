@@ -69,27 +69,32 @@ export async function removeOutbox(id: string) {
   notify();
 }
 export async function snapshot<T>(key: string): Promise<T | null> {
+  return (await snapshotEntry<T>(key))?.value ?? null;
+}
+async function snapshotEntry<T>(key: string): Promise<{ value: T; savedAt: string } | null> {
   const entry = await operation<{ key: string; value: T; savedAt: string } | undefined>(
     STORE_CACHE, 'readonly', store => store.get(key),
   );
-  return entry?.value ?? null;
+  return entry && entry.value !== null && entry.value !== undefined ? { value: entry.value, savedAt: entry.savedAt } : null;
 }
 export async function rememberSnapshot<T>(key: string, value: T): Promise<void> {
   await operation(STORE_CACHE, 'readwrite', store => store.put({ key, value, savedAt: new Date().toISOString() }));
 }
 
 /** Cached responses are explicitly marked stale in the global offline status. */
-export async function cachedRead<T>(key: string, remote: () => Promise<T>): Promise<T> {
+export async function cachedRead<T>(key: string, remote: () => Promise<T>,
+  onCached?: (savedAt: string) => void): Promise<T> {
   try {
     const data = await remote();
     await rememberSnapshot(key, data).catch(() => undefined);
     if (typeof window !== 'undefined') window.dispatchEvent(new Event('akm-server-reachable'));
     return data;
   } catch (error) {
-    const cached = await snapshot<T>(key).catch(() => null);
+    const cached = await snapshotEntry<T>(key).catch(() => null);
     if (cached !== null) {
       if (typeof window !== 'undefined') window.dispatchEvent(new Event('akm-cached-response'));
-      return cached;
+      onCached?.(cached.savedAt);
+      return cached.value;
     }
     throw error;
   }

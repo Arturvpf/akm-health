@@ -100,7 +100,7 @@ export function SelfCareJourney() {
             {crew.map(item => <option key={item.id} value={item.id}>{item.name} · {item.id}</option>)}
           </select>
         </label>
-        <div className="journey-score" aria-label={`${points} participation points`}>
+        <div className="journey-score">
           <strong>{points}</strong><span>participation points · last 24 hours</span>
         </div>
         <div className="journey-progress">

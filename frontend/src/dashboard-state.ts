@@ -6,14 +6,17 @@ export interface DashboardState {
   phase: 'loading' | 'ready' | 'error';
   error: string | null;
   receivedAt: string | null;
+  /** Device save time of a local copy shown because the server could not be reached; null for live data. */
+  cachedAt?: string | null;
 }
 export const INITIAL_DASHBOARD_STATE: DashboardState = {
-  data: null, phase: 'loading', error: null, receivedAt: null,
+  data: null, phase: 'loading', error: null, receivedAt: null, cachedAt: null,
 };
 
 /** Owns only GET requests; old or unmounted requests can never replace confirmed data. */
 export function createDashboardController(
-  load = fetchDashboard, timeoutMs = 10_000,
+  load: (signal: AbortSignal, onCached?: (savedAt: string) => void) => Promise<DashboardResponse> = fetchDashboard,
+  timeoutMs = 10_000,
 ) {
   let state = INITIAL_DASHBOARD_STATE;
   let sequence = 0;
@@ -54,9 +57,13 @@ export function createDashboardController(
           }, timeoutMs);
           timer = timeout;
         });
-        const data = await Promise.race([load(controller.signal), deadline]);
+        let cachedAt: string | null = null;
+        const data = await Promise.race([load(controller.signal, savedAt => { cachedAt = savedAt; }), deadline]);
         if (disposed || current !== sequence) return;
-        publish({ data, phase: 'ready', error: null, receivedAt: new Date().toISOString() });
+        // A device copy is not a confirmed refresh: keep its own save time and flag it as stale.
+        publish(cachedAt === null
+          ? { data, phase: 'ready', error: null, receivedAt: new Date().toISOString(), cachedAt: null }
+          : { data, phase: 'ready', error: null, receivedAt: cachedAt, cachedAt });
       } catch (error) {
         if (disposed || current !== sequence) return;
         publish({ ...state, phase: 'error', error: timedOut ? 'The request timed out.'
