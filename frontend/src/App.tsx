@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { NAVIGATION, pageHref, parsePage, type PageId } from './navigation';
 import { MissionPreview } from './MissionPreview';
 import { Dashboard } from './Dashboard';
+import { MeasurementForm } from './MeasurementForm';
 import { ActionLink, Card, SimulationNotice } from './design-system';
 
 type Section = {
@@ -87,7 +88,7 @@ export function App() {
       <div className="content-shell">
         <header className="topbar">
           <div><small>AKM HEALTH / MVP P0</small><strong>{view.heading}</strong></div>
-          <span className="version-chip">{page === 'dashboard' ? 'Consulta à API local' : 'Demonstração local'}</span>
+          <span className="version-chip">{page === 'dashboard' || page === 'registrar' ? 'API local' : 'Demonstração local'}</span>
         </header>
         <main id="main-content" className="main-area" tabIndex={-1}>
           <div aria-live="polite" className="sr-only">Página atual: {view.heading}</div>
@@ -95,7 +96,7 @@ export function App() {
           <h1>{view.heading}</h1>
           <p className="lead">{view.intro}</p>
 
-          {page === 'dashboard' ? <Dashboard /> : <>
+          {page === 'dashboard' ? <Dashboard /> : page === 'registrar' ? <MeasurementForm /> : <>
           <SimulationNotice />
 
           <section className="panels" aria-label={page === 'historico' ? 'Histórico e navegação' : 'Dados de exemplo e navegação'}>

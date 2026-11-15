@@ -38,7 +38,7 @@ python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
 - [AKM-21 individual detector](docs/akm-21-individual-detector.md) documents the pure sleep-change rule, evidence selection, limitations and an in-memory demo (`python scripts/demo_individual_detection.py`).
 - [AKM-22 collective detector](docs/akm-22-collective-detector.md) documents comparable crew periods and uncertain environmental coincidences (`python scripts/demo_collective_detection.py`).
 - The API uses `backend/akm.db` by default. Set `AKM_DB_PATH` to use a different SQLite file. Startup creates or migrates the local database.
-- Run `npm --prefix frontend run dev` to open the React application. The [AKM-13 crew dashboard](docs/akm-13-crew-dashboard.md) reads the local API; the other three routes remain simulated previews. See the [AKM-10/12 walkthrough](docs/akm-10-12-wireframes-and-shell.md) for the original prototype and build commands.
+- Run `npm --prefix frontend run dev` to open the React application. The [AKM-13 crew dashboard](docs/akm-13-crew-dashboard.md) reads the local API; the [AKM-14 registration form](docs/akm-14-measurement-forms.md) saves the five supported measurements through the API. See the [AKM-10/12 walkthrough](docs/akm-10-12-wireframes-and-shell.md) for the original prototype and build commands.
 - The [AKM-11 design system](docs/akm-11-accessible-design-system.md) documents shared React components, accessible status and provenance labels, and how to exercise the simulated interface states.
 
 After installing the dependencies, run the local checks with the virtual environment active.
@@ -63,7 +63,7 @@ To load the simulated ODYSSEY-26 profiles and readings, run `python -m app.seed`
 | --- | --- |
 | `backend/app/` | FastAPI application, SQLite connectivity and Pydantic contracts |
 | `backend/tests/` | Backend smoke and contract tests |
-| `frontend/src/` | API-connected crew dashboard, navigation shell, simulated previews, and shared TypeScript contracts |
+| `frontend/src/` | API-connected dashboard and guided registration, history, navigation shell, simulated previews, and shared TypeScript contracts |
 | `docs/` | Decisions, investigation behavior, evidence and scientific references |
 | `scripts/check.py` | Local backend lint/tests and frontend type checks |
 
