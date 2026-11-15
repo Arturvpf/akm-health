@@ -1,0 +1,69 @@
+.investigation-page,
+.investigation-fields,
+.investigation-field-grid,
+.investigation-details,
+.investigation-checks,
+.investigation-link-form,
+.investigation-evidence li {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.investigation-page { gap: var(--space-5); }
+.investigation-field-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
+.investigation-fields > [role="status"]:empty { display: none; }
+.investigation-field-grid .ds-field { min-width: 0; }
+.investigation-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.investigation-page button:disabled,
+.investigation-page button[aria-disabled="true"] { cursor: default; opacity: .72; }
+
+.investigation-details { margin-top: var(--space-3); overflow-wrap: anywhere; }
+.investigation-details > section {
+  margin-top: 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+
+.investigation-details ul { padding-inline-start: var(--space-5); margin: var(--space-2) 0; }
+.investigation-details li + li { margin-top: var(--space-2); }
+.investigation-details li p { margin-top: var(--space-1); }
+.investigation-details .investigation-evidence { padding: 0; list-style: none; }
+.investigation-evidence li {
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-control);
+  background: var(--surface-page);
+}
+
+.investigation-checks { padding: 0; list-style: none; }
+.investigation-check-box {
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  overflow-wrap: anywhere;
+}
+
+.investigation-check-box h4 { margin: 0 0 var(--space-2); }
+.investigation-check-box h5 { margin: 0; font-size: var(--text-small); }
+.investigation-page .investigation-agenda-heading { margin-top: var(--space-4); }
+.investigation-link-form { margin-top: var(--space-3); }
+.investigation-link-form .ds-details { margin: 0; }
+.investigation-disclosure { margin-top: var(--space-4); }
+.investigation-disclosure > summary {
+  width: fit-content;
+  min-height: var(--target-min);
+  padding-block: var(--space-2);
+  color: var(--link);
+  cursor: pointer;
+  font-weight: 650;
+}
+
+.investigation-disclosure form { margin-top: var(--space-2); }
+.investigation-page .investigation-message {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--tone-border);
+  border-radius: var(--radius-control);
+  background: var(--tone-surface);
+  color: var(--tone-text);
+}

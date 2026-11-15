@@ -27,6 +27,6 @@ npm --prefix frontend run build
 npm --prefix frontend run dev
 ```
 
-Abra `http://127.0.0.1:5173/`. As quatro rotas `#/dashboard`, `#/registrar`, `#/historico` e `#/investigacao` mostram dados demonstrativos no React. O Dashboard apresenta a tripulação e a cabine, Registrar exibe um payload de exemplo, Histórico apresenta leituras e qualidade, e Investigação separa achado, evidência, hipótese e próxima checagem. A integração de cada tela com a API pertence às AKM-13 a AKM-16. O wireframe abre a partir de uma única cópia em `frontend/public/`.
+Abra `http://127.0.0.1:5173/`. Dashboard consulta o estado da missão na API local. Histórico consulta leituras com filtros, qualidade e tendências. Investigação usa a mesma API para análise experimental e acompanhamento das checagens. O wireframe abre a partir de uma única cópia em `frontend/public/`. [Histórico AKM-15](akm-15-history-trends.md) · [Investigação AKM-16](akm-16-investigation-routine-ui.md)
 
 Os links suportam navegação direta, voltar e avançar. O item ativo usa `aria-current` e a troca de página transfere o foco para o conteúdo principal. Hashes desconhecidos exibem o Dashboard.

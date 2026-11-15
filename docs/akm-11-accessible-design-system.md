@@ -17,6 +17,8 @@ Vazio, carregamento, falha de conexão e atualização concluída são estados d
 
 ## Reproduzir
 
+O roteiro abaixo registra a verificação da demonstração original do design system. Para executar a tela de Investigação conectada à API e reproduzir seus estados, use o [roteiro AKM-16](akm-16-investigation-routine-ui.md). O wireframe mantém os seletores de simulação.
+
 ```sh
 npm --prefix frontend ci
 python scripts/check.py
