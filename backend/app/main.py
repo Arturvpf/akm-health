@@ -77,6 +77,20 @@ def get_session(request: Request):
 
 
 DatabaseSession = Annotated[Session, Depends(get_session)]
+HISTORY_QUERY_NAMES = frozenset(
+    field.alias or name for name, field in MeasurementHistoryQuery.model_fields.items()
+)
+
+
+async def validate_history_query_names(request: Request) -> None:
+    # FastAPI 0.115 normalizes aliases to internal names. Check the public names on the wire.
+    errors = [
+        {"type": "extra_forbidden", "loc": ("query", name), "msg": "Extra inputs are not permitted", "input": value}
+        for name, value in request.query_params.items()
+        if name not in HISTORY_QUERY_NAMES
+    ]
+    if errors:
+        raise RequestValidationError(errors)
 
 
 def require_astronaut(session: Session, astronaut_id: str | None) -> None:
@@ -92,6 +106,7 @@ def astronauts(session: DatabaseSession):
 
 @app.get(
     "/api/measurements", response_model=list[MeasurementRead],
+    dependencies=[Depends(validate_history_query_names)],
     responses={404: {"description": "Astronaut not found"}},
 )
 def measurement_history(

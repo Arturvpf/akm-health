@@ -347,7 +347,7 @@ def detect_collective_patterns(
     for result in sufficient:
         cohorts.setdefault(tuple(row.period for row in result.evidence), []).append(result)
     comparable_periods = [periods for periods, members in cohorts.items() if len(members) >= 2]
-    periods = max(comparable_periods, default=())
+    periods = max(comparable_periods, key=lambda pair: (pair[1], pair[0]), default=())
     cohort = tuple(cohorts.get(periods, ()))
     affected = tuple(result.astronaut_id for result in cohort if result.status == "attention")
     if not cohort:

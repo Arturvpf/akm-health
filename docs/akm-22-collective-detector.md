@@ -8,7 +8,7 @@
 
 A configuração inclui a regra individual (padrão: 48 h e proporção 0,8) e tolerância ambiental (padrão: 12 h, podendo ser zero). Todos são parâmetros de demonstração, não cortes clínicos.
 
-Só há comparação coletiva com pelo menos dois perfis com baseline e dois períodos úteis nos **mesmos dois dias UTC**. A data mantém a aproximação de período documentada na AKM-21. Quando existem vários grupos comparáveis, escolhe-se o par de períodos mais recente; padrões antigos não são promovidos a resultado do grupo atual. A saída preserva os resultados individuais de todos os perfis, inclusive dos que ficaram fora desse grupo.
+Só há comparação coletiva com pelo menos dois perfis com baseline e dois períodos úteis nos **mesmos dois dias UTC**. A data mantém a aproximação de período documentada na AKM-21. Quando existem vários grupos comparáveis, escolhe-se o par com a data final mais recente. Em caso de empate, prevalece a data inicial mais recente. A saída preserva os resultados individuais de todos os perfis, inclusive dos que ficaram fora desse grupo.
 
 - Menos de dois perfis comparáveis: `insufficient_data`.
 - Pelo menos dois perfis do grupo comparável em `attention` individual: `attention` coletivo.

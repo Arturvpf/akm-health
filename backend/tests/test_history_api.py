@@ -87,6 +87,19 @@ def test_single_period_alias_filters_history(seeded, boundary, timestamp, expect
     assert [row["value"] for row in response.json()] == expected
 
 
+@pytest.mark.parametrize(("name", "canonical"), [
+    ("from_timestamp", "from"), ("to_timestamp", "to"),
+])
+def test_history_rejects_internal_period_names_with_or_without_public_alias(seeded, name, canonical):
+    timestamp = "2026-11-14T07:00:00Z"
+    for params in ({name: timestamp}, {canonical: timestamp, name: "2026-11-13T07:00:00Z"}):
+        response = seeded.get("/api/measurements", params=params)
+        assert response.status_code == 422, response.text
+        error = response.json()["detail"][0]
+        assert error["loc"] == ["query", name]
+        assert error["type"] == "extra_forbidden"
+
+
 def test_habitat_history_keeps_suspect_samples_but_snapshot_uses_usable_values(seeded):
     history = seeded.get("/api/measurements", params={"kind": "co2_ppm"}).json()
     assert [row["value"] for row in history] == [680, 950, 980, 2200]
@@ -140,7 +153,7 @@ def test_offset_respects_sqlite_integer_boundary(seeded):
     {"from": "2026-11-15T00:00:00Z", "to": "2026-11-14T00:00:00Z"},
     {"from": "0001-01-01T00:00:00+01:00"},
     {"to": "9999-12-31T23:59:59-01:00"},
-    {"limit": 0}, {"limit": 1001}, {"offset": -1}, {"limit": "invalid"},
+    {"limit": 0}, {"limit": 1001}, {"offset": -1}, {"limit": "invalid"}, {"unknown": "value"},
 ])
 def test_invalid_history_query_returns_422(seeded, params):
     response = seeded.get("/api/measurements", params=params)

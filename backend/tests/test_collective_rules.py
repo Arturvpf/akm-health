@@ -199,6 +199,32 @@ def test_latest_comparable_cohort_does_not_reuse_an_older_collective_pattern():
     assert [row.status for row in result.individual_results[:2]] == ["attention", "attention"]
 
 
+@pytest.mark.parametrize(("affected_days", "normal_days"), [
+    ((12, 15), (13, 14)),
+    ((13, 15), (12, 15)),
+])
+def test_latest_cohort_uses_final_period_first_and_initial_period_to_break_ties(affected_days, normal_days):
+    base = scenario_snapshot()
+    rows = []
+    for profile in base.astronauts:
+        affected = profile.id in ("A1", "A2")
+        for day in affected_days if affected else normal_days:
+            measured_at = AS_OF.replace(day=day, hour=7)
+            rows.append(MeasurementRead(
+                id=len(rows) + 1, astronaut_id=profile.id, kind="sleep_hours", unit="h",
+                value=5 if affected else 8, source="synthetic", measurement_zone="astronaut",
+                measured_at=measured_at, recorded_at=measured_at + timedelta(minutes=5),
+            ))
+    snapshot = with_rows(base.model_copy(update={"as_of": AS_OF.replace(day=15)}), rows)
+    config = CollectiveRuleConfig(individual=IndividualRuleConfig(window=timedelta(hours=96)))
+
+    result = detect_collective_patterns(snapshot, "demo-v1", config)
+
+    assert tuple(period.day for period in result.periods) == affected_days
+    assert result.comparable_astronaut_ids == result.affected_astronaut_ids == ("A1", "A2")
+    assert result.status == "attention"
+
+
 def test_different_direction_or_unchanged_environment_is_not_a_consistent_shift():
     base = scenario_snapshot()
     rows = [

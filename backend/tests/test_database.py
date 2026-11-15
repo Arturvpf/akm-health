@@ -1,3 +1,4 @@
+from contextlib import closing
 from datetime import datetime, timedelta, timezone
 import sqlite3
 
@@ -79,6 +80,29 @@ def test_migration_rejects_unknown_schema_without_writes(tmp_path):
     with pytest.raises(RuntimeError, match="schema version: 99"):
         migrate(engine)
     assert inspect(engine).get_table_names() == []
+
+
+def test_startup_rejects_unrelated_database_with_matching_version(tmp_path, monkeypatch):
+    path = tmp_path / "another_app.db"
+    with closing(sqlite3.connect(path)) as connection:
+        connection.execute("CREATE TABLE other_app (id INTEGER PRIMARY KEY)")
+        connection.execute("PRAGMA user_version = 1")
+    before = path.read_bytes()
+    monkeypatch.setenv("AKM_DB_PATH", str(path))
+
+    with pytest.raises(RuntimeError, match=r"schema v1.*astronauts.*AKM_DB_PATH"):
+        with TestClient(app):
+            pytest.fail("The API accepted an incompatible database")
+
+    assert path.read_bytes() == before
+
+
+def test_migration_rejects_versioned_database_with_missing_column(engine):
+    with engine.begin() as connection:
+        connection.exec_driver_sql("ALTER TABLE astronauts DROP COLUMN role")
+
+    with pytest.raises(RuntimeError, match=r"schema v1.*astronauts\.role.*AKM_DB_PATH"):
+        migrate(engine)
 
 
 def test_later_migration_preserves_mission_rows(engine):
