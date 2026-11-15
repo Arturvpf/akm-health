@@ -1,6 +1,6 @@
 # AKM-36 — Interactive and accessible human body
 
-Page `#/body`. An **original** schematic SVG, with no clinical anatomical claim, is presented with overlaid native HTML controls and an equivalent text list. The areas have `button`, `aria-label`, `aria-pressed`, visible focus and native support for Tab, Shift+Tab, Enter and Space. The context changes through AKM-35 without fabricating new readings.
+Page `#/body`. A schematic hologram image supplied by the team (`frontend/public/body-hologram.webp`), with no clinical anatomical claim, is presented with an SVG highlight layer and overlaid native HTML controls and an equivalent text list. The cards and tags are `button` elements whose accessible name is their visible text (for example "Mood 3 / 5"), with `aria-pressed`, visible focus and native support for Tab, Shift+Tab, Enter and Space. The context changes through AKM-35 without fabricating new readings.
 
 | Selected area | Faithful association with P0 indicators | Do not infer |
 |---|---|---|
@@ -9,7 +9,7 @@ Page `#/body`. An **original** schematic SVG, with no clinical anatomical claim,
 | Muscles and bones | **No P0 indicator** | Measured bone mass or muscle loss |
 | Habitat | `co2_ppm`, `cabin_temp_c` **outside the body** | Respiratory diagnosis or individual exposure |
 
-Official NASA links to research on isolation, gravity and closed environments are shown in each area. The interface uses text in addition to color and offers an alternative to visual selection on the SVG.
+Official NASA links to research on isolation, gravity and closed environments are shown in each area. The interface uses text in addition to color and offers an alternative to visual selection on the image.
 
 **Sources:** https://www.nasa.gov/hrp/hazards/ ; https://www.nasa.gov/hrp/risks/ ; https://www.nasa.gov/hrp/hazard-isolation-and-confinement/ ; https://www.nasa.gov/hrp/hazard-hostile-closed-environments/ .
 

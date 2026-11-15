@@ -1,5 +1,5 @@
 """AKM Health API contracts (AKM-03). Data persistence belongs to AKM-17/20."""
-from datetime import date as date_type, datetime, timezone
+from datetime import date as date_type, datetime, timedelta, timezone
 from enum import Enum
 import re
 from typing import Literal
@@ -44,6 +44,9 @@ def require_utc(value: datetime) -> datetime:
         raise ValueError("Timestamp is outside the supported UTC range") from exc
 
 
+FUTURE_TOLERANCE = timedelta(minutes=10)
+
+
 class StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -86,16 +89,24 @@ class MeasurementCreate(StrictModel):
             raise ValueError("Habitat measurement must have astronaut_id=null")
         if self.kind == Kind.sleep_hours and not 0 <= self.value <= 24:
             raise ValueError("sleep_hours must be between 0 and 24")
-        if self.kind == Kind.heart_rate_bpm and self.value <= 0:
-            raise ValueError("heart_rate_bpm must be positive")
+        if self.kind == Kind.heart_rate_bpm and not 20 <= self.value <= 250:
+            raise ValueError("heart_rate_bpm must be between 20 and 250")
         if self.kind == Kind.mood_score and self.value not in (1, 2, 3, 4, 5):
             raise ValueError("mood_score must be an integer 1..5")
-        if self.kind == Kind.co2_ppm and self.value < 0:
-            raise ValueError("co2_ppm cannot be negative")
+        if self.kind == Kind.co2_ppm and not 0 <= self.value <= 40000:
+            raise ValueError("co2_ppm must be between 0 and 40000")
+        if self.kind == Kind.cabin_temp_c and not -20 <= self.value <= 60:
+            raise ValueError("cabin_temp_c must be between -20 and 60")
         return self
 
     def zone(self) -> MeasurementZone:
         return METRICS[self.kind][1]  # type: ignore[return-value]
+
+    def ensure_not_in_future(self, now: datetime | None = None) -> None:
+        """New observations cannot be dated after now, allowing a few minutes of clock drift."""
+        limit = (now or datetime.now(timezone.utc)) + FUTURE_TOLERANCE
+        if self.measured_at > limit:
+            raise ValueError("measured_at cannot be in the future")
 
 
 class MeasurementRead(MeasurementCreate):

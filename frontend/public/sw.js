@@ -1,5 +1,5 @@
 /* AKM-33: same-origin application shell only. Never cache /api responses implicitly. */
-const CACHE_NAME = 'akm-health-shell-v2';
+const CACHE_NAME = 'akm-health-shell-v3';
 // Precache the whole application shell on install: index.html, every built asset it references
 // and the fonts referenced from the built CSS. Without this, a first offline reload would find
 // index.html but no JavaScript, because the first page load happens before this worker controls it.
@@ -10,7 +10,7 @@ async function precacheShell() {
   const html = await page.clone().text();
   await cache.put('/index.html', page.clone());
   await cache.put('/', page);
-  const assets = new Set(['/akm-mark.svg']);
+  const assets = new Set(['/akm-mark.svg', '/body-hologram.webp']);
   for (const match of html.matchAll(/(?:src|href)="(\/[^"#?]+\.(?:js|css|svg|png|ico))"/g)) assets.add(match[1]);
   for (const url of [...assets]) {
     try {

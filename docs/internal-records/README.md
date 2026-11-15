@@ -1,0 +1,3 @@
+# Internal working records
+
+These files are the team's internal task records (originally written in Portuguese while the work was in progress, now translated to English). They are **not part of the submission documentation**: the documents in `docs/` and the root `README.md` are authoritative. Where code, tests and these records disagree, the code on `main` is the source of truth. Some route names and message texts in these records predate the current route identifiers (`#/register`, `#/history`, `#/investigation`), and `AKM_Health_Design_System_v1.0.docx` is a dated snapshot whose embedded screenshots still show the earlier Portuguese interface.

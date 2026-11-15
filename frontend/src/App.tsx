@@ -7,6 +7,7 @@ import { ScenarioComparator } from './ScenarioComparator';
 import { EnvironmentSelector } from './EnvironmentView';
 import { BodyExplorer } from './BodyExplorer';
 import { SelfCareJourney } from './SelfCareJourney';
+import { LinkLostNotice } from './LinkLostNotice';
 import { OfflineStatus } from './OfflineStatus';
 import { Landing } from './Landing';
 import { SceneBackground } from './SceneBackground';
@@ -141,6 +142,7 @@ export function App() {
           <div className="eyebrow">{view.eyebrow}</div>
           <h1>{view.heading}</h1>
           <p className="lead">{view.intro}</p>
+          <LinkLostNotice page={page} />
 
           {page === 'dashboard' ? <Dashboard /> : page === 'register' ? <MeasurementForm /> : page === 'scenarios' ? <ScenarioComparator /> : page === 'environments' ? <EnvironmentSelector /> : page === 'body' ? <BodyExplorer /> : page === 'self-care' ? <SelfCareJourney /> : <>
           <SimulationNotice />

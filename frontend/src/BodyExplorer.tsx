@@ -5,6 +5,7 @@ import { METRICS } from './history-data';
 import type { Kind, MetricSnapshot } from './types';
 import { formatUtc, useDashboardSnapshot } from './use-dashboard';
 import './experiments.css';
+import './body-map.css';
 
 /**
  * AKM-36 — accessible body map.
@@ -62,7 +63,7 @@ export function BodyExplorer() {
 
   return <div className="experiment-stack">
     <InformationNotice label="Illustrative map, not an anatomical exam">
-      Original vector diagram with no clinical images. Each region opens the latest stored reading for the selected crew member.
+      Schematic hologram image, not a clinical image. Each region opens the latest stored reading for the selected crew member.
       It does not diagnose. Use Tab and Enter or Space to move between regions.
     </InformationNotice>
     <div className="body-layout">
@@ -75,24 +76,36 @@ export function BodyExplorer() {
           </select>
         </label>
         <div className="body-stage">
-          <svg className="body-silhouette" viewBox="0 0 260 430" role="img" focusable="false"
-            aria-label="Schematic front-facing human silhouette. Use the buttons to select a region.">
-            <g fill="#1b2347" stroke="#8da2d6" strokeWidth="2.5" strokeLinejoin="round">
-              <ellipse cx="130" cy="53" rx="34" ry="41" />
-              <path d="M119 91 L141 91 L147 107 L178 116 Q189 120 190 146 L181 234 L158 248 L152 403 Q143 417 132 405 L122 270 L112 405 Q101 417 92 400 L99 248 L79 234 L70 146 Q71 121 84 116 L114 107 Z" />
-              <path d="M76 123 Q58 123 51 147 L23 264 Q18 282 32 285 Q44 284 49 271 L91 161" />
-              <path d="M184 123 Q202 123 209 147 L237 264 Q242 282 228 285 Q216 284 211 271 L169 161" />
-            </g>
-            {selected === 'head' && <ellipse cx="130" cy="53" rx="38" ry="45" fill="none" stroke="#67e8f9" strokeWidth="4" />}
-            {selected === 'chest' && <path d="M84 120 L176 120 L172 200 L88 200 Z" fill="none" stroke="#67e8f9" strokeWidth="4" strokeLinejoin="round" />}
+          <img className="body-photo" src="/body-hologram.webp" width="667" height="1024" alt="" />
+          <svg className="body-silhouette" viewBox="0 0 667 1024" role="img" focusable="false"
+            aria-label="Schematic front view of a human body with a highlighted heart. Use the buttons to select a region.">
+            <defs>
+              <radialGradient id="heart-glow"><stop offset="0" stopColor="#ff8fb0" stopOpacity="0.55" /><stop offset="1" stopColor="#ff8fb0" stopOpacity="0" /></radialGradient>
+              <filter id="soft-glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="6" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+            </defs>
+            <ellipse className="body-heart" cx="343" cy="330" rx="62" ry="66" fill="url(#heart-glow)" />
+            {selected === 'head' && <ellipse className="body-pulse" cx="334" cy="121" rx="56" ry="70" fill="none" stroke="#fff" strokeWidth="5" filter="url(#soft-glow)" />}
+            {selected === 'chest' && <rect className="body-pulse" x="246" y="238" width="180" height="214" rx="34" fill="none" stroke="#fff" strokeWidth="5" filter="url(#soft-glow)" />}
           </svg>
-          {(['head', 'chest'] as const).map((id, index) =>
-            <button key={id} type="button" className={`body-point body-point-${id}`} aria-pressed={selected === id}
-              aria-label={`${index + 1}. Select ${REGIONS[id].label}`} onClick={() => setSelected(id)}>
-              <span aria-hidden="true">{index + 1}</span>
-            </button>)}
+          <button type="button" className="body-card body-card-head" aria-pressed={selected === 'head'} onClick={() => setSelected('head')}>
+            <span className="body-card-number" data-n="1" aria-hidden="true" />
+            <span className="body-card-text"><span>Mood</span><strong>{reading('mood_score') ? `${value.format(reading('mood_score')!.value)} / 5` : 'No data'}</strong></span>
+          </button>
+          <button type="button" className="body-card body-card-chest" aria-pressed={selected === 'chest'} onClick={() => setSelected('chest')}>
+            <span className="body-card-number" data-n="2" aria-hidden="true" />
+            <span className="body-card-text"><span>Heart rate</span><strong>{reading('heart_rate_bpm') ? `${value.format(reading('heart_rate_bpm')!.value)} bpm` : 'No data'}</strong></span>
+            <svg className="body-card-trace" viewBox="0 0 80 18" aria-hidden="true" focusable="false"><path d="M0 9 H22 L28 2 L34 16 L40 9 H56 L61 4 L66 13 L70 9 H80" fill="none" stroke="#7ff3ff" strokeWidth="1.4" strokeLinejoin="round" /></svg>
+          </button>
+          <button type="button" className="body-tag body-tag-sleep" aria-pressed={selected === 'sleep'} onClick={() => setSelected('sleep')}>
+            <span aria-hidden="true">☾</span>
+            <span className="body-tag-text"><span>Sleep</span><strong>{reading('sleep_hours') ? `${value.format(reading('sleep_hours')!.value)} h` : 'No data'}</strong></span>
+          </button>
+          <button type="button" className="body-tag body-tag-habitat" aria-pressed={selected === 'habitat'} onClick={() => setSelected('habitat')}>
+            <span aria-hidden="true">◌</span>
+            <span className="body-tag-text"><span>Cabin</span><strong>{reading('co2_ppm') ? `${value.format(reading('co2_ppm')!.value)} ppm` : 'No data'}</strong></span>
+          </button>
         </div>
-        <p className="body-legend">1 · Head (mood) · 2 · Chest (heart rate). Sleep and cabin readings are not body regions.</p>
+        <p className="body-legend">1 · Head (mood) · 2 · Chest (heart rate). Sleep and cabin readings sit outside the body.</p>
         <div className="body-button-row" role="group" aria-label="All regions and indicators">
           {ORDER.map(id => <button type="button" key={id} className="body-nav-button" aria-pressed={selected === id}
             onClick={() => setSelected(id)}>{REGIONS[id].label}</button>)}

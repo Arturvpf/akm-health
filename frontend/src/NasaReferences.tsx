@@ -253,12 +253,14 @@ export function NasaReferences({ mission, environment }: {
         <p role="alert">NASA references could not be loaded.</p>
         <ActionButton onClick={() => { setState('loading'); setAttempt(value => value + 1); }}>Try again</ActionButton>
       </> : <>
-        <h3>Human Research Program</h3>
-        <SourceBadge source="nasa_reference" />
-        <ul>{state.scientific_references.map(reference => {
-          const url = nasaReferenceUrl(reference.url);
-          return <li key={reference.url}>{url ? <a href={url}>{reference.title}</a> : reference.title}</li>;
-        })}</ul>
+        <div className="nasa-hrp">
+          <h3>Human Research Program</h3>
+          <SourceBadge source="nasa_reference" />
+          <ul>{state.scientific_references.map(reference => {
+            const url = nasaReferenceUrl(reference.url);
+            return <li key={reference.url}>{url ? <a href={url}>{reference.title}</a> : reference.title}</li>;
+          })}</ul>
+        </div>
         <HistoricalSeries history={state.historical_series} />
         <RadiationPanel series={state.radiation} status={state.radiation_status} />
         <Co2ContextPanel context={state.co2_context} status={state.co2_context_status}

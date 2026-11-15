@@ -63,14 +63,16 @@ export function validateDraft(draft: MeasurementDraft, astronautIds: string[]):
   const value = Number(raw);
   if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(raw) || !Number.isFinite(value)) errors.value = 'Enter a finite number or leave the reading unrecorded.';
   else if (draft.kind === 'sleep_hours' && (value < 0 || value > 24)) errors.value = 'Enter a duration from 0 to 24 hours.';
-  else if (draft.kind === 'heart_rate_bpm' && value <= 0) errors.value = 'Enter a reading greater than zero in bpm.';
+  else if (draft.kind === 'heart_rate_bpm' && (value < 20 || value > 250)) errors.value = 'Enter a heart rate from 20 to 250 bpm.';
   else if (draft.kind === 'mood_score' && (!Number.isInteger(value) || value < 1 || value > 5)) errors.value = 'Choose an integer from 1 to 5.';
-  else if (draft.kind === 'co2_ppm' && value < 0) errors.value = 'Enter a nonnegative CO₂ reading.';
+  else if (draft.kind === 'co2_ppm' && (value < 0 || value > 40000)) errors.value = 'Enter a CO₂ reading from 0 to 40,000 ppm.';
+  else if (draft.kind === 'cabin_temp_c' && (value < -20 || value > 60)) errors.value = 'Enter a cabin temperature from -20 to 60 °C.';
   const measuredAt = measurementTime(draft.localTime, draft.offset);
   if (!measuredAt) {
     errors.localTime = 'Enter a valid date and time and check the UTC offset.';
     if (!/^[+-](?:[01]\d|2[0-3]):[0-5]\d$/.test(draft.offset)) errors.offset = 'Use +00:00 or -03:00 format, with hours from 00 to 23 and minutes from 00 to 59.';
   }
+  else if (Date.parse(measuredAt) > Date.now() + 10 * 60_000) errors.localTime = 'The observation time cannot be in the future.';
   if (draft.source !== 'manual' && draft.source !== 'synthetic') errors.source = 'Choose a manual or simulated source.';
   if (draft.quality !== 'ok' && draft.quality !== 'suspect') errors.quality = 'Choose the technical quality of the reading.';
   if (Object.keys(errors).length || !measuredAt) return { errors, payload: null };

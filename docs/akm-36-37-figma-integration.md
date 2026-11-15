@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | `AKM_Health_AKM33_34_35_36_Completo.zip` | Repository snapshot built on `19c7b4e` (PR #28) plus 35 changed files | AKM-33 offline sync, AKM-34 scenario comparator, AKM-35 mission environments, AKM-36 body map |
 | [Figma Make — AKM Health Mission Monitoring](https://www.figma.com/make/zu8Tq9w8gElqjLBJWlUEfP/) | Standalone React/Tailwind prototype in Portuguese. All data are hard-coded and nothing calls the API | AKM-36 body map (`HumanHealthMap`), AKM-37 gamification (`SelfCareJourney`), AKM-11 brand identity (logo, dark palette), AKM Predict mock, NASA EDA panel |
-| `docs/internal-pt/AKM_Health_Design_System_v1.0.docx` | Design-system and product document by The Bug Bang Theory | AKM-11 design system, input for AKM-32 submission material and review rules for AKM-36/37 |
+| `docs/internal-records/AKM_Health_Design_System_v1.0.docx` | Design-system and product document by The Bug Bang Theory | AKM-11 design system, input for AKM-32 submission material and review rules for AKM-36/37 |
 
 ## Which version wins, and why
 

@@ -8,4 +8,18 @@ The running investigation engine uses deterministic Python rules, not an LLM API
 
 Mission profiles/readings are fictional synthetic demonstration data or manually entered fictional records. NASA historical values must come from the credited audited source, not generated guesses. AI-generated output is not a medical/scientific validation or proof of NASA endorsement.
 
-PR authors and human reviewers remain responsible for correctness, source/license checks and final approval. The assistant is not a commit coauthor. The requester subsequently authorized the [Apache-2.0 project license](../LICENSE). Contributor acknowledgments and event-specific disclosure remain team responsibilities.
+PR authors and human reviewers remain responsible for correctness, source/license checks and final approval. Commits are authored by the human team member who made them; the assistant is not listed as a commit coauthor, and this document is where its use is disclosed. The requester subsequently authorized the [Apache-2.0 project license](../LICENSE). Contributor acknowledgments and event-specific disclosure remain team responsibilities.
+
+## Declaration by team member
+
+Each member completes their own row before submitting the Space Apps form, and lists the same tools in the form's AI-use field. Leave nothing out: the form asks for every AI tool used.
+
+| Member | AI tools used | What they were used for |
+| --- | --- | --- |
+| Artur Vinicius Pereira Fernandes | Anthropic Claude (through Claude Code); OpenAI Codex | Implementation, code review, tests, deployment configuration, documentation and interface polish across the project, including the final weekend changes: "Why this finding" panel, downlink report, guided tour, link-loss simulation, body map illustration, input-safety fixes and the README. |
+| Other members | To be completed by each member | To be completed by each member |
+
+## Generated media
+
+- The application ships no AI-generated audio or video. Its animated backgrounds and hazard cards are vector or canvas drawings written as code, with Claude's help where noted above. The one raster image is the body-map artwork (`frontend/public/body-hologram.webp`), supplied by the team. It looks like AI-generated art, so the team must state its tool and source here before submission. Its static cards and labels are covered by live HTML, so no value shown in the app comes from the image.
+- If the demo video or slides use AI-generated images or a synthetic voice, mark them with a visible watermark or on-screen label, as the Space Apps rules require.

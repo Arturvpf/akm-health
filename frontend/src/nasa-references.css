@@ -3,15 +3,16 @@
   min-width: 0;
 }
 
+/* Each reference block is its own card, like the cards on the landing page. */
 .nasa-planet,
+.nasa-hrp,
 .nasa-history {
-  padding-block: var(--space-4);
-  border-block-start: 1px solid var(--border);
-}
-
-.nasa-planet {
-  margin-block-end: var(--space-4);
-  border-block: 1px solid var(--border);
+  padding: var(--space-4);
+  margin-block-start: var(--space-4);
+  border: 1px solid rgb(148 163 255 / 28%);
+  border-radius: var(--radius-card);
+  background: rgb(15 22 48 / 70%);
+  min-width: 0;
 }
 
 .nasa-history .ds-field {

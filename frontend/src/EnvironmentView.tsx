@@ -24,11 +24,15 @@ export function EnvironmentSelector() {
         </select>
       </label>
       <dl className="experiment-details"><dt>Setting</dt><dd>{current.setting}</dd><dt>Reference gravity</dt><dd>{current.gravity}</dd></dl>
-      <h3>Documented context factors</h3>
-      <ul>{current.factors.map(factor => <li key={factor}>{factor}</li>)}</ul>
-      <p><strong>Interpretation:</strong> {current.implications}</p>
-      <p><strong>Limitation:</strong> {current.limitations}</p>
-      <p><strong>NASA sources:</strong> {current.sources.map((source, i) => <span key={source.url}>{i > 0 ? ' · ' : ''}<a href={source.url} target="_blank" rel="noopener noreferrer">{source.title}</a></span>)}</p>
+      <div className="experiment-panel">
+        <h3>Documented context factors</h3>
+        <ul>{current.factors.map(factor => <li key={factor}>{factor}</li>)}</ul>
+      </div>
+      <div className="experiment-panel">
+        <p><strong>Interpretation:</strong> {current.implications}</p>
+        <p><strong>Limitation:</strong> {current.limitations}</p>
+        <p><strong>NASA sources:</strong> {current.sources.map((source, i) => <span key={source.url}>{i > 0 ? ' · ' : ''}<a href={source.url} target="_blank" rel="noopener noreferrer">{source.title}</a></span>)}</p>
+      </div>
     </Card>
   </div>;
 }
