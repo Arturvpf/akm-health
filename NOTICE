@@ -1,0 +1,15 @@
+AKM Health
+Copyright 2026 AKM Health contributors
+
+The original AKM Health source code and documentation are licensed under
+the Apache License, Version 2.0. See LICENSE for the full terms.
+Individual contributors retain copyright in their contributions.
+
+Third-party libraries, NASA datasets, external content, names and marks
+retain their respective terms; this notice does not relicense them.
+See docs/third-party-notices.md and docs/data-sources.md for attribution,
+provenance and applicable terms, including NASA OSDR EDA RR-1 telemetry.
+
+AKM Health is an experimental demonstration with a fictional mission and
+crew. It does not represent medical evaluation, clinical monitoring or
+NASA endorsement. This description does not modify the license terms.

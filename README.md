@@ -113,3 +113,7 @@ Start a task branch from main. Consult the [Notion architecture](https://app.not
 - **Uncertain POST:** check History before retrying. Measurements have no server idempotency key; local duplicate-click protection does not deduplicate concurrent writers.
 - **Schema error:** check AKM_DB_PATH and [database notes](docs/database.md). Back up data; do not delete the database as a first response.
 - **NASA unavailable:** missing/invalid history yields not_imported without fabricated values; a broken HRP catalog yields 503. Restore trusted artifacts using the [data guide](docs/data-sources.md).
+
+## License
+
+Original AKM Health source code and documentation are licensed under the [Apache License 2.0](LICENSE). Copyright 2026 AKM Health contributors; see [NOTICE](NOTICE). Third-party dependencies, NASA data and external content retain their own terms and attribution requirements; see [third-party notices](docs/third-party-notices.md) and [data sources](docs/data-sources.md). This license does not grant rights to NASA names or marks or imply endorsement.
