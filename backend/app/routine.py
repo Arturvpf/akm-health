@@ -94,10 +94,10 @@ def plan_routine(
         if check.astronaut_id is not None and check.astronaut_id not in subjects:
             items.append(RoutineItem(**base, status="outside_scope", explanation="Alvo fora do escopo conhecido."))
         elif window is None:
-            items.append(RoutineItem(**base, status="not_started", explanation="A janela configurada ainda não começou."))
+            items.append(RoutineItem(**base, status="not_started", explanation="The configured window has not started yet."))
         elif protocol is not None:
             items.append(RoutineItem(**base, status="protocol_deferred",
-                explanation="A rotina aguarda o encaminhamento prioritário do protocolo informado."))
+                explanation="The routine is waiting for the priority referral in the supplied protocol."))
         else:
             usable = [sample for sample in snapshot.measurements
                       if sample.kind == check.kind and sample.astronaut_id == check.astronaut_id
@@ -106,10 +106,10 @@ def plan_routine(
             if usable:
                 sample = max(usable, key=lambda row: (row.measured_at, row.id))
                 items.append(RoutineItem(**base, status="satisfied", measurement_id=sample.id,
-                    explanation="Já existe medição utilizável nesta janela de demonstração."))
+                    explanation="A usable measurement already exists in this demo window."))
             elif not catalog.get((check.kind, check.astronaut_id), False):
                 items.append(RoutineItem(**base, status="unavailable",
-                    explanation="Recurso não informado ou indisponível; não criar coleta inviável."))
+                    explanation="Resource not reported or unavailable; do not create an unworkable collection."))
             else:
                 items.append(RoutineItem(**base, status="needed", explanation=check.reason))
     return RoutinePlan(items=tuple(items))

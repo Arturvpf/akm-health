@@ -45,7 +45,7 @@ def configure(*targets, anchor="2026-11-14T00:00:00Z"):
     settings = app.state.investigation_settings
     policy = RoutinePolicy.model_validate({"checks": [
         {"kind": kind, "astronaut_id": subject, "anchor_at": anchor, "every": "P1D",
-         "reason": f"Coleta de demonstração: {kind}.", "reference": "AKM-06 · janela diária da demo"}
+         "reason": f"Demo collection: {kind}.", "reference": "AKM-06 · demo daily window"}
         for kind, subject in targets
     ]})
     catalog = {(item.kind, item.astronaut_id): item for item in settings.resources}
@@ -188,7 +188,7 @@ def test_human_protocol_defers_routine_without_new_measurement_requirement(seede
     assert result["next_check"] is None and result["status"] != "critical"
     assert agenda(seeded) == []
     assert audit(result["id"])["plan"]["items"][0]["status"] == "protocol_deferred"
-    assert any("encaminhamento humano" in finding for finding in result["findings"])
+    assert any("human referral" in finding for finding in result["findings"])
 
 
 def test_protocol_can_promote_existing_dated_routine_and_precedes_adaptive_check(seeded):

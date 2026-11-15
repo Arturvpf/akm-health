@@ -102,112 +102,112 @@
         "astronaut_id": "A1",
         "every": "P1D",
         "anchor_at": "2026-11-14T00:00:00Z",
-        "reason": "Registrar o sono do período concluído.",
-        "reference": "AKM-06; janela diária UTC escolhida somente para a demo AKM-25"
+        "reason": "Record sleep for the completed sleep period.",
+        "reference": "AKM-06, using the UTC daily window chosen for the AKM-25 demo"
       },
       {
         "kind": "heart_rate_bpm",
         "astronaut_id": "A1",
         "every": "P1D",
         "anchor_at": "2026-11-14T00:00:00Z",
-        "reason": "Registrar uma leitura pontual em condição comparável; repouso não é verificado pelo app.",
-        "reference": "AKM-06; janela diária UTC escolhida somente para a demo AKM-25"
+        "reason": "Record one reading under comparable conditions. Resting conditions are outside the app's verification scope.",
+        "reference": "AKM-06, using the UTC daily window chosen for the AKM-25 demo"
       },
       {
         "kind": "mood_score",
         "astronaut_id": "A1",
         "every": "P1D",
         "anchor_at": "2026-11-14T00:00:00Z",
-        "reason": "Registrar o check-in subjetivo diário da demonstração.",
-        "reference": "AKM-06; janela diária UTC escolhida somente para a demo AKM-25"
+        "reason": "Record the daily subjective check-in.",
+        "reference": "AKM-06, using the UTC daily window chosen for the AKM-25 demo"
       },
       {
         "kind": "sleep_hours",
         "astronaut_id": "A2",
         "every": "P1D",
         "anchor_at": "2026-11-14T00:00:00Z",
-        "reason": "Registrar o sono do período concluído.",
-        "reference": "AKM-06; janela diária UTC escolhida somente para a demo AKM-25"
+        "reason": "Record sleep for the completed sleep period.",
+        "reference": "AKM-06, using the UTC daily window chosen for the AKM-25 demo"
       },
       {
         "kind": "heart_rate_bpm",
         "astronaut_id": "A2",
         "every": "P1D",
         "anchor_at": "2026-11-14T00:00:00Z",
-        "reason": "Registrar uma leitura pontual em condição comparável; repouso não é verificado pelo app.",
-        "reference": "AKM-06; janela diária UTC escolhida somente para a demo AKM-25"
+        "reason": "Record one reading under comparable conditions. Resting conditions are outside the app's verification scope.",
+        "reference": "AKM-06, using the UTC daily window chosen for the AKM-25 demo"
       },
       {
         "kind": "mood_score",
         "astronaut_id": "A2",
         "every": "P1D",
         "anchor_at": "2026-11-14T00:00:00Z",
-        "reason": "Registrar o check-in subjetivo diário da demonstração.",
-        "reference": "AKM-06; janela diária UTC escolhida somente para a demo AKM-25"
+        "reason": "Record the daily subjective check-in.",
+        "reference": "AKM-06, using the UTC daily window chosen for the AKM-25 demo"
       },
       {
         "kind": "sleep_hours",
         "astronaut_id": "A3",
         "every": "P1D",
         "anchor_at": "2026-11-14T00:00:00Z",
-        "reason": "Registrar o sono do período concluído.",
-        "reference": "AKM-06; janela diária UTC escolhida somente para a demo AKM-25"
+        "reason": "Record sleep for the completed sleep period.",
+        "reference": "AKM-06, using the UTC daily window chosen for the AKM-25 demo"
       },
       {
         "kind": "heart_rate_bpm",
         "astronaut_id": "A3",
         "every": "P1D",
         "anchor_at": "2026-11-14T00:00:00Z",
-        "reason": "Registrar uma leitura pontual em condição comparável; repouso não é verificado pelo app.",
-        "reference": "AKM-06; janela diária UTC escolhida somente para a demo AKM-25"
+        "reason": "Record one reading under comparable conditions. Resting conditions are outside the app's verification scope.",
+        "reference": "AKM-06, using the UTC daily window chosen for the AKM-25 demo"
       },
       {
         "kind": "mood_score",
         "astronaut_id": "A3",
         "every": "P1D",
         "anchor_at": "2026-11-14T00:00:00Z",
-        "reason": "Registrar o check-in subjetivo diário da demonstração.",
-        "reference": "AKM-06; janela diária UTC escolhida somente para a demo AKM-25"
+        "reason": "Record the daily subjective check-in.",
+        "reference": "AKM-06, using the UTC daily window chosen for the AKM-25 demo"
       },
       {
         "kind": "sleep_hours",
         "astronaut_id": "A4",
         "every": "P1D",
         "anchor_at": "2026-11-14T00:00:00Z",
-        "reason": "Registrar o sono do período concluído.",
-        "reference": "AKM-06; janela diária UTC escolhida somente para a demo AKM-25"
+        "reason": "Record sleep for the completed sleep period.",
+        "reference": "AKM-06, using the UTC daily window chosen for the AKM-25 demo"
       },
       {
         "kind": "heart_rate_bpm",
         "astronaut_id": "A4",
         "every": "P1D",
         "anchor_at": "2026-11-14T00:00:00Z",
-        "reason": "Registrar uma leitura pontual em condição comparável; repouso não é verificado pelo app.",
-        "reference": "AKM-06; janela diária UTC escolhida somente para a demo AKM-25"
+        "reason": "Record one reading under comparable conditions. Resting conditions are outside the app's verification scope.",
+        "reference": "AKM-06, using the UTC daily window chosen for the AKM-25 demo"
       },
       {
         "kind": "mood_score",
         "astronaut_id": "A4",
         "every": "P1D",
         "anchor_at": "2026-11-14T00:00:00Z",
-        "reason": "Registrar o check-in subjetivo diário da demonstração.",
-        "reference": "AKM-06; janela diária UTC escolhida somente para a demo AKM-25"
+        "reason": "Record the daily subjective check-in.",
+        "reference": "AKM-06, using the UTC daily window chosen for the AKM-25 demo"
       },
       {
         "kind": "co2_ppm",
         "astronaut_id": null,
         "every": "P1D",
         "anchor_at": "2026-11-14T00:00:00Z",
-        "reason": "Registrar o CO₂ interno na janela ambiental demonstrativa.",
-        "reference": "AKM-06; janela diária UTC escolhida somente para a demo AKM-25"
+        "reason": "Record cabin CO₂ during the demo collection window.",
+        "reference": "AKM-06, using the UTC daily window chosen for the AKM-25 demo"
       },
       {
         "kind": "cabin_temp_c",
         "astronaut_id": null,
         "every": "P1D",
         "anchor_at": "2026-11-14T00:00:00Z",
-        "reason": "Registrar a temperatura interna na janela ambiental demonstrativa.",
-        "reference": "AKM-06; janela diária UTC escolhida somente para a demo AKM-25"
+        "reason": "Record cabin temperature during the demo collection window.",
+        "reference": "AKM-06, using the UTC daily window chosen for the AKM-25 demo"
       }
     ]
   }

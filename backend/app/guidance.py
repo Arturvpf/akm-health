@@ -18,24 +18,24 @@ def explain_investigation(
     references = [
         InvestigationReference(
             source_id="AKM-ARCH",
-            title="AKM Health · Arquitetura e regras da demonstração",
-            url="https://app.notion.com/p/4189432b2222816494fdd66f32e11ec4",
-            relevance="Define a comparação de sono e os critérios experimentais da análise.",
+            title="AKM Health · Demo architecture and rules",
+            url="https://github.com/Arturvpf/akm-health/blob/main/docs/architecture-backend.md",
+            relevance="Defines the sleep comparison and the experimental criteria.",
         ),
         InvestigationReference(
             source_id="HRR-100",
-            title="NASA Human Research Roadmap · Sono, ritmo circadiano e carga de trabalho",
+            title="NASA Human Research Roadmap · Sleep, circadian rhythms, and workload",
             url="https://humanresearchroadmap.nasa.gov/Risks/risk.aspx?i=100",
-            relevance="Contextualiza o monitoramento do sono em missão. O critério da demo vem da arquitetura AKM.",
+            relevance="Provides context for monitoring sleep on missions. The AKM architecture defines the demo rule.",
         ),
         InvestigationReference(
             source_id="AKM-08",
-            title="AKM Health · Critérios de alerta e revisão humana",
-            url="https://github.com/Arturvpf/akm-health/blob/9cd37e8fc33cc4ac271281e0b36f61e33b2d40ba/docs/akm-08-alert-safety.md",
-            relevance="Explica quando levar a análise à equipe e como seguir o protocolo da missão.",
+            title="AKM Health · Alert criteria and human review",
+            url="https://github.com/Arturvpf/akm-health/blob/main/docs/akm-08-alert-safety.md",
+            relevance="Explains when to contact mission staff and how to follow the mission protocol.",
         ),
     ]
-    limitations = ["A investigação descreve dados da demonstração. A avaliação clínica cabe à equipe responsável."]
+    limitations = ["This investigation describes demo readings. Clinical assessment belongs to mission staff."]
     coverage = None
     if detection is not None:
         evaluated = detection.comparable_astronaut_ids if isinstance(detection, CollectiveDetection) else (
@@ -46,30 +46,30 @@ def explain_investigation(
         )
         limitations.extend(detection.limitations)
     else:
-        limitations.append("Este registro não fornece detalhes auditáveis da cobertura da análise.")
+        limitations.append("The saved record lacks auditable details about coverage.")
 
     if result.status == "insufficient_data":
-        uncertainty = "A cobertura das leituras é insuficiente para avaliar o padrão de sono neste escopo."
+        uncertainty = "This scope lacks enough readings to assess the sleep pattern."
     elif result.status == "attention":
-        uncertainty = "A causa do padrão de sono permanece em aberto."
+        uncertainty = "The cause of the sleep pattern remains unknown."
     elif result.status == "normal":
-        uncertainty = "O resultado se limita ao padrão de sono avaliado, aos perfis cobertos e à janela das leituras."
+        uncertainty = "The result applies to the evaluated sleep pattern, profiles, and observation window."
     else:
-        uncertainty = "A interpretação operacional do registro cabe à equipe da missão."
+        uncertainty = "Mission staff are responsible for interpreting the record operationally."
 
     comparison = None
     if result.status == "attention" and isinstance(detection, CollectiveDetection):
         comparison = next((item for item in detection.environment if item.kind == "co2_ppm"), None)
     if comparison is not None:
-        uncertainty += f" O CO₂ considerado é o do ar interno da cabine. {comparison.explanation}"
+        uncertainty += f" The CO₂ readings describe cabin air. {comparison.explanation}"
     if (comparison is not None
             or (result.next_check and result.next_check.kind == "co2_ppm")
             or any(item.kind == "co2_ppm" for item in result.evidence)):
         references.append(InvestigationReference(
             source_id="NASA-CO2",
-            title="NASA OCHMO-TB-004 · Dióxido de carbono",
+            title="NASA OCHMO-TB-004 · Carbon dioxide",
             url="https://www.nasa.gov/ochmo-tb-004-carbon-dioxide-2/",
-            relevance="Contextualiza a observação do ar da cabine. As leituras da investigação vêm da demonstração.",
+            relevance="Provides cabin-air context. The investigation uses demo readings.",
         ))
 
     check_context = None
@@ -78,17 +78,16 @@ def explain_investigation(
     if selection is not None and selection.status == "protocol_referral":
         human_review = HumanReview(
             mode="per_protocol",
-            instruction="Procure o responsável designado pelo protocolo da missão sem aguardar nova coleta.",
+            instruction="Contact the person designated by the mission protocol without waiting for a new reading.",
             protocol_reference=selection.protocol_reference,
         )
     else:
         human_review = HumanReview(
             mode="conditional",
             instruction=(
-                "Se o padrão persistir após a rechecagem, as coletas repetidas falharem ou você precisar de ajuda, "
-                "leve o escopo da investigação, as leituras, os horários, a qualidade, as lacunas e as verificações "
-                "já feitas à equipe responsável. "
-                "Se o protocolo indicar encaminhamento imediato, procure o responsável designado sem aguardar reanálise."
+                "If the pattern persists after a follow-up, repeated collections fail, or you need help, "
+                "share the scope, readings, timestamps, quality, gaps, and completed checks with mission staff. "
+                "If the protocol calls for immediate referral, contact the designated person without waiting for reanalysis."
             ),
         )
     return InvestigationExplanation(

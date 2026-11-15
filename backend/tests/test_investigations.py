@@ -73,15 +73,15 @@ def test_roundtrip_preserves_canonical_result_and_audit(seeded):
     assert explanation["coverage"]["evaluated_astronaut_ids"] == ["A1", "A2", "A3", "A4"]
     assert explanation["coverage"]["window_end"] == result["created_at"]
     assert explanation["check_context"] == {"status": "selected", "reason": result["next_check"]["reason"]}
-    assert "coincidência não estabelece causalidade" in explanation["uncertainty"]
+    assert "The cause remains unknown" in explanation["uncertainty"]
     references = {item["source_id"]: item for item in explanation["references"]}
     assert references.keys() == {"AKM-ARCH", "HRR-100", "AKM-08", "NASA-CO2"}
     assert all(item["url"].startswith("https://") and item["relevance"] for item in references.values())
     assert explanation["limitations"]
     review = explanation["human_review"]
     assert review["mode"] == "conditional"
-    assert "persistir após a rechecagem" in review["instruction"]
-    assert "sem aguardar reanálise" in review["instruction"]
+    assert "pattern persists after a follow-up" in review["instruction"]
+    assert "without waiting for reanalysis" in review["instruction"]
     assert seeded.get(f'/api/investigations/{result["id"]}').json() == result
     with Session(app.state.engine) as session:
         row = session.get(Investigation, result["id"])
@@ -145,7 +145,7 @@ def test_fingerprint_tracks_baseline_version_settings_and_canonical_catalog_orde
     unavailable = run(seeded)
     assert unavailable["next_check"] is None and unavailable["followup_id"] is None
     assert unavailable["status"] == "attention"
-    assert any("disponível" in item for item in unavailable["findings"])
+    assert any("available" in item for item in unavailable["findings"])
     assert unavailable["explanation"]["check_context"]["status"] == "unavailable"
     assert unavailable["explanation"]["human_review"]["mode"] == "conditional"
     assert unavailable["input_fingerprint"] != first["input_fingerprint"]
@@ -193,7 +193,7 @@ def test_empty_crew_has_no_invented_check_and_empty_profile_gets_data_gap(client
     assert empty["status"] == "insufficient_data"
     assert empty["next_check"] is empty["followup_id"] is None
     assert empty["evidence"] == []
-    assert "insuficiente" in empty["explanation"]["uncertainty"]
+    assert "lacks enough readings" in empty["explanation"]["uncertainty"]
     assert empty["explanation"]["coverage"]["evaluated_astronaut_ids"] == []
     assert empty["explanation"]["check_context"]["status"] == "needs_context"
     with Session(app.state.engine) as session:
@@ -214,13 +214,13 @@ def test_crew_explains_missing_usable_co2_without_claiming_coincidence(seeded):
     result = run(seeded)
     assert result["status"] == "attention"
     assert all("CO₂" not in item["label"] for item in result["hypotheses"])
-    assert "Faltam leituras ambientais utilizáveis" in result["explanation"]["uncertainty"]
+    assert "Comparable valid environmental readings are missing" in result["explanation"]["uncertainty"]
     assert result["next_check"]["kind"] == "co2_ppm"
 
 
 def test_protocol_human_referral_requires_no_measurement_or_critical_state(seeded):
     settings = app.state.investigation_settings
-    protocol = ValidatedProtocol(reference="demo/protocolo-revisado", validated=True, action="human_review")
+    protocol = ValidatedProtocol(reference="demo/reviewed-protocol", validated=True, action="human_review")
     app.state.investigation_settings = settings.model_copy(update={"protocol": protocol})
     result = run(seeded)
     assert result["status"] == "attention"
@@ -228,7 +228,7 @@ def test_protocol_human_referral_requires_no_measurement_or_critical_state(seede
     assert result["explanation"]["check_context"]["status"] == "protocol_referral"
     review = result["explanation"]["human_review"]
     assert review["mode"] == "per_protocol" and review["protocol_reference"] == protocol.reference
-    assert "sem aguardar nova coleta" in review["instruction"]
+    assert "without waiting for a new reading" in review["instruction"]
     assert counts() == (1, 0)
 
 
@@ -256,7 +256,7 @@ def test_legacy_results_keep_identity_and_only_restore_supported_explanation(see
     else:
         assert explanation["coverage"] is explanation["check_context"] is None
         assert explanation["human_review"]["mode"] == "conditional"
-        assert "causa do padrão de sono permanece em aberto" in explanation["uncertainty"]
+        assert "The cause of the sleep pattern remains unknown" in explanation["uncertainty"]
     with Session(app.state.engine) as session:
         assert session.get(Investigation, original["id"]).result_json == legacy_json
     assert counts() == (1, 1)

@@ -128,12 +128,12 @@ def detect_individual_changes(
         for row in selected
     )
     limitations = [
-        "Regra experimental de software com dados fictícios; não é avaliação clínica.",
-        "Período de sono aproximado pela data UTC; o resultado depende da janela e dos dados usados.",
-        "Este detector individual não avalia padrões coletivos nem causalidade ambiental.",
+        "This experimental rule uses simulated data. Clinical assessment is outside its scope.",
+        "UTC dates approximate sleep periods. The result depends on the observation window and available data.",
+        "This individual detector evaluates neither crew patterns nor environmental causality.",
     ]
     if suspect_ids:
-        limitations.append("Leituras suspeitas foram excluídas da evidência.")
+        limitations.append("Suspect readings were excluded from the evidence.")
 
     baseline = snapshot.baseline_sleep_hours
     # Two finite float representations need at most 34 significant digits in
@@ -145,21 +145,21 @@ def detect_individual_changes(
         )
     if threshold is None:
         status = "insufficient_data"
-        findings = ("É necessária uma baseline sintética de sono positiva para avaliar a regra.",)
+        findings = ("The rule requires a positive simulated sleep baseline.",)
     elif len(evidence) < 2:
         status = "insufficient_data"
         findings = (
-            f"Há {len(evidence)} período(s) de sono utilizável(is) na janela; são necessários dois períodos distintos.",
+            f"{len(evidence)} usable sleep periods in the window. The rule requires two distinct periods.",
         )
     elif all(Decimal(str(row.value)) <= threshold for row in evidence):
         status = "attention"
         findings = (
-            f"As duas observações de sono são menores ou iguais a {config.sleep_ratio * 100:g}% "
-            "da baseline sintética: padrão experimental a verificar.",
+            f"Both sleep observations are at or below {config.sleep_ratio * 100:g}% "
+            "of the simulated baseline. Check this experimental pattern.",
         )
     else:
         status = "normal"
-        findings = ("Há dados suficientes, sem padrão pela regra individual de sono da demo.",)
+        findings = ("The individual sleep rule found no pattern in the available data.",)
 
     return IndividualDetection(
         astronaut_id=snapshot.astronaut_id, status=status, rules_version=rules_version,
@@ -307,15 +307,15 @@ def _compare_environment(
         or all(row.value < baseline.value for row in matched)
     ))
     if not cohort:
-        explanation = "Sem dois perfis com períodos de sono comparáveis para relacionar o ambiente."
+        explanation = "At least two crew members with comparable sleep periods are needed to evaluate environmental context."
     elif len(matched) != 2:
-        explanation = "Faltam leituras ambientais utilizáveis em ambos os períodos comparáveis."
+        explanation = "Comparable valid environmental readings are missing."
     elif baseline is None:
-        explanation = "Não há leitura ambiental anterior para servir de referência na janela."
+        explanation = "An earlier environmental reading is needed as a reference for this window."
     elif shifted:
-        explanation = "Duas leituras comparáveis variam na mesma direção frente à referência; coincidência não estabelece causalidade."
+        explanation = "Two comparable readings shifted in the same direction relative to the reference. The cause remains unknown."
     else:
-        explanation = "As leituras não sustentam uma mudança consistente frente à referência."
+        explanation = "The readings show no consistent change relative to the reference."
     return EnvironmentalComparison(
         kind=kind, baseline=_habitat_evidence(baseline) if baseline is not None else None,
         aligned_readings=tuple(_habitat_evidence(row) for row in matched),
@@ -352,13 +352,13 @@ def detect_collective_patterns(
     affected = tuple(result.astronaut_id for result in cohort if result.status == "attention")
     if not cohort:
         status = "insufficient_data"
-        findings = ("São necessários pelo menos dois perfis com sono suficiente nos mesmos dois períodos UTC.",)
+        findings = ("At least two crew members need usable sleep readings from the same two UTC periods.",)
     elif len(affected) >= 2:
         status = "attention"
-        findings = (f"Padrão experimental de sono compartilhado por {len(affected)} astronautas: {', '.join(affected)}.",)
+        findings = (f"Experimental sleep pattern shared by {len(affected)} crew members: {', '.join(affected)}.",)
     else:
         status = "normal"
-        findings = ("Sem padrão coletivo pela regra da demo; alterações individuais permanecem nos resultados de cada perfil.",)
+        findings = ("The demo rule found no crew pattern. Individual findings remain available by crew member.",)
     environment = tuple(
         _compare_environment(kind, snapshot, cohort, window_start, config.environment_tolerance)
         for kind in ("co2_ppm", "cabin_temp_c")
@@ -367,12 +367,12 @@ def detect_collective_patterns(
     if status == "attention":
         if environment[0].consistent_shift:
             hypotheses.append(CollectiveHypothesis(
-                label="Coincidência temporal com mudança de CO₂ interno", certainty="unconfirmed",
-                explanation="O padrão de sono e as leituras de CO₂ são temporalmente comparáveis; os dados não demonstram causalidade.",
+                label="Timing overlaps a change in cabin CO₂", certainty="unconfirmed",
+                explanation="The sleep pattern and cabin CO₂ readings overlap in time. Their causal relationship remains unconfirmed.",
             ))
         hypotheses.append(CollectiveHypothesis(
-            label="Explicações alternativas ainda não verificadas", certainty="unconfirmed",
-            explanation="Rotina compartilhada, fatores individuais e condições da coleta também podem contribuir; os dados disponíveis não distinguem essas possibilidades.",
+            label="Unconfirmed alternative explanations", certainty="unconfirmed",
+            explanation="Shared routines, individual factors, and collection conditions could also contribute. The available data cannot distinguish these possibilities.",
         ))
     return CollectiveDetection(
         status=status, rules_version=rules_version, as_of=snapshot.as_of, window_start=window_start,
@@ -382,9 +382,9 @@ def detect_collective_patterns(
         affected_astronaut_ids=affected, periods=periods, environment=environment,
         hypotheses=tuple(hypotheses), findings=findings,
         limitations=(
-            "Regra experimental com tripulação fictícia; não é avaliação clínica nem diagnóstico.",
-            "Datas UTC aproximam os períodos de sono. Só o par comparável mais recente é avaliado coletivamente.",
-            "Coincidência ambiental não demonstra causalidade; temperatura permanece contexto descritivo.",
-            "Qualidade suspeita, ausência de referência ou incompatibilidade temporal limitam a evidência ambiental sem apagar achados de sono.",
+            "This experimental rule uses a simulated crew. Clinical assessment and diagnosis are outside its scope.",
+            "UTC dates approximate sleep periods. The crew analysis uses the latest comparable pair.",
+            "Environmental overlap leaves the cause unconfirmed. Temperature provides descriptive context.",
+            "Suspect readings, missing references, and incompatible timestamps limit the environmental evidence. Sleep findings remain available.",
         ),
     )

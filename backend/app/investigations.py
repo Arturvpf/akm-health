@@ -194,7 +194,7 @@ def _persist_routine(session: Session, row: Investigation, plan: RoutinePlan) ->
         if followup is None:
             followup = Followup(
                 investigation_id=row.id, astronaut_id=item.check.astronaut_id, kind=item.check.kind,
-                reason=f"Rotina demonstrativa: {item.check.reason} Referência: {item.check.reference}.",
+                reason=f"Demo routine: {item.check.reason} Reference: {item.check.reference}.",
                 created_at=row.created_at, due_at=item.due_at,
             )
             session.add(followup)
@@ -222,7 +222,7 @@ def _compose_result(row: Investigation, detection, selection, followup_id: int |
         hypotheses = [InvestigationHypothesis.model_validate(item.model_dump()) for item in detection.hypotheses]
     findings = list(detection.findings)
     findings.append(f"Janela observada: {detection.window_start.isoformat()} a {detection.as_of.isoformat()}.")
-    findings.extend(f"Limitação: {limitation}" for limitation in detection.limitations)
+    findings.extend(f"Limitation: {limitation}" for limitation in detection.limitations)
     if selection.next_check is None:
         findings.append(selection.reason)
     result = InvestigationResult(
