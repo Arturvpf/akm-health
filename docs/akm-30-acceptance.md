@@ -17,6 +17,8 @@ npm --prefix frontend run test:mvp
 
 The install command downloads Chromium Headless Shell; it requires internet only during tool preparation. Browser tests require Python backend dependencies, installed frontend dev dependencies, the production build and free loopback ports **8765, 8766, 8767**. PYTHON may select the interpreter. The runner fails rather than reusing a pre-existing service on these ports. Close your own prior test process before retrying; do not terminate unrelated services.
 
+Optional overrides: AKM_ACCEPTANCE_API_PORT, AKM_ACCEPTANCE_PREVIEW_PORT and AKM_ACCEPTANCE_EMPTY_PORT select other free loopback ports (defaults 8765/8766/8767); AKM_ACCEPTANCE_BROWSER_CHANNEL=chrome uses an installed Google Chrome instead of the downloaded Chromium shell. The test context blocks the AKM-33 shell service worker so that request routing, response assertions and the external-request block observe every page request.
+
 Browser reports and captures go to frontend/node_modules/.cache/akm30 by default. AKM_ACCEPTANCE_OUTPUT may select another absolute output directory. JSON includes exercised cases, axe violations/incomplete checks, JavaScript errors and limitations. A failed assertion produces report.json and attempts a failure capture/body dump.
 
 ## Isolation and real vs simulated behavior
@@ -35,8 +37,8 @@ Browser reports and captures go to frontend/node_modules/.cache/akm30 by default
 | --- | --- | --- |
 | T01 | health, /docs, OpenAPI 200 and real POST schema | test_t01_t12_mvp_acceptance |
 | T02 | Seed twice: 4 profiles / 29 samples, then 0 / 0 | Same API test |
-| T03 | 201 personal sleep, UTC normalization, persisted History, no implicit investigation | API test + browser registration→History |
-| T04 | Invalid unit, unknown profile, out-of-domain mood, missing timezone, NaN, habitat/profile mismatch; no write | API test |
+| T03 | 201 personal sleep, UTC normalization, persisted History, no implicit investigation; saved reading not kept as a resubmittable draft | API tests (direct and AKM-33 outbox endpoint) + browser registration→History |
+| T04 | Invalid unit, unknown profile, out-of-domain mood, missing timezone, NaN, habitat/profile mismatch; no write | API tests (direct and outbox endpoint) + browser live 422/404 through the outbox |
 | T05 | Habitat CO₂ 201, null subject, habitat zone | API test + browser recheck |
 | T06 | Empty and suspect-only evidence is insufficient_data, never normal by absence | API test; separate real-empty API in browser |
 | T07 | Explicit analysis, same-ID replay/reused, stable check count | API test + browser investigation/reanalysis |
@@ -59,25 +61,65 @@ Zero axe violations is not a blanket accessibility approval. Incomplete checks m
 
 ## Execution record
 
-Results, source revision, captures and remaining gaps are recorded below after execution and in the PR/Notion task. Earlier feature or API-suite successes do not substitute for a failed/new browser run.
+Earlier feature or API-suite successes do not substitute for a failed/new browser run. The run below supersedes the earlier record made on base 5645a03, before the AKM-33 offline outbox (PR #33) reached main.
 
-### Recorded run
+### Recorded run: integrated main + PR #32 + PR #34 (2026-11-15)
 
-Base main: `5645a03dc8f6301df67984c6d49c4c72038debf8`; branch `test/akm-30-mvp-acceptance`. See [execution metadata](evidence/akm30/execution.json) and [full browser report](evidence/akm30/report.json). The report was collected after both application fixes below; stale captures from failed harness attempts were excluded.
+| Item | Value |
+| --- | --- |
+| Tested tree | ac6e9ab85e8a17eabe09d16e757804aa01f227b4 = scratch merge of main f714cbc (includes PR #33) + PR #32 head 21d7d67 + this branch at 6479dec. |
+| OS | Ubuntu 24.04.5 LTS, Linux 6.18 (container) |
+| Browser | Headless Google Chrome for Testing 153.0.8010.12 (AKM_ACCEPTANCE_BROWSER_CHANNEL=chrome; Playwright Core 1.65.1, axe-core 4.14.0). Supplementary check: Python Playwright 1.63.0, same Chrome. |
+| Runtimes | Python 3.13.18, Node 22.23.4 |
+| Ports | API 8500, preview 4500, empty API 8501 (via the AKM_ACCEPTANCE_* overrides) |
 
-- Backend: **340 passed**, Ruff passed; the two integrated API acceptance tests also passed in a focused run. No backend implementation changed after this run.
-- Frontend: **41 passed** (35 dashboard/registration/wireframe plus 6 history/investigation API), including the new embedded-window regression; navigation, TypeScript and production Vite build passed.
-- Browser: **8 scenario groups passed**, Chromium **159.0.8154.6**, **12 axe audits / zero violations**, zero JavaScript errors. All four routes passed document-overflow assertions at 320 and 1280 CSS px with external browser requests blocked. No external requests were attempted.
-- Corrected two findings: Other pages now has a named navigation landmark (removing an aria-prohibited-attr incomplete result), and the persisted dashboard observation-window sentence translates inside longer paragraphs without changing UTC timestamps. API contracts and database schema are unchanged.
+Commands and outcomes (all executed on the tested tree):
 
-Captures: [dashboard desktop](evidence/akm30/dashboard-1280.png), [dashboard mobile](evidence/akm30/dashboard-320.png), [registration desktop](evidence/akm30/registrar-1280.png), [registration mobile](evidence/akm30/registrar-320.png), [History desktop](evidence/akm30/historico-1280.png), [History mobile](evidence/akm30/historico-320.png), [investigation desktop](evidence/akm30/investigacao-1280.png), [investigation mobile](evidence/akm30/investigacao-320.png), [receipt](evidence/akm30/receipt.png), [completed-check journey](evidence/akm30/investigation.png).
+- scripts/check.py: Ruff passed; backend **348 passed**; TypeScript passed.
+- node --test: dashboard 19, history 4, investigation-api 2, registration 16, wireframe 4, navigation 1, p2-experiments 1, p2-offline 1 — **48 passed, 0 failed**. npm run test:navigation passed. Production build passed. scripts/demo_investigation_flow.py exited 0.
+- backend/tests/test_mvp_acceptance.py: 3 passed (test_t01_t12_mvp_acceptance, test_t06_suspect_only_is_not_normal, test_t03_t04_registration_outbox_path).
+- npm run test:mvp: **11 scenario groups passed**, **23 axe audits / 0 violations**, 0 JavaScript errors, 0 external requests attempted; only color-contrast incomplete results ([report](evidence/akm30/report.json)).
+- Supplementary check ([script](evidence/akm30/supplementary-check.py), [report](evidence/akm30/supplementary-report.json)): all 8 routes with the service worker **allowed** and Chrome DNS resolution limited to 127.0.0.1; axe at 320/1280; Tab-only pass; text+icon check on notices/badges.
 
-The final dashboard desktop, registration desktop, History mobile and investigation mobile captures were visually inspected: labels, origin/time, uncertainty and sections remain legible without page-wide horizontal clipping. History's chart/table intentionally scroll internally at 320 px. This is captured-layout review, not a full human interaction approval.
+### T01–T15
 
-### axe incomplete review and remaining acceptance
+| ID | Steps | Expected | Actual | Result | Evidence |
+| --- | --- | --- | --- | --- | --- |
+| T01 | GET /api/health, /docs, /openapi.json; POST schema present | 200; health ok | As expected | PASS | test_t01_t12_mvp_acceptance |
+| T02 | Seed twice | 4 profiles/29 samples, then 0/0 | As expected | PASS | test_t01_t12_mvp_acceptance |
+| T03 | Register sleep (UTC−3) via /api/measurements and via the outbox /api/sync/measurements; replay same operation ID; browser keyboard registration → receipt → History; reopen Register | 201, UTC-normalized, persisted, no implicit investigation, replay 200 same ID, form not prefilled with the saved reading | As expected after fix 1 below (before: form reopened prefilled with the saved value 5.2) | PASS | API tests; browser "T13 keyboard registration", "T03/T13 confirmed reading is not kept…"; receipt.png |
+| T04 | Invalid unit, unknown profile, mood 6, no timezone, NaN, habitat/profile mismatch on both endpoints; browser: live 422 (model rule), 422 (quality field), 404 (profile) through the outbox | 422/404, no write; form shows correctable error, nothing queued | As expected; field-level 422 marks the field aria-invalid; model-level 422 shows the general message | PASS | API tests; browser "T03/T04 outbox path" |
+| T05 | Habitat CO₂ 201, null subject, habitat zone; browser recheck | As stated | As expected | PASS | API test; browser recheck flow |
+| T06 | Empty storage and suspect-only evidence | insufficient_data, never normal; empty UI invents no crew | As expected | PASS | API tests; browser "T06/T14 real empty storage" |
+| T07 | Explicit run, same-scope replay | reused=true, same ID, stable check count; GET never runs rules | As expected (2 POSTs, 0 on navigation) | PASS | API test; browser "T07" |
+| T08 | New observation after analysis, explicit reanalysis | Fresh-input signal; fingerprint changes only on explicit run | As expected | PASS | API test; browser "T08–T10/T13" |
+| T09 | Missing, mismatched, suspect completion evidence | Rejected, check stays pending; suspect not offered in UI | As expected | PASS | API test; browser |
+| T10 | Compatible link, replay, conflicting evidence, restart | 200 with measurement_id; 409 on conflict; survives restart | As expected | PASS | API test; browser PATCH; investigation.png |
+| T11 | Missing/corrupt local NASA artifact | not_imported, no invented values | As expected | PASS | test_t01_t12_mvp_acceptance |
+| T12 | Local NASA source/period/parameters | 864 values, unchanged after seed/analysis, separate panel | As expected | PASS | API test; browser; supplementary (864 via preview proxy) |
+| T13 | Browser Register→History→Investigate→select check→link compatible reading→Reanalyze | Each step through real HTTP to the seeded API | As expected | PASS | browser suite; receipt.png, investigation.png |
+| T14 | axe WCAG 2/2.1 A/AA at 320/1280 on 8 routes and exercised states; skip link; keyboard save; Tab-only pass; text+icon on notices; empty/error/stale states | 0 violations; labeled states; focus visible | 0 violations (after fixes 3–4); stale copy labeled (fix 2); notices carry text plus aria-hidden icon; datetime inputs (Register, History filters) show no outline in computed style during Tab pass — needs human visual check | PASS (automated) / **requires human** | report.json, supplementary-report.json, captures |
+| T14-SR | Real screen-reader listening | — | Not executed (no screen reader available to the executor) | **requires human** | — |
+| T15 | Built app, all 8 routes, external requests blocked (Playwright) and, separately, DNS limited to loopback with service worker allowed; NASA from local API | No non-loopback request; NASA loads | 0 external/non-loopback requests in both runs; 864 NASA values served locally | PASS (scoped: browser-level isolation, not an OS with networking disabled) | report.json, supplementary-report.json |
 
-Only color-contrast incomplete results remain in the final report. Nodes are decorative/non-text symbols, SVG chart text (axe cannot establish a background inside the image), or table cells partially outside a named horizontal scroll region. Visible labels accompany status symbols, and exact chart data has a table alternative. Source colors were checked separately: muted SVG text #465d74 on white **6.82:1**, caution #664900 on #fff3ce **7.53:1**, positive #20583d on #e7f4eb **7.34:1**, primary white on #244e6e **8.79:1**, neutral #374553 on #eff2f5 **8.74:1**. These checks resolve the observed color pairs; they do not certify all platform/font/assistive-technology combinations. The suite fails on any violation or non-contrast incomplete rule.
+### Defects found in the integrated build and fixed on this branch
 
-**T14 remains partially accepted.** Desktop app inventory returned a computer-use timeout. No successful screen-reader listening occurred. Before closing AKM-30, perform and record a human English screen-reader/keyboard walkthrough: skip link and landmarks; form labels/instructions/errors and native datetime segments; saved receipt announcement/focus; History chart/table and horizontal keyboard scroll; investigation status/uncertainty; compatible completion and reanalysis; empty/error recovery. Record OS/browser/reader versions and actual outcomes.
+1. **Saved reading reappeared as a draft** (AKM-33 localStorage draft): after a confirmed save, reopening Register prefilled the same value/time/target, inviting a duplicate with a new operation ID. Now cleared on saved/queued; metric kept. Unit + browser regression (browser assertion fails without the fix: actual 5.2).
+2. **Cached dashboard announced as a confirmed refresh**: on API failure the cache fallback was shown with "Dashboard updated." and the current time as "Last confirmed refresh". Now labeled "Could not get current data… copy saved on this device at …" with the save time. Unit + browser regression; [capture](evidence/akm30/dashboard-stale-copy.png).
+3. **Every error state was labeled "Connection error"**, including server validation rejections. Generic label is now "Error"; messages keep the specific cause.
+4. **Exploratory pages axe findings**: body map buttons failed label-in-name (serious, 2 nodes); self-care score used aria-label on a generic div (aria-prohibited-attr). Both fixed; these pages are now audited in the suite.
+5. **Browser suite out of date with main**: it waited for /api/measurements while the UI saves through /api/sync/measurements, and the shell service worker could hide requests from routing. Updated; ports/browser channel configurable.
 
-**T15 evidence is scoped to local-app operation after installation** with browser external-request blocking. It is not evidence of an operating system disconnected from the network, a PWA or later synchronization. If physical/network-adapter disconnection is required by review, record that separately. This PR is ready for technical review; full accessibility acceptance and merge remain pending.
+### axe incomplete review
+
+Only color-contrast incomplete results remain: decorative/non-text symbols, SVG chart text and cells partially outside a horizontal scroll region. Colors were not changed by this branch; the earlier source-color ratios still apply (muted SVG text #465d74 on white 6.82:1, caution #664900 on #fff3ce 7.53:1, positive #20583d on #e7f4eb 7.34:1, primary white on #244e6e 8.79:1, neutral #374553 on #eff2f5 8.74:1). Zero axe violations is not a blanket accessibility approval.
+
+### Remaining for humans
+
+- **T14 screen reader**: English screen-reader walkthrough (skip link and landmarks; form labels/errors and native datetime segments; receipt announcement/focus; History chart/table horizontal scroll; investigation status/uncertainty; completion and reanalysis; empty/error/stale-copy recovery). Record OS/browser/reader versions.
+- **T14 visual focus** on datetime-local inputs (Register, History filters).
+- **T15** if reviewers require an OS-level disconnected run, record it separately; evidence here is browser-level isolation.
+- README still says the guide "does not claim mobile PWA persistence/sync"; main now ships the AKM-33 offline outbox — wording to be reconciled by the doc owner.
+- CI in PR #32 does not run test-p2-experiments.cjs, test-p2-offline.cjs or the browser suite.
+
+Captures: [dashboard desktop](evidence/akm30/dashboard-1280.png), [dashboard mobile](evidence/akm30/dashboard-320.png), [registration desktop](evidence/akm30/registrar-1280.png), [registration mobile](evidence/akm30/registrar-320.png), [History desktop](evidence/akm30/historico-1280.png), [History mobile](evidence/akm30/historico-320.png), [investigation desktop](evidence/akm30/investigacao-1280.png), [investigation mobile](evidence/akm30/investigacao-320.png), [receipt](evidence/akm30/receipt.png), [completed-check journey](evidence/akm30/investigation.png), [stale dashboard copy](evidence/akm30/dashboard-stale-copy.png); exploratory pages comparador/ambientes/corpo/autocuidado at 320 and 1280 in evidence/akm30.

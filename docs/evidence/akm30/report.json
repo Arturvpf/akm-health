@@ -3,13 +3,16 @@
   "fixture": "Synthetic seed shifted by one delta into current window; NASA unchanged",
   "cases": [
     "T14 skip link and GET navigation do not run rules",
-    "T13 keyboard registration → real receipt → persisted History",
+    "T03/T13 confirmed reading is not kept as a resubmittable draft",
+    "T13 keyboard registration \u2192 real receipt \u2192 persisted History",
+    "T03/T04 outbox path: live 422/404 rejections show correctable errors, nothing queued or written",
     "T07 explicit collective finding and reuse in UI",
-    "T08–T10/T13 suspect exclusion → compatible link → explicit reanalysis",
+    "T08\u2013T10/T13 suspect exclusion \u2192 compatible link \u2192 explicit reanalysis",
     "T12/T14/T15 NASA separation; all routes at 320/1280 with external network blocked",
+    "T14/T15 exploratory pages at 320/1280 with external network blocked",
     "T14 NASA catalog error and explicit retry",
     "T06/T14 real empty storage, no invented crew, habitat remains available",
-    "T14 refresh error retains confirmed data and recovers"
+    "T14 refresh error keeps data, labels the device copy as stale and recovers"
   ],
   "audits": [
     {
@@ -24,13 +27,31 @@
               "target": [
                 ".ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             }
           ]
         }
       ],
-      "passes": 21
+      "passes": 22
+    },
+    {
+      "name": "registration live rejection 422 out-of-domain value (model-level rule, no field location)",
+      "violations": [],
+      "incomplete": [],
+      "passes": 27
+    },
+    {
+      "name": "registration live rejection 422 invalid quality (field-level)",
+      "violations": [],
+      "incomplete": [],
+      "passes": 27
+    },
+    {
+      "name": "registration live rejection 404 unknown profile",
+      "violations": [],
+      "incomplete": [],
+      "passes": 27
     },
     {
       "name": "investigation result and completed check",
@@ -44,56 +65,56 @@
               "target": [
                 ".badge-row > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">⚠︎</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u26a0\ufe0e</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "li:nth-child(1) > div > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "li:nth-child(2) > div > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "li:nth-child(3) > div > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".scientific-context > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".nasa-planet > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".nasa-history > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
@@ -135,13 +156,13 @@
               "target": [
                 ".ds-action-primary > span[aria-hidden=\"true\"]"
               ],
-              "html": "<span aria-hidden=\"true\">→</span>",
+              "html": "<span aria-hidden=\"true\">\u2192</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             }
           ]
         }
       ],
-      "passes": 29
+      "passes": 30
     },
     {
       "name": "dashboard 1280",
@@ -155,168 +176,168 @@
               "target": [
                 "article[aria-labelledby=\"crew-heading-0\"] > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">⚠︎</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u26a0\ufe0e</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-0\"] > dl > div:nth-child(1) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-0\"] > dl > div:nth-child(2) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-0\"] > dl > div:nth-child(3) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-1\"] > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">⚠︎</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u26a0\ufe0e</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-1\"] > dl > div:nth-child(1) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-1\"] > dl > div:nth-child(2) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-1\"] > dl > div:nth-child(3) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-2\"] > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">⚠︎</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u26a0\ufe0e</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-2\"] > dl > div:nth-child(1) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-2\"] > dl > div:nth-child(2) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-2\"] > dl > div:nth-child(3) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-3\"] > .tone-positive.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-3\"] > dl > div:nth-child(1) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-3\"] > dl > div:nth-child(2) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-3\"] > dl > div:nth-child(3) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".ds-card:nth-child(1) > dl > div:nth-child(1) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".ds-card:nth-child(1) > dl > div:nth-child(2) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".dashboard-alerts > li > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">⚠︎</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u26a0\ufe0e</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "li:nth-child(1) > .tone-positive.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "li:nth-child(2) > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">⚠︎</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u26a0\ufe0e</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".nasa-planet > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".ds-card > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".nasa-history > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
@@ -357,7 +378,7 @@
           ]
         }
       ],
-      "passes": 30
+      "passes": 31
     },
     {
       "name": "dashboard 320",
@@ -371,168 +392,168 @@
               "target": [
                 "article[aria-labelledby=\"crew-heading-0\"] > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">⚠︎</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u26a0\ufe0e</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-0\"] > dl > div:nth-child(1) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-0\"] > dl > div:nth-child(2) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-0\"] > dl > div:nth-child(3) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-1\"] > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">⚠︎</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u26a0\ufe0e</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-1\"] > dl > div:nth-child(1) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-1\"] > dl > div:nth-child(2) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-1\"] > dl > div:nth-child(3) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-2\"] > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">⚠︎</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u26a0\ufe0e</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-2\"] > dl > div:nth-child(1) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-2\"] > dl > div:nth-child(2) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-2\"] > dl > div:nth-child(3) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-3\"] > .tone-positive.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-3\"] > dl > div:nth-child(1) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-3\"] > dl > div:nth-child(2) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article[aria-labelledby=\"crew-heading-3\"] > dl > div:nth-child(3) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".ds-card:nth-child(1) > dl > div:nth-child(1) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".ds-card:nth-child(1) > dl > div:nth-child(2) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".dashboard-alerts > li > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">⚠︎</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u26a0\ufe0e</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "li:nth-child(1) > .tone-positive.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "li:nth-child(2) > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">⚠︎</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u26a0\ufe0e</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".nasa-planet > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".ds-card > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".nasa-history > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
@@ -579,7 +600,7 @@
       "name": "registrar 1280",
       "violations": [],
       "incomplete": [],
-      "passes": 26
+      "passes": 27
     },
     {
       "name": "registrar 320",
@@ -634,62 +655,62 @@
               "target": [
                 ".history-legend-valid"
               ],
-              "html": "<span class=\"history-legend-valid\" aria-hidden=\"true\">●</span>",
+              "html": "<span class=\"history-legend-valid\" aria-hidden=\"true\">\u25cf</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "tr:nth-child(1) > td:nth-child(4) > .ds-badge.tone-neutral > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "tr:nth-child(1) > td:nth-child(5) > .ds-badge.tone-neutral > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "tr:nth-child(2) > td:nth-child(4) > .ds-badge.tone-neutral > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "tr:nth-child(2) > td:nth-child(5) > .ds-badge.tone-neutral > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "tr:nth-child(3) > td:nth-child(4) > .ds-badge.tone-neutral > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "tr:nth-child(3) > td:nth-child(5) > .ds-badge.tone-neutral > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".ds-action-primary.ds-action[href$=\"#/investigacao\"] > span[aria-hidden=\"true\"]"
               ],
-              "html": "<span aria-hidden=\"true\">→</span>",
+              "html": "<span aria-hidden=\"true\">\u2192</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             }
           ]
         }
       ],
-      "passes": 30
+      "passes": 31
     },
     {
       "name": "historico 320",
@@ -738,14 +759,14 @@
               "target": [
                 ".history-legend-valid"
               ],
-              "html": "<span class=\"history-legend-valid\" aria-hidden=\"true\">●</span>",
+              "html": "<span class=\"history-legend-valid\" aria-hidden=\"true\">\u25cf</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
-                "time[datetime=\"2026-11-14T15:46:51.135062Z\"]"
+                "time[datetime=\"2026-11-14T16:19:51.881351Z\"]"
               ],
-              "html": "<time datetime=\"2026-11-14T15:46:51.135062Z\">11/14/26, 3:46:51 PM,135062</time>",
+              "html": "<time datetime=\"2026-11-14T16:19:51.881351Z\">11/14/26, 4:19:51 PM,881351</time>",
               "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
             },
             {
@@ -759,21 +780,21 @@
               "target": [
                 "tr:nth-child(1) > td:nth-child(4) > .ds-badge.tone-neutral > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "tr:nth-child(1) > td:nth-child(5) > .ds-badge.tone-neutral > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
-                "time[datetime=\"2026-11-15T15:46:51.135062Z\"]"
+                "time[datetime=\"2026-11-15T16:19:51.881351Z\"]"
               ],
-              "html": "<time datetime=\"2026-11-15T15:46:51.135062Z\">11/15/26, 3:46:51 PM,135062</time>",
+              "html": "<time datetime=\"2026-11-15T16:19:51.881351Z\">11/15/26, 4:19:51 PM,881351</time>",
               "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
             },
             {
@@ -787,21 +808,21 @@
               "target": [
                 "tr:nth-child(2) > td:nth-child(4) > .ds-badge.tone-neutral > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "tr:nth-child(2) > td:nth-child(5) > .ds-badge.tone-neutral > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
-                "time[datetime=\"2026-11-15T16:44:49.420285Z\"]"
+                "time[datetime=\"2026-11-15T17:16:53.458304Z\"]"
               ],
-              "html": "<time datetime=\"2026-11-15T16:44:49.420285Z\">11/15/26, 4:44:49 PM,420285</time>",
+              "html": "<time datetime=\"2026-11-15T17:16:53.458304Z\">11/15/26, 5:16:53 PM,458304</time>",
               "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
             },
             {
@@ -815,21 +836,21 @@
               "target": [
                 "tr:nth-child(3) > td:nth-child(4) > .ds-badge.tone-neutral > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "tr:nth-child(3) > td:nth-child(5) > .ds-badge.tone-neutral > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".ds-action-primary.ds-action[href$=\"#/investigacao\"] > span[aria-hidden=\"true\"]"
               ],
-              "html": "<span aria-hidden=\"true\">→</span>",
+              "html": "<span aria-hidden=\"true\">\u2192</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             }
           ]
@@ -849,56 +870,56 @@
               "target": [
                 ".badge-row > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">⚠︎</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u26a0\ufe0e</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "li:nth-child(1) > div > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "li:nth-child(2) > div > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "li:nth-child(3) > div > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".scientific-context > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".nasa-planet > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".nasa-history > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
@@ -940,13 +961,13 @@
               "target": [
                 ".ds-action-primary > span[aria-hidden=\"true\"]"
               ],
-              "html": "<span aria-hidden=\"true\">→</span>",
+              "html": "<span aria-hidden=\"true\">\u2192</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             }
           ]
         }
       ],
-      "passes": 29
+      "passes": 30
     },
     {
       "name": "investigacao 320",
@@ -960,56 +981,56 @@
               "target": [
                 ".badge-row > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">⚠︎</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u26a0\ufe0e</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "li:nth-child(1) > div > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "li:nth-child(2) > div > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "li:nth-child(3) > div > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".scientific-context > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".nasa-planet > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".nasa-history > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
@@ -1051,13 +1072,187 @@
               "target": [
                 ".ds-action-primary > span[aria-hidden=\"true\"]"
               ],
-              "html": "<span aria-hidden=\"true\">→</span>",
+              "html": "<span aria-hidden=\"true\">\u2192</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             }
           ]
         }
       ],
       "passes": 29
+    },
+    {
+      "name": "comparador 1280",
+      "violations": [],
+      "incomplete": [],
+      "passes": 30
+    },
+    {
+      "name": "comparador 320",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": [
+            {
+              "target": [
+                "caption"
+              ],
+              "html": "<caption>Simulated baseline versus manual hypothesis, with no clinical score</caption>",
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "th[scope=\"col\"]:nth-child(4)"
+              ],
+              "html": "<th scope=\"col\">Difference</th>",
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(2) > td:nth-child(4)"
+              ],
+              "html": "<td>0 bpm</td>",
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            },
+            {
+              "target": [
+                "tr:nth-child(4) > td:nth-child(4)"
+              ],
+              "html": "<td>0 ppm</td>",
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+            }
+          ]
+        }
+      ],
+      "passes": 31
+    },
+    {
+      "name": "ambientes 1280",
+      "violations": [],
+      "incomplete": [],
+      "passes": 27
+    },
+    {
+      "name": "ambientes 320",
+      "violations": [],
+      "incomplete": [],
+      "passes": 27
+    },
+    {
+      "name": "corpo 1280",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": [
+            {
+              "target": [
+                ".ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            }
+          ]
+        }
+      ],
+      "passes": 28
+    },
+    {
+      "name": "corpo 320",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": [
+            {
+              "target": [
+                ".ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            }
+          ]
+        }
+      ],
+      "passes": 28
+    },
+    {
+      "name": "autocuidado 1280",
+      "violations": [],
+      "incomplete": [],
+      "passes": 20
+    },
+    {
+      "name": "autocuidado 320",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": [
+            {
+              "target": [
+                "li:nth-child(1) > .journey-check[aria-hidden=\"true\"]"
+              ],
+              "html": "<span aria-hidden=\"true\" class=\"journey-check\">\u25cb</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                ".done:nth-child(2) > .journey-check[aria-hidden=\"true\"]"
+              ],
+              "html": "<span aria-hidden=\"true\" class=\"journey-check\">\u2713</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                ".done:nth-child(3) > .journey-check[aria-hidden=\"true\"]"
+              ],
+              "html": "<span aria-hidden=\"true\" class=\"journey-check\">\u2713</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                ".done:nth-child(4) > .journey-check[aria-hidden=\"true\"]"
+              ],
+              "html": "<span aria-hidden=\"true\" class=\"journey-check\">\u2713</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                ".achievement-row > li:nth-child(1) > span[aria-hidden=\"true\"]"
+              ],
+              "html": "<span aria-hidden=\"true\">\u2606</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                ".unlocked:nth-child(2) > span[aria-hidden=\"true\"]"
+              ],
+              "html": "<span aria-hidden=\"true\">\u2605</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                ".unlocked:nth-child(3) > span[aria-hidden=\"true\"]"
+              ],
+              "html": "<span aria-hidden=\"true\">\u2605</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                ".unlocked:nth-child(4) > span[aria-hidden=\"true\"]"
+              ],
+              "html": "<span aria-hidden=\"true\">\u2605</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            }
+          ]
+        }
+      ],
+      "passes": 25
     },
     {
       "name": "empty dashboard",
@@ -1071,272 +1266,56 @@
               "target": [
                 ".dashboard-grid > article > .ds-notice.tone-neutral > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">◇</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25c7</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article:nth-child(2) > .ds-notice.tone-neutral > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">◇</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25c7</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "section[aria-label=\"Assessments\"] > article > .ds-notice.tone-neutral > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">◇</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25c7</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".tone-positive > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".tone-caution > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">⚠︎</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u26a0\ufe0e</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".nasa-planet > .ds-badge.tone-neutral > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 "article > .ds-badge.tone-neutral > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
               "target": [
                 ".nasa-history > .ds-badge.tone-neutral > .ds-icon[aria-hidden=\"true\"]"
               ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                "text[y=\"14\"]"
-              ],
-              "html": "<text x=\"59\" y=\"14\" dy=\".32em\" text-anchor=\"end\">3,521</text>",
-              "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
-            },
-            {
-              "target": [
-                "text[y=\"85\"]"
-              ],
-              "html": "<text x=\"59\" y=\"85\" dy=\".32em\" text-anchor=\"end\">3,074</text>",
-              "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
-            },
-            {
-              "target": [
-                "text[y=\"156\"]"
-              ],
-              "html": "<text x=\"59\" y=\"156\" dy=\".32em\" text-anchor=\"end\">2,627</text>",
-              "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
-            },
-            {
-              "target": [
-                "text[x=\"68\"]"
-              ],
-              "html": "<text x=\"68\" y=\"177\">00:00</text>",
-              "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
-            },
-            {
-              "target": [
-                "text[x=\"538\"]"
-              ],
-              "html": "<text x=\"538\" y=\"177\" text-anchor=\"end\">23:56 UTC</text>",
-              "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
-            }
-          ]
-        }
-      ],
-      "passes": 29
-    },
-    {
-      "name": "dashboard failed refresh preserves snapshot",
-      "violations": [],
-      "incomplete": [
-        {
-          "id": "color-contrast",
-          "impact": "serious",
-          "nodes": [
-            {
-              "target": [
-                "article[aria-labelledby=\"crew-heading-0\"] > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">⚠︎</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                "article[aria-labelledby=\"crew-heading-0\"] > dl > div:nth-child(1) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                "article[aria-labelledby=\"crew-heading-0\"] > dl > div:nth-child(2) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                "article[aria-labelledby=\"crew-heading-0\"] > dl > div:nth-child(3) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                "article[aria-labelledby=\"crew-heading-1\"] > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">⚠︎</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                "article[aria-labelledby=\"crew-heading-1\"] > dl > div:nth-child(1) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                "article[aria-labelledby=\"crew-heading-1\"] > dl > div:nth-child(2) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                "article[aria-labelledby=\"crew-heading-1\"] > dl > div:nth-child(3) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                "article[aria-labelledby=\"crew-heading-2\"] > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">⚠︎</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                "article[aria-labelledby=\"crew-heading-2\"] > dl > div:nth-child(1) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                "article[aria-labelledby=\"crew-heading-2\"] > dl > div:nth-child(2) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                "article[aria-labelledby=\"crew-heading-2\"] > dl > div:nth-child(3) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                "article[aria-labelledby=\"crew-heading-3\"] > .tone-positive.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                "article[aria-labelledby=\"crew-heading-3\"] > dl > div:nth-child(1) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                "article[aria-labelledby=\"crew-heading-3\"] > dl > div:nth-child(2) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                "article[aria-labelledby=\"crew-heading-3\"] > dl > div:nth-child(3) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                ".ds-card:nth-child(1) > dl > div:nth-child(1) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                ".ds-card:nth-child(1) > dl > div:nth-child(2) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                ".dashboard-alerts > li > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">⚠︎</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                "li:nth-child(1) > .tone-positive.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">✓</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                "li:nth-child(2) > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">⚠︎</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                ".nasa-planet > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                ".ds-card > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
-              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
-            },
-            {
-              "target": [
-                ".nasa-history > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
-              ],
-              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">▤</span>",
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
               "summary": "Fix any of the following:\n  Element content contains only non-text characters"
             },
             {
@@ -1378,6 +1357,222 @@
         }
       ],
       "passes": 30
+    },
+    {
+      "name": "dashboard failed refresh shows labeled device copy",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": [
+            {
+              "target": [
+                "article[aria-labelledby=\"crew-heading-0\"] > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u26a0\ufe0e</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                "article[aria-labelledby=\"crew-heading-0\"] > dl > div:nth-child(1) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                "article[aria-labelledby=\"crew-heading-0\"] > dl > div:nth-child(2) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                "article[aria-labelledby=\"crew-heading-0\"] > dl > div:nth-child(3) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                "article[aria-labelledby=\"crew-heading-1\"] > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u26a0\ufe0e</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                "article[aria-labelledby=\"crew-heading-1\"] > dl > div:nth-child(1) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                "article[aria-labelledby=\"crew-heading-1\"] > dl > div:nth-child(2) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                "article[aria-labelledby=\"crew-heading-1\"] > dl > div:nth-child(3) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                "article[aria-labelledby=\"crew-heading-2\"] > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u26a0\ufe0e</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                "article[aria-labelledby=\"crew-heading-2\"] > dl > div:nth-child(1) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                "article[aria-labelledby=\"crew-heading-2\"] > dl > div:nth-child(2) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                "article[aria-labelledby=\"crew-heading-2\"] > dl > div:nth-child(3) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                "article[aria-labelledby=\"crew-heading-3\"] > .tone-positive.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                "article[aria-labelledby=\"crew-heading-3\"] > dl > div:nth-child(1) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                "article[aria-labelledby=\"crew-heading-3\"] > dl > div:nth-child(2) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                "article[aria-labelledby=\"crew-heading-3\"] > dl > div:nth-child(3) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                ".ds-card:nth-child(1) > dl > div:nth-child(1) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                ".ds-card:nth-child(1) > dl > div:nth-child(2) > dd > .dashboard-reading > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                ".dashboard-alerts > li > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u26a0\ufe0e</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                "li:nth-child(1) > .tone-positive.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u2713</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                "li:nth-child(2) > .tone-caution.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u26a0\ufe0e</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                ".nasa-planet > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                ".ds-card > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                ".nasa-history > .tone-neutral.ds-badge > .ds-icon[aria-hidden=\"true\"]"
+              ],
+              "html": "<span class=\"ds-icon\" aria-hidden=\"true\">\u25a4</span>",
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            },
+            {
+              "target": [
+                "text[y=\"14\"]"
+              ],
+              "html": "<text x=\"59\" y=\"14\" dy=\".32em\" text-anchor=\"end\">3,521</text>",
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+            },
+            {
+              "target": [
+                "text[y=\"85\"]"
+              ],
+              "html": "<text x=\"59\" y=\"85\" dy=\".32em\" text-anchor=\"end\">3,074</text>",
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+            },
+            {
+              "target": [
+                "text[y=\"156\"]"
+              ],
+              "html": "<text x=\"59\" y=\"156\" dy=\".32em\" text-anchor=\"end\">2,627</text>",
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+            },
+            {
+              "target": [
+                "text[x=\"68\"]"
+              ],
+              "html": "<text x=\"68\" y=\"177\">00:00</text>",
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+            },
+            {
+              "target": [
+                "text[x=\"538\"]"
+              ],
+              "html": "<text x=\"538\" y=\"177\" text-anchor=\"end\">23:56 UTC</text>",
+              "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+            }
+          ]
+        }
+      ],
+      "passes": 31
     }
   ],
   "browserErrors": [],
@@ -1387,6 +1582,12 @@
     "datetime-local content is filled by Playwright; internal native date segments are not manually certified.",
     "Blocking browser external requests tests local application operation, not a disconnected operating system."
   ],
-  "browser": "159.0.8154.6",
+  "browser": "153.0.8010.12",
+  "ports": {
+    "api": 8500,
+    "preview": 4500,
+    "empty": 8501
+  },
+  "channel": "chrome",
   "success": true
 }
