@@ -1,0 +1,5 @@
+.offline-banner{background:#eaf2f6;border-bottom:2px solid #a0b3c3;padding:.7rem clamp(1.25rem,4vw,2.75rem);color:#21334b;font-size:.88rem}
+.offline-banner button{font:inherit;background:#fff;border:1px solid #436782;border-radius:.5rem;padding:.4rem .8rem;color:#21334b;min-height:2.5rem;cursor:pointer}
+.offline-banner button:disabled{opacity:.5;cursor:not-allowed}
+.offline-actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.4rem}
+.offline-banner details{margin-top:.5rem}.offline-banner code{word-break:break-all}.offline-banner li{margin-bottom:.25rem}

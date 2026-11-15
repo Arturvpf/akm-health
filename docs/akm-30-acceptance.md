@@ -83,3 +83,13 @@ Only color-contrast incomplete results remain in the final report. Nodes are dec
 **T14 remains partially accepted.** Desktop app inventory returned a computer-use timeout. No successful screen-reader listening occurred. Before closing AKM-30, perform and record a human English screen-reader/keyboard walkthrough: skip link and landmarks; form labels/instructions/errors and native datetime segments; saved receipt announcement/focus; History chart/table and horizontal keyboard scroll; investigation status/uncertainty; compatible completion and reanalysis; empty/error recovery. Record OS/browser/reader versions and actual outcomes.
 
 **T15 evidence is scoped to local-app operation after installation** with browser external-request blocking. It is not evidence of an operating system disconnected from the network, a PWA or later synchronization. If physical/network-adapter disconnection is required by review, record that separately. This PR is ready for technical review; full accessibility acceptance and merge remain pending.
+
+### Integration with updated main
+
+Merged main revision `f714cbce01160f6747eb342739779a013bf8f950` into the AKM-30 branch. The package.json conflict preserves all four MVP/P1/P2 test commands. Incoming offline support changes the browser registration transport to POST /api/sync/measurements; the acceptance suite now verifies its 201 receipt, matching operation_id and reused=false before checking persisted History. The original POST /api/measurements contract remains covered by API acceptance.
+
+The browser suite also explicitly selects a personal metric for the empty-crew assertion (drafts now persist), and verifies the cached-copy warning followed by a successful dashboard refresh after a simulated 503. NASA's error/retry test is unchanged. No production behavior was changed by the conflict resolution.
+
+Validation after integration: **347 backend tests**, **41 frontend tests**, P1/P2 scenario/environment checks and in-memory IndexedDB outbox checks passed. Ruff, TypeScript, navigation and production build passed. The repeated browser journey passed all **8 scenario groups**, **12 axe audits with zero violations**, and zero JavaScript errors. See the [new browser report](evidence/akm30/main-integration-report.json). Earlier captures above belong to the earlier recorded base; fresh integration captures are retained with the local validation outputs.
+
+Human screen-reader listening and the complete human keyboard walkthrough remain pending. Network isolation evidence remains browser external-request blocking with loopback available. Resolving this branch conflict does not approve those manual criteria or merge the PR.

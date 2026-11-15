@@ -6,7 +6,7 @@ from math import isfinite
 from sqlite3 import SQLITE_CONSTRAINT_FOREIGNKEY
 from typing import Annotated, Literal
 
-from fastapi import Depends, FastAPI, HTTPException, Path, Query, Request
+from fastapi import Depends, FastAPI, HTTPException, Path, Query, Request, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -23,6 +23,7 @@ from .investigations import (
 )
 from .models import Astronaut, Followup, Measurement
 from .nasa_reference import load_nasa_references
+from .offline_sync import register_sync_measurement
 from .schemas import (
     AstronautRead,
     DashboardResponse,
@@ -34,6 +35,7 @@ from .schemas import (
     MeasurementHistoryQuery,
     MeasurementRead,
     NASAReferenceResponse,
+    SyncMeasurementRequest, SyncMeasurementReceipt,
 )
 
 
@@ -239,3 +241,15 @@ def nasa_references():
 def validate_measurement(body: MeasurementCreate):
     """Testing-only endpoint. Not part of the ten canonical business API routes."""
     return {"kind": body.kind, "measurement_zone": body.zone(), "valid": True}
+
+
+@app.post(
+    "/api/sync/measurements", status_code=201, response_model=SyncMeasurementReceipt,
+    responses={200: {"description": "Previously recorded operation (idempotent replay)"},
+               404: {"description": "Astronaut not found"},
+               409: {"description": "Operation ID content mismatch"}},
+)
+def sync_measurement(body: SyncMeasurementRequest, response: Response, session: DatabaseSession):
+    receipt, status = register_sync_measurement(session, body)
+    response.status_code = status
+    return receipt

@@ -1,0 +1,142 @@
+[
+  {
+    "path": "README.md",
+    "action": "modified"
+  },
+  {
+    "path": "backend/app/db.py",
+    "action": "modified"
+  },
+  {
+    "path": "backend/app/main.py",
+    "action": "modified"
+  },
+  {
+    "path": "backend/app/models.py",
+    "action": "modified"
+  },
+  {
+    "path": "backend/app/offline_sync.py",
+    "action": "added"
+  },
+  {
+    "path": "backend/app/schemas.py",
+    "action": "modified"
+  },
+  {
+    "path": "backend/tests/test_akm33_sync.py",
+    "action": "added"
+  },
+  {
+    "path": "backend/tests/test_database.py",
+    "action": "modified"
+  },
+  {
+    "path": "docs/akm-33-36-verification.md",
+    "action": "added"
+  },
+  {
+    "path": "docs/akm-33-offline-sync.md",
+    "action": "added"
+  },
+  {
+    "path": "docs/akm-34-hypothetical-scenarios.md",
+    "action": "added"
+  },
+  {
+    "path": "docs/akm-35-environments.md",
+    "action": "added"
+  },
+  {
+    "path": "docs/akm-36-body-explorer.md",
+    "action": "added"
+  },
+  {
+    "path": "docs/database.md",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/package.json",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/public/sw.js",
+    "action": "added"
+  },
+  {
+    "path": "frontend/scripts/test-p2-experiments.cjs",
+    "action": "added"
+  },
+  {
+    "path": "frontend/scripts/test-p2-offline.cjs",
+    "action": "added"
+  },
+  {
+    "path": "frontend/src/App.tsx",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/BodyExplorer.tsx",
+    "action": "added"
+  },
+  {
+    "path": "frontend/src/EnvironmentView.tsx",
+    "action": "added"
+  },
+  {
+    "path": "frontend/src/MeasurementForm.tsx",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/OfflineStatus.tsx",
+    "action": "added"
+  },
+  {
+    "path": "frontend/src/ScenarioComparator.tsx",
+    "action": "added"
+  },
+  {
+    "path": "frontend/src/api.ts",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/environment-data.ts",
+    "action": "added"
+  },
+  {
+    "path": "frontend/src/experiments.css",
+    "action": "added"
+  },
+  {
+    "path": "frontend/src/history-data.ts",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/investigation-api.ts",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/measurement-api.ts",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/navigation.ts",
+    "action": "modified"
+  },
+  {
+    "path": "frontend/src/offline-store.ts",
+    "action": "added"
+  },
+  {
+    "path": "frontend/src/offline.css",
+    "action": "added"
+  },
+  {
+    "path": "frontend/src/scenario-data.ts",
+    "action": "added"
+  },
+  {
+    "path": "frontend/src/vite-env.d.ts",
+    "action": "added"
+  }
+]

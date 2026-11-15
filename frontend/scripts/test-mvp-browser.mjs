@@ -90,11 +90,14 @@ async function record(kind, value, quality = 'ok') {
   await page.locator('#measurement-quality').focus();
   await page.keyboard.press('Tab');
   assert.equal(await page.locator(':focus').innerText(), 'Save measurement');
-  const response = page.waitForResponse(r => r.url().endsWith('/api/measurements') && r.request().method() === 'POST');
+  const response = page.waitForResponse(r => r.url().endsWith('/api/sync/measurements') && r.request().method() === 'POST');
   await page.keyboard.press('Enter');
   const saved = await response;
   assert.equal(saved.status(), 201);
-  const receipt = await saved.json();
+  const confirmation = await saved.json();
+  assert.equal(confirmation.operation_id, saved.request().postDataJSON().operation_id);
+  assert.equal(confirmation.reused, false);
+  const receipt = confirmation.measurement;
   await page.getByRole('heading', { name: 'Measurement #' + receipt.id + ' confirmed', exact: true }).waitFor();
   return receipt;
 }
@@ -225,6 +228,7 @@ try {
   await audit('empty dashboard');
   await go('registrar');
   await page.locator('#measurement-kind:enabled').waitFor();
+  await page.locator('#measurement-kind').selectOption('sleep_hours'); // A previous draft may restore a habitat metric.
   assert.equal(await page.getByRole('button', { name: 'Save measurement', exact: true }).isDisabled(), true);
   await page.locator('#measurement-kind').selectOption('co2_ppm');
   assert.equal(await page.getByRole('button', { name: 'Save measurement', exact: true }).isEnabled(), true);
@@ -235,12 +239,12 @@ try {
   await page.getByRole('button', { name: 'Refresh data', exact: true }).waitFor();
   await page.route('**/api/dashboard', route => route.fulfill({ status: 503, body: '{}' }));
   await page.getByRole('button', { name: 'Refresh data', exact: true }).click();
-  await page.getByRole('button', { name: 'Try again', exact: true }).first().waitFor();
+  await page.getByText('Showing cached copy (may be out of date)', { exact: true }).waitFor();
   assert.ok((await page.locator('body').innerText()).includes('Aurora'));
   await audit('dashboard failed refresh preserves snapshot');
   await page.unroute('**/api/dashboard');
-  await page.getByRole('button', { name: 'Try again', exact: true }).first().click();
-  await page.getByRole('button', { name: 'Refresh data', exact: true }).waitFor();
+  await page.getByRole('button', { name: 'Refresh data', exact: true }).click();
+  await page.getByText('Showing cached copy (may be out of date)', { exact: true }).waitFor({ state: 'hidden' });
   passed('T14 refresh error retains confirmed data and recovers');
   assert.deepEqual(report.browserErrors, []);
   report.success = true;

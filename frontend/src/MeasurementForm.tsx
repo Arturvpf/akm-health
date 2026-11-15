@@ -10,8 +10,14 @@ import type { Kind } from './types';
 export function MeasurementForm() {
   const [context, setContext] = useState(INITIAL_DASHBOARD_STATE);
   const [registration, setRegistration] = useState(INITIAL_REGISTRATION);
-  const [draft, setDraft] = useState<MeasurementDraft>({ ...EMPTY_DRAFT });
+  const [draft, setDraft] = useState<MeasurementDraft>(() => {
+    try { return { ...EMPTY_DRAFT, ...JSON.parse(localStorage.getItem('akm-measurement-draft-v1') ?? '{}') }; }
+    catch { return { ...EMPTY_DRAFT }; }
+  });
   const [errors, setErrors] = useState<FieldErrors>({});
+  useEffect(() => {
+    try { localStorage.setItem('akm-measurement-draft-v1', JSON.stringify(draft)); } catch { /* storage may be denied */ }
+  }, [draft]);
   const contextController = useRef<ReturnType<typeof createDashboardController> | null>(null);
   const registrationController = useRef<ReturnType<typeof createRegistrationController> | null>(null);
   useEffect(() => {
@@ -64,12 +70,12 @@ export function MeasurementFormView({ context, registration, draft, errors, onCh
   const previousPhase = useRef(registration.phase);
   useEffect(() => {
     if (Object.keys(errors).length) form.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
-    else if (registration.phase !== previousPhase.current && ['saved', 'error', 'uncertain'].includes(registration.phase)) feedback.current?.focus();
+    else if (registration.phase !== previousPhase.current && ['saved', 'error', 'uncertain', 'queued'].includes(registration.phase)) feedback.current?.focus();
     previousPhase.current = registration.phase;
   }, [errors, registration.phase]);
   const metric = FORM_METRICS[draft.kind];
   const busy = registration.phase === 'saving';
-  const locked = busy || registration.phase === 'uncertain';
+  const locked = busy || registration.phase === 'uncertain' || registration.phase === 'queued';
   const ready = context.phase === 'ready' && context.data !== null;
   const fields = (field: keyof MeasurementDraft, description?: string) => ({
     id: `measurement-${field}`, 'aria-invalid': errors[field] ? true as const : undefined,
@@ -93,7 +99,11 @@ export function MeasurementFormView({ context, registration, draft, errors, onCh
     </div>
     <div ref={feedback} tabIndex={-1} className="registration-feedback" role={registration.error ? 'alert' : 'status'}>
       {busy && <DataState kind="loading">Saving measurement. Wait for confirmation before leaving this page.</DataState>}
-      {registration.error && <DataState kind="error">{registration.error}</DataState>}
+      {registration.error && (registration.phase === 'queued' ? <DataState kind="loading">{registration.error}</DataState> : <DataState kind="error">{registration.error}</DataState>)}
+      {registration.phase === 'queued' && <div className="status-actions">
+        <p>The reading is stored on this device but not yet confirmed by the server. The sync bar shows pending items and conflicts. Do not register the same reading again.</p>
+        <ActionButton onClick={onNew}>Register another measurement</ActionButton>
+      </div>}
       {registration.phase === 'uncertain' && <div className="status-actions">
         <ActionLink href="#/historico" target="_blank" rel="noopener noreferrer">Check History in a new tab</ActionLink>
         <ActionButton onClick={onUnlock}>I checked History and the reading is missing. Enable resubmission.</ActionButton>
@@ -163,7 +173,7 @@ export function MeasurementFormView({ context, registration, draft, errors, onCh
       <Card heading="How to record">
         <section id="measurement-instructions" aria-live="polite"><h3>{METRIC_LABELS[draft.kind]} · {metric.displayUnit}</h3><p>{metric.instruction}</p><p>{metric.limit}</p></section>
         <ol className="measurement-steps"><li>Check the metric and target.</li><li>Enter the reading, observation time, and UTC offset.</li><li>Select the source and quality. Review the details before saving.</li><li>Wait for the measurement confirmation number.</li></ol>
-        <p>Edit fields before submitting. Saved measurements are read-only.</p>
+        <p>Your draft is kept in this browser. Submissions use a local queue with a stable ID, so network retries do not create duplicates. Saved measurements are read-only.</p>
         <p>Find historical NASA data in the NASA references section.</p>
         <p><a href={metric.url}>NASA reference · {metric.id}</a></p>
       </Card>
