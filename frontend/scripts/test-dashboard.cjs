@@ -39,8 +39,8 @@ test('localizes saved investigation copy and preserves measurements, scope and c
 const stamp = '2026-11-14T08:00:00Z';
 function snapshot() {
   return {
-    mission: { name: 'Missão de teste', day: 184, destination: 'mars_surface', gravity_g_reference: 0.378,
-      context_source_url: 'https://nssdc.gsfc.nasa.gov/planetary/factsheet/', demo_only: true },
+    mission: { name: 'Missão de teste', day: 184, destination: 'mars_surface', gravity_g_reference: 0.38,
+      context_source_url: 'https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html', demo_only: true },
     astronauts: [{ id: 'A1', name: 'Aurora', status: 'attention', latest_metrics: {
       sleep_hours: { value: 5.4, unit: 'h', measured_at: stamp, source: 'synthetic' },
       heart_rate_bpm: { value: 72, unit: 'bpm', measured_at: stamp, source: 'manual' },

@@ -8,7 +8,7 @@ This inventory describes the artifacts used by the current application, not ever
 | Mission manual | POST /api/measurements → SQLite | User-entered observations of the fictional mission, never real patient data |
 | NASA reference | backend/data/nasa/hrp_catalog.json | Three NASA HRP links: hazards, risks and ongoing research; no quantitative patient data |
 | NASA historical | backend/data/nasa/reference.json | Read-only RR-1 ISS environmental archive, outside the mission tables and rule inputs |
-| Planetary context | backend/app/mission_environment.json | Fictional destination mars_surface; static NASA gravity reference 0.378 Earth g, not measured gravity |
+| Planetary context | backend/app/mission_environment.json | Fictional destination mars_surface; static NASA gravity reference 0.38 Earth g (Mars mean 3.73 m/s² ÷ Earth 9.82 m/s², NASA NSSDCA Mars Fact Sheet, last updated 19 May 2025), not measured gravity. Lunar value 1.62 m/s² from the NSSDCA Moon Fact Sheet (last updated 11 January 2024) |
 
 ## Exact NASA historical resource
 
