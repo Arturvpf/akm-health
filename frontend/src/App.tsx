@@ -142,10 +142,6 @@ export function App() {
                   Go to {NAVIGATION.find((item) => item.id === view.next)?.label}
                   <span aria-hidden="true">→</span>
                 </ActionLink>
-                <ActionLink href="akm-10-wireframe.html" target="_blank" rel="noopener noreferrer">
-                  Open the interactive wireframe (Portuguese) <span aria-hidden="true">↗</span>
-                  <span className="sr-only">(opens in a new tab)</span>
-                </ActionLink>
               </div>
               <nav className="links" aria-label="Other pages">
                 {NAVIGATION.filter((item) => item.id !== page && item.id !== view.next).map((item) => (

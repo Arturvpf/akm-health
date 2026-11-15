@@ -6,7 +6,7 @@
 | --- | --- |
 | AKM-10 · Wireframe | [PR #19](https://github.com/Arturvpf/akm-health/pull/19) and [prototype walkthrough](akm-10-12-wireframes-and-shell.md). |
 | AKM-11 · Design system | [PR #23](https://github.com/Arturvpf/akm-health/pull/23) and [accessible components and states](akm-11-accessible-design-system.md). |
-| AKM-12 · Navigation shell | [PR #19](https://github.com/Arturvpf/akm-health/pull/19) and the navigation and wireframe regression tests. |
+| AKM-12 · Navigation shell | [PR #19](https://github.com/Arturvpf/akm-health/pull/19) and the navigation regression tests. |
 | AKM-13 · Dashboard | [PR #25](https://github.com/Arturvpf/akm-health/pull/25) and [API-connected dashboard evidence](akm-13-crew-dashboard.md). |
 | AKM-14 · Register | [PR #26](https://github.com/Arturvpf/akm-health/pull/26) and [registration and error-recovery evidence](akm-14-measurement-forms.md). |
 | AKM-15 · History | [PR #24](https://github.com/Arturvpf/akm-health/pull/24) and [history, trends and chart alternatives](akm-15-history-trends.md). |
@@ -31,7 +31,7 @@ Regression commands, with the backend environment active and npm dependencies in
 
 ```sh
 python scripts/check.py
-node --test frontend/scripts/test-dashboard.cjs frontend/scripts/test-registration.cjs frontend/scripts/test-history.cjs frontend/scripts/test-investigation-api.cjs frontend/scripts/test-wireframe.cjs
+node --test frontend/scripts/test-dashboard.cjs frontend/scripts/test-registration.cjs frontend/scripts/test-history.cjs frontend/scripts/test-investigation-api.cjs
 npm --prefix frontend run test:navigation
 npm --prefix frontend run build
 ```

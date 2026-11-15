@@ -9,7 +9,6 @@
     "preview": "vite preview --host 127.0.0.1",
     "typecheck": "tsc --noEmit",
     "test:navigation": "node scripts/test-navigation.cjs",
-    "test:wireframe": "node --test scripts/test-wireframe.cjs",
     "test:dashboard": "node --test scripts/test-dashboard.cjs",
     "test:registration": "node --test scripts/test-registration.cjs",
     "test:mvp": "node scripts/test-mvp-browser.mjs",

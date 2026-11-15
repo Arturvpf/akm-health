@@ -116,7 +116,7 @@ python -m venv .venv
 python -m pip install -r backend/requirements-dev.txt
 npm --prefix frontend ci
 python scripts/check.py
-node --test frontend/scripts/test-dashboard.cjs frontend/scripts/test-history.cjs frontend/scripts/test-investigation-api.cjs frontend/scripts/test-registration.cjs frontend/scripts/test-wireframe.cjs
+node --test frontend/scripts/test-dashboard.cjs frontend/scripts/test-history.cjs frontend/scripts/test-investigation-api.cjs frontend/scripts/test-registration.cjs
 npm --prefix frontend run test:navigation
 npm --prefix frontend run build
 python scripts/demo_investigation_flow.py
