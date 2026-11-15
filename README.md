@@ -110,9 +110,21 @@ Start a task branch from main. Consult the [Notion architecture](https://app.not
 - **API errors:** check health on port 8000. Vite proxies /api to 127.0.0.1:8000; a different API port requires updating the proxy. API and frontend are separate processes.
 - **Port occupied:** stop your own previous server or use another port and update the proxy. Do not terminate unrelated processes.
 - **No collective pattern:** check time, coverage, quality and the 48-hour window. Use the deterministic script for the fixed scenario; do not change medical meanings to force a result.
-- **Uncertain POST:** check History before retrying. Measurements have no server idempotency key; local duplicate-click protection does not deduplicate concurrent writers.
+- **Uncertain POST:** check History before retrying. The original `POST /api/measurements` has no idempotency key (the AKM-33 sync endpoint does); local duplicate-click protection does not deduplicate concurrent writers.
 - **Schema error:** check AKM_DB_PATH and [database notes](docs/database.md). Back up data; do not delete the database as a first response.
 - **NASA unavailable:** missing/invalid history yields not_imported without fabricated values; a broken HRP catalog yields 503. Restore trusted artifacts using the [data guide](docs/data-sources.md).
+
+## Exploratory P1/P2 tools (AKM-33 to AKM-37)
+
+These additions are experimental and do not change the P0 investigation engine. Open them from **Exploratory tools (P1/P2)** in the sidebar.
+
+- [AKM-33 · Offline persistence and sync conflicts](docs/akm-33-offline-sync.md): new manual measurements are queued in IndexedDB with a stable UUID and sent to `POST /api/sync/measurements`, which is idempotent and returns 409 on a conflicting body. Only **new measurements** are queued offline; investigations and follow-up completion still need the API online.
+- [AKM-34 · Hypothetical scenarios](docs/akm-34-hypothetical-scenarios.md): arithmetic comparison over immutable synthetic seed values, with assumptions shown.
+- [AKM-35 · Mission environments](docs/akm-35-environments.md): four hypothetical contexts with NASA gravity references; switching does not alter health states.
+- [AKM-36 · Interactive body map](docs/akm-36-body-explorer.md): keyboard-accessible schematic showing the latest stored reading per region; not a diagnostic instrument.
+- AKM-37 · Self-care journey: participation points from stored readings and completed follow-ups; values never change points. See [ZIP, Figma Make and design-document integration](docs/akm-36-37-figma-integration.md).
+
+**Use a separate database for this branch.** AKM-33 adds a `sync_operations` table and migrates `PRAGMA user_version` from 1 to 2. The migration is forward-only: code without AKM-33 refuses a version-2 file (`Unsupported AKM database schema version: 2`). Point `AKM_DB_PATH` at a separate file (for example `work/p1p2.db`) and keep the P0 demo database untouched. The service worker only caches the production build served from a secure origin (localhost or HTTPS): `npm --prefix frontend run build && npm --prefix frontend run preview`. Extra checks: `npm --prefix frontend run test:p2` and `npm --prefix frontend run test:offline`. See the [AKM-33–36 verification record](docs/akm-33-36-verification.md).
 
 ## License
 
