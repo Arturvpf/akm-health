@@ -16,10 +16,10 @@ Each member completes their own row before submitting the Space Apps form, and l
 
 | Member | AI tools used | What they were used for |
 | --- | --- | --- |
-| Artur Vinicius Pereira Fernandes | Anthropic Claude (through Claude Code); OpenAI Codex | Implementation, code review, tests, deployment configuration, documentation and interface polish across the project, including the final weekend changes: "Why this finding" panel, downlink report, guided tour, link-loss simulation, body map illustration, input-safety fixes and the README. |
+| Artur Vinicius Pereira Fernandes | Anthropic Claude (through Claude Code); OpenAI Codex; Google Gemini (image generation) | Body-map hologram image (Gemini). Implementation, code review, tests, deployment configuration, documentation and interface polish across the project, including the final weekend changes: "Why this finding" panel, downlink report, guided tour, link-loss simulation, body map illustration, input-safety fixes and the README. |
 | Other members | To be completed by each member | To be completed by each member |
 
 ## Generated media
 
-- The application ships no AI-generated audio or video. Its animated backgrounds and hazard cards are vector or canvas drawings written as code, with Claude's help where noted above. The one raster image is the body-map artwork (`frontend/public/body-hologram.webp`), supplied by the team. It looks like AI-generated art, so the team must state its tool and source here before submission. Its static cards and labels are covered by live HTML, so no value shown in the app comes from the image.
+- The application ships no AI-generated audio or video. Its animated backgrounds and hazard cards are vector or canvas drawings written as code, with Claude's help where noted above. The one raster image is the body-map artwork (`frontend/public/body-hologram.webp`), an AI-generated image made by the team with Google Gemini. Its static cards and labels are covered by live HTML, so no value shown in the app comes from the image.
 - If the demo video or slides use AI-generated images or a synthetic voice, mark them with a visible watermark or on-screen label, as the Space Apps rules require.
