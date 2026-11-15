@@ -5,7 +5,7 @@ import { englishMissionCopy } from './mission-copy';
 import { createDashboardController, INITIAL_DASHBOARD_STATE, type DashboardState } from './dashboard-state';
 import { ActionButton, ActionLink, Card, DataState, Details, InformationNotice, ProtocolLegend, SourceBadge, StatusBadge } from './design-system';
 import { pageHref } from './navigation';
-import type { DataSource, InvestigationStatus, Kind, MetricSnapshot } from './types';
+import type { AstronautDashboardRead, DataSource, InvestigationStatus, Kind, MetricSnapshot } from './types';
 
 const number = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
 const date = new Intl.DateTimeFormat('en-US', { dateStyle: 'short', timeStyle: 'short', timeZone: 'UTC' });
@@ -37,6 +37,28 @@ function Reading({ kind, sample, legacyValue }: { kind: Kind; sample?: MetricSna
   </div>;
 }
 
+/** One-glance answer to "is anything worth checking right now?", derived only from the API snapshot. */
+function MissionPulse({ crew, evaluated, hasNewReadings }: { crew: AstronautDashboardRead[]; evaluated: boolean; hasNewReadings: boolean }) {
+  const flagged = crew.filter(person => person.status === 'attention').length;
+  const headline = !evaluated ? 'No investigation has been run yet.'
+    : flagged > 0 ? `${flagged} of ${crew.length} crew members show an experimental pattern to check.`
+    : 'No pattern under the demo rule.';
+  const detail = hasNewReadings ? 'New readings arrived since the last run. Run an investigation to include them.'
+    : evaluated ? 'Based on the most recent investigation. The cause is never assumed.'
+    : 'Investigations only run when you ask. Readings below are the latest recorded.';
+  return <section className="mission-pulse" aria-label="Mission status at a glance">
+    <div>
+      <p className="pulse-label"><span aria-hidden="true">{flagged > 0 ? '▲ ' : '● '}</span>Right now</p>
+      <p className="pulse-headline">{headline}</p>
+      <p className="pulse-detail">{detail}</p>
+    </div>
+    <div className="pulse-actions">
+      <ActionLink variant="primary" href={pageHref('investigation')}>Investigate<span aria-hidden="true">→</span></ActionLink>
+      <ActionLink href={pageHref('register')}>Log a reading</ActionLink>
+    </div>
+  </section>;
+}
+
 export function DashboardView({ state, onRefresh }: { state: DashboardState; onRefresh: () => void }) {
   const { data, phase, error, receivedAt } = state;
   const cachedAt = state.cachedAt ?? null;
@@ -59,6 +81,7 @@ export function DashboardView({ state, onRefresh }: { state: DashboardState; onR
       {phase === 'ready' && cachedAt !== null && <DataState kind="error">Could not get current data from the mission server. Showing a copy saved on this device at <Timestamp value={cachedAt} />. It may be out of date.</DataState>}
     </div>
     {data && <>
+      <MissionPulse crew={data.astronauts} evaluated={evaluated} hasNewReadings={data.has_unanalyzed_measurements} />
       <section className="dashboard-summary" aria-label="Mission summary">
         <Card heading={data.mission.name}>
           <Details items={[

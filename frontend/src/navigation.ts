@@ -12,9 +12,11 @@ export const EXPERIMENTAL_NAVIGATION = [
   { id: 'body', label: 'Body map', description: 'AKM-36 · Educational links' },
   { id: 'self-care', label: 'Self-care journey', description: 'AKM-37 · Participation points' },
 ] as const;
-export const ALL_NAVIGATION = [...NAVIGATION, ...EXPERIMENTAL_NAVIGATION] as const;
+/** Landing page: the front door of the site, outside the four mission pages. */
+export const HOME = { id: 'home', label: 'Home', description: 'Overview of AKM Health' } as const;
+export const ALL_NAVIGATION = [HOME, ...NAVIGATION, ...EXPERIMENTAL_NAVIGATION] as const;
 export type PageId = (typeof ALL_NAVIGATION)[number]['id'];
-export const DEFAULT_PAGE: PageId = 'dashboard';
+export const DEFAULT_PAGE: PageId = 'home';
 
 /** Earlier builds used Portuguese hash ids; they still resolve to the English routes. */
 export const LEGACY_ROUTES: Readonly<Record<string, PageId>> = {
