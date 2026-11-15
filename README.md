@@ -41,7 +41,7 @@ Keep the API running. In a **second terminal**, at the repository root:
 npm --prefix frontend run dev -- --port 5173 --strictPort
 ```
 
-Open [AKM Health](http://127.0.0.1:5173/#/dashboard). All four mission screens use the API. Route identifiers remain dashboard, registrar, historico, investigacao. Current main has Portuguese labels; a separate English-interface PR may change labels without changing route identifiers.
+Open [AKM Health](http://127.0.0.1:5173/#/dashboard). All four mission screens use the API. Route identifiers remain dashboard, registrar, historico, investigacao. The main interface labels and built-in investigation narratives are in English following merged PR #29; route identifiers remain unchanged. The separate interactive wireframe is an older Portuguese-language reference.
 
 Check [health](http://127.0.0.1:8000/api/health), [OpenAPI JSON](http://127.0.0.1:8000/openapi.json) and [NASA references](http://127.0.0.1:8000/api/nasa/references). Health returns status=ok and storage=sqlite_reachable. [Swagger UI](http://127.0.0.1:8000/docs) loads CDN assets and may not render offline.
 
@@ -87,6 +87,13 @@ npm --prefix frontend run build
 ```
 
 scripts/check.py covers Ruff, backend tests and TypeScript, **not** the complete frontend/browser suite. Registration integration expects the repository .venv; PYTHON may select another interpreter. The [verification record](docs/akm-31-verification.md) separates executed commands from remaining browser, accessibility and scientific review. Automated success does not mean visual approval, merge or clinical validation.
+
+## Space Apps 2026 submission and acceptance
+
+- [Current requirements-to-evidence audit](docs/space-apps-2026-final-audit.md) distinguishes verified functionality from pending scientific sign-off, full AKM-30 acceptance and official submission.
+- [AKM-30 acceptance task](https://app.notion.com/p/4189432b222281b799e9ca40f6f3ec9c) and [AKM-32 submission task](https://app.notion.com/p/4189432b2222816dbad1d27d8ba2071d) must be completed with evidence; a merged PR or passing unit tests alone are not the final event submission.
+- The 2026 NASA Space Apps submission deadline is November 15 at 11:59 PM in the applicable event's local time: [official event page](https://www.spaceappschallenge.org/2026/). Check the team's Project tab and any earlier local deadline. Do not claim the project has been submitted without confirmation.
+- The challenge's complete Resources tab and exact project-form requirements still require verification in the signed-in Space Apps platform. The credited NASA RR-1 historical excerpt is an input for contextual visualization, not a real clinical astronaut dataset or a medical threshold.
 
 ## Architecture and contributing
 
