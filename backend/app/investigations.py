@@ -20,6 +20,7 @@ from .rules import (
     CollectiveRuleConfig, CrewMember, CrewSnapshot, IndividualSnapshot,
     detect_collective_patterns, detect_individual_changes,
 )
+from .routine import RoutinePlan, RoutinePolicy, plan_routine
 from .schemas import (
     FollowupRead, InvestigationEvidence, InvestigationHypothesis, InvestigationResult,
     InvestigationRunRequest, MeasurementRead, METRICS, NextCheck, StrictModel,
@@ -36,6 +37,7 @@ class InvestigationSettings(StrictModel):
     config: CollectiveRuleConfig = CollectiveRuleConfig()
     resources: tuple[CheckResource, ...]
     protocol: ValidatedProtocol | None = None
+    routine: RoutinePolicy = RoutinePolicy()
 
     @field_validator("rules_version")
     @classmethod
@@ -90,11 +92,25 @@ def fingerprint_payload(snapshot, request: InvestigationRunRequest, settings: In
     options = settings.model_dump(mode="json")
     # Catalog order is not semantic, whereas protocol preference order is.
     options["resources"] = sorted(options["resources"], key=lambda row: (row["kind"], row["astronaut_id"] or ""))
-    return {
+    if not settings.routine.checks:
+        # An unconfigured scheduler must preserve pre-AKM-25 fingerprints.
+        options.pop("routine")
+    else:
+        options["routine"]["checks"] = sorted(options["routine"]["checks"],
+            key=lambda row: (row["kind"], row["astronaut_id"] or ""))
+    payload = {
         "schema": "akm-investigation-v1", "request": request.model_dump(mode="json"),
         "snapshot": snapshot.model_dump(mode="json", exclude={"as_of"}), "settings": options,
         "priority_policy_version": NextCheckSelection.model_fields["policy_version"].default,
     }
+    if settings.routine.checks:
+        plan = plan_routine(snapshot, settings.routine, settings.resources, settings.protocol)
+        payload["routine_windows"] = [
+            {"kind": item.check.kind, "astronaut_id": item.check.astronaut_id,
+             "window_start": item.model_dump(mode="json")["window_start"]}
+            for item in plan.items if item.status != "outside_scope"
+        ]
+    return payload
 
 
 def _find_by_fingerprint(session: Session, fingerprint: str) -> Investigation | None:
@@ -127,14 +143,65 @@ def _response(row: Investigation, *, reused: bool = False) -> InvestigationResul
     return result.model_copy(update={"reused": reused})
 
 
-def _encode_document(response: InvestigationResult, snapshot, settings, detection, selection) -> str:
-    return json.dumps({
+def _encode_document(response: InvestigationResult, snapshot, settings, detection, selection, routine_audit=None) -> str:
+    document = {
         "schema_version": 1, "response": response.model_dump(mode="json"),
         "audit": {
             "snapshot": snapshot.model_dump(mode="json"), "settings": settings.model_dump(mode="json"),
             "detection": detection.model_dump(mode="json"), "selection": selection.model_dump(mode="json"),
         },
-    }, sort_keys=True, allow_nan=False)
+    }
+    if routine_audit is not None:
+        document["audit"]["routine"] = routine_audit
+    return json.dumps(document, sort_keys=True, allow_nan=False)
+
+
+def _pending_target(session: Session, kind, astronaut_id) -> Followup | None:
+    return session.exec(select(Followup).where(
+        Followup.status == "pending", Followup.kind == kind, Followup.astronaut_id == astronaut_id,
+    ).order_by(Followup.id)).first()
+
+
+def _routine_key(entry: dict) -> tuple:
+    return entry["kind"], entry["astronaut_id"], entry["window_start"], entry["due_at"]
+
+
+def _persist_routine(session: Session, row: Investigation, plan: RoutinePlan) -> dict:
+    history = {}
+    for previous in session.exec(select(Investigation).order_by(Investigation.id)):
+        if previous.id == row.id:
+            continue
+        try:
+            _response_value, audit = stored_document(previous)
+        except (ValueError, KeyError, TypeError):
+            continue
+        for entry in audit.get("routine", {}).get("followups", []):
+            history[_routine_key(entry)] = entry["followup_id"]
+    entries = []
+    for item in plan.items:
+        if item.status != "needed":
+            continue
+        encoded = item.model_dump(mode="json")
+        entry = dict(kind=item.check.kind, astronaut_id=item.check.astronaut_id,
+                     window_start=encoded["window_start"], due_at=encoded["due_at"])
+        previous_id = history.get(_routine_key(entry))
+        followup = session.get(Followup, previous_id) if previous_id is not None else None
+        if followup is None:
+            followup = _pending_target(session, item.check.kind, item.check.astronaut_id)
+        reused = followup is not None
+        if followup is None:
+            followup = Followup(
+                investigation_id=row.id, astronaut_id=item.check.astronaut_id, kind=item.check.kind,
+                reason=f"Rotina demonstrativa: {item.check.reason} Referência: {item.check.reference}.",
+                created_at=row.created_at, due_at=item.due_at,
+            )
+            session.add(followup)
+            session.flush()
+        entries.append({**entry, "followup_id": followup.id, "reused": reused,
+                        "resolution": "already_completed" if followup.status == "completed" else (
+                            "reused_pending" if reused else "created"
+                        )})
+    return {"plan": plan.model_dump(mode="json"), "followups": entries}
 
 
 def _compose_result(row: Investigation, detection, selection, followup_id: int | None) -> InvestigationResult:
@@ -195,10 +262,7 @@ def run_investigation(
             followup = None
             if selection.next_check is not None:
                 check = selection.next_check
-                followup = session.exec(select(Followup).where(
-                    Followup.status == "pending", Followup.kind == check.kind,
-                    Followup.astronaut_id == check.astronaut_id,
-                ).order_by(Followup.id)).first()
+                followup = _pending_target(session, check.kind, check.astronaut_id)
                 if followup is None:
                     followup = Followup(
                         investigation_id=row.id, astronaut_id=check.astronaut_id, kind=check.kind,
@@ -207,7 +271,11 @@ def run_investigation(
                     session.add(followup)
                     session.flush()
             response = _compose_result(row, detection, selection, followup.id if followup else None)
-            row.result_json = _encode_document(response, snapshot, settings, detection, selection)
+            routine_audit = None
+            if settings.routine.checks:
+                plan = plan_routine(snapshot, settings.routine, settings.resources, settings.protocol)
+                routine_audit = _persist_routine(session, row, plan)
+            row.result_json = _encode_document(response, snapshot, settings, detection, selection, routine_audit)
             session.add(row)
         return response
     except HTTPException:

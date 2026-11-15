@@ -9,8 +9,9 @@ from sqlalchemy.orm import aliased
 from sqlmodel import Session, select
 
 from .alerts import alert_legend
+from .agenda import pending_followups
 from .investigations import stored_document
-from .models import Astronaut, Followup, Investigation, Measurement
+from .models import Astronaut, Investigation, Measurement
 from .schemas import (
     AstronautDashboardRead,
     DashboardResponse,
@@ -130,9 +131,7 @@ def build_dashboard(session: Session) -> DashboardResponse:
         alerts=alerts,
         pending_followups=[
             FollowupRead.model_validate(followup, from_attributes=True)
-            for followup in session.exec(
-                select(Followup).where(Followup.status == "pending").order_by(Followup.id)
-            )
+            for followup in pending_followups(session)
         ],
         last_investigation_at=last_investigation_at,
         has_unanalyzed_measurements=has_unanalyzed,
