@@ -1,0 +1,40 @@
+/* Floating guided-demo panel. It sits above the page without covering the header. */
+.tour {
+  position: fixed;
+  right: clamp(0.75rem, 2vw, 1.5rem);
+  bottom: clamp(0.75rem, 2vw, 1.5rem);
+  z-index: 60;
+  width: min(25rem, calc(100vw - 1.5rem));
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--info-border);
+  border-radius: var(--radius-card);
+  background: rgb(6 10 24 / 94%);
+  box-shadow: 0 18px 50px rgb(0 0 0 / 55%);
+  backdrop-filter: blur(12px);
+  color: var(--text);
+}
+.tour-progress { margin: 0; color: var(--text-muted); font-size: var(--text-caption); }
+.tour-title { margin: var(--space-1) 0 var(--space-2); font-size: var(--text-section); line-height: 1.25; }
+.tour-text { margin: 0; color: #d4dbea; font-size: var(--text-small); line-height: 1.55; }
+.tour-where { margin: var(--space-3) 0 0; font-size: var(--text-small); }
+.tour-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-4); }
+.tour-actions button {
+  min-height: 2.5rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--border-strong, var(--border));
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+.tour-actions .tour-primary { border-color: var(--action); background: var(--action); color: #fff; font-weight: 600; }
+.tour-actions .tour-quiet { margin-left: auto; border-color: transparent; color: var(--text-muted); }
+
+/* Leave room so the panel never hides the end of the page. */
+html[data-tour] .footer { margin-bottom: 15rem; }
+
+@media (max-width: 520px) {
+  .tour { right: 0.75rem; left: 0.75rem; width: auto; }
+  html[data-tour] .footer { margin-bottom: 19rem; }
+}

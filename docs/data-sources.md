@@ -89,6 +89,12 @@ The catalog links [NASA HRP hazards](https://www.nasa.gov/hrp/hazards/), [risks]
 
 ## Attribution and reuse terms
 
+Required acknowledgments, shown in the application footer and on the NASA references panel (wording from the [OSDR FAQ](https://science.nasa.gov/reference/osdr-faq)):
+
+- "Data are courtesy of the NASA Open Science Data Repository (https://osdr.nasa.gov/bio/repo)".
+- "Data and visualizations are courtesy of the Environmental Data Application (EDA) (https://visualization.osdr.nasa.gov/eda/)". The OSDR asks for the tool version number; this excerpt was accessed on 15 November 2026 and the version was not recorded, so the access date stands in for it.
+- The application is not affiliated with, endorsed by or sponsored by NASA, and uses no NASA insignia, logotype or mission identifiers.
+
 Credit NASA OSDR EDA, RR-1, the exact telemetry URL, observation interval, transformation and access/audit date when reusing this excerpt. [OSDR redistribution terms](https://science.nasa.gov/reference/osdr-help-terms-and-conditions/#data-redistribution) refer to NASA policy and request source attribution.
 
 The [NASA Science Data Licenses policy](https://science.data.nasa.gov/about/license), consulted for AKM-31 on 15 November 2026, describes CC0 for NASA-led mission data unless a restrictive notice applies. The prior AKM-38/39 audit found no separate restrictive notice in the consulted export/API response. This repository relies on that documented interpretation for the credited excerpt; it does not relabel every NASA web page, image, logo or third-party contribution as CC0. Review source-specific notices when changing artifacts. See [third-party notices](third-party-notices.md).

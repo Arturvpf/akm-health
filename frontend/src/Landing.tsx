@@ -4,6 +4,7 @@ import { useSelectedEnvironment } from './EnvironmentView';
 import { PlanetScene } from './PlanetScene';
 import { SAMPLE_HABITAT, SAMPLE_PROFILES } from './scenario-data';
 import { pageHref } from './navigation';
+import { startTour } from './GuidedTour';
 
 const WHAT_IT_DOES = [
   {
@@ -17,6 +18,29 @@ const WHAT_IT_DOES = [
   {
     title: 'Sits next to NASA data',
     text: 'A day of real ISS cabin telemetry and three NASA research references are shown beside the simulated crew. They give context only and never feed the rules.',
+  },
+];
+
+const HAZARDS = [
+  {
+    title: 'Radiation',
+    text: 'Daily ISS cabin radiation from NASA experiment RR-1 sits next to the simulated mission as historical context. It never feeds the rules.',
+    href: pageHref('dashboard'), link: 'See the NASA references',
+  },
+  {
+    title: 'Isolation and confinement',
+    text: 'Sleep and well-being are recorded for every crew member. When the same drop shows up across the crew, the investigation reports it as a shared pattern.',
+    href: pageHref('register'), link: 'Record a reading',
+  },
+  {
+    title: 'Altered gravity',
+    text: 'Mars (0.38 g), the Moon (0.165 g) and low Earth orbit are available as mission settings, with NASA reference values. They change the context shown, not any reading.',
+    href: pageHref('environments'), link: 'Compare mission settings',
+  },
+  {
+    title: 'Hostile and closed environments',
+    text: 'Cabin CO₂ and temperature are tracked as readings of their own, and the ISS CO₂ range from RR-1 shows what a real closed cabin looked like.',
+    href: pageHref('history'), link: 'Review recorded readings',
   },
 ];
 
@@ -101,7 +125,7 @@ export function Landing() {
           <p className="lp-lead">AKM Health records crew readings and cabin conditions, looks for patterns when you ask it to, and tells you which reading to take next to confirm or rule them out.</p>
           <div className="lp-cta-row">
             <Cta href={pageHref('dashboard')} variant="primary">Open the dashboard</Cta>
-            <Cta href={pageHref('investigation')}>Run an investigation</Cta>
+            <button type="button" className="ds-action ds-action-secondary lp-cta" onClick={startTour}>Take the 2-minute tour</button>
             <button type="button" className="lp-link-button"
               onClick={() => method.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>How it works</button>
           </div>
@@ -130,6 +154,20 @@ export function Landing() {
             <article key={item.title} className="lp-column">
               <h3>{item.title}</h3>
               <p>{item.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="lp-section" aria-labelledby="lp-hazards">
+        <h2 id="lp-hazards" className="lp-h2">Built around the hazards of long missions</h2>
+        <p className="lp-sub">The challenge describes four hazards that make long missions hard on health. This is where each one shows up in the app. NASA's Human Research Program lists <a href="https://www.nasa.gov/hrp/hazards/">the full set of spaceflight hazards</a>.</p>
+        <div className="lp-columns lp-columns-four">
+          {HAZARDS.map(item => (
+            <article key={item.title} className="lp-column">
+              <h3>{item.title}</h3>
+              <p>{item.text}</p>
+              <p className="lp-column-link"><a href={item.href}>{item.link}</a></p>
             </article>
           ))}
         </div>

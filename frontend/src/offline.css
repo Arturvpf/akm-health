@@ -1,2 +1,11 @@
 .offline-banner{background:rgb(56 189 248 / 12%);border-bottom:1px solid var(--info-border);padding:.7rem clamp(1.25rem,4vw,2.75rem);color:var(--info-text);font-size:.88rem}
 .offline-banner button{font:inherit;background:transparent;border:1px solid var(--info-border);border-radius:.5rem;padding:.4rem .8rem;color:var(--text);min-height:2.5rem;cursor:pointer}
+
+.offline-hint { color: var(--text-muted); }
+.offline-banner .offline-restore { border-color: var(--caution-border); }
+
+.offline-banner.is-lost { background: var(--caution-surface); border-bottom-color: var(--caution-border); color: var(--caution-text); }
+.offline-banner.is-lost .offline-hint { color: inherit; }
+.offline-banner.is-lost button { border-color: var(--caution-border); }
+
+.offline-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }

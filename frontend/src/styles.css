@@ -322,6 +322,12 @@ option { background: var(--surface-solid); color: var(--text); }
   background: rgb(4 6 13 / 60%);
 }
 
+.footer-credit {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+}
 .footer-status { display: inline-flex; align-items: center; gap: var(--space-2); }
 .footer-status::before { content: ""; width: 0.55rem; height: 0.55rem; border-radius: 50%; background: #34d399; }
 

@@ -10,6 +10,7 @@ import { SelfCareJourney } from './SelfCareJourney';
 import { OfflineStatus } from './OfflineStatus';
 import { Landing } from './Landing';
 import { SceneBackground } from './SceneBackground';
+import { GuidedTour } from './GuidedTour';
 import { ActionLink, Card, SimulationNotice } from './design-system';
 
 type Section = {
@@ -170,9 +171,15 @@ export function App() {
         <footer className="footer">
           <span>AKM Health — Space Health Monitoring · NASA Space Apps Challenge 2026</span>
           <span className="footer-status">Simulated mission · not a medical device</span>
+          <p className="footer-credit">
+            An independent project by The Bug Bang Theory for the NASA Space Apps Challenge. It is not affiliated with,
+            endorsed by or sponsored by NASA. NASA data are courtesy of
+            the <a href="https://osdr.nasa.gov/bio/repo">NASA Open Science Data Repository</a>.
+          </p>
         </footer>
       </div>
     </div>
+    <GuidedTour />
     </>
   );
 }

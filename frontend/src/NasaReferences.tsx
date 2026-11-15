@@ -264,6 +264,12 @@ export function NasaReferences({ mission, environment }: {
         <Co2ContextPanel context={state.co2_context} status={state.co2_context_status}
           current={environment ? { value: environment.co2_ppm, measured_at: environment.measured_at } : undefined} />
       </>}
+      <p className="nasa-credit">
+        Data are courtesy of the <a href="https://osdr.nasa.gov/bio/repo">NASA Open Science Data Repository</a>.
+        Data and visualizations for the ISS radiation and CO₂ context are courtesy of
+        the <a href="https://visualization.osdr.nasa.gov/eda/">Environmental Data Application (EDA)</a>,
+        mission RR-1. This project is not affiliated with or endorsed by NASA.
+      </p>
     </Card>
   </div>;
 }
