@@ -48,6 +48,8 @@ python scripts/check.py
 
 The command runs Ruff, Pytest and the TypeScript type check. Run it before opening a PR and include its result in the PR description.
 
+[AKM-29 investigation engine validation](docs/akm-29-investigation-engine-validation.md) links the rules and acceptance cases to automated tests and shows how to reproduce the synthetic HTTP flow.
+
 The API, tests, and type checking run locally after dependency installation. The interactive Swagger UI currently loads assets from a CDN. The health endpoint and JSON OpenAPI schema are served locally.
 
 To apply the SQLite schema separately, run `python -m app.db` with `backend/` as the working directory. See the [database notes](docs/database.md) for schema versioning and cases that require review.
@@ -77,3 +79,5 @@ Start a topic branch from `main`. Group commits by deliverable and open a PR wit
 [AKM-24 alert presentation](docs/akm-24-alert-presentation.md) describes status labels, icons, colors and the reserved red legend (`python scripts/demo_alerts.py`).
 
 [AKM-23 next check](docs/akm-23-next-check.md) documents explainable scoring, resource availability, protocol priority and feasible alternatives (`python scripts/demo_next_check.py`).
+
+[AKM-26 investigation explanation](docs/akm-26-investigation-explanation.md) documents the API fields for coverage, reference links, uncertainty and human review, with a reproducible synthetic example.

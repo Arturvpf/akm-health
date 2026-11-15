@@ -1,7 +1,7 @@
 """AKM-20: real SQLite transactions, immutable results and follow-up completion."""
 
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 import json
 
 from fastapi.testclient import TestClient
@@ -9,26 +9,19 @@ import pytest
 from sqlalchemy import func
 from sqlmodel import Session, select
 
-from app import investigations, models
+from app import investigations, next_check
 from app.main import app
 from app.models import Astronaut, Followup, Investigation, Measurement
+from app.next_check import ValidatedProtocol
 from app.seed import seed
 
 
 @pytest.fixture
-def client(tmp_path, monkeypatch):
+def client(tmp_path, monkeypatch, investigation_clock):
     monkeypatch.setenv("AKM_DB_PATH", str(tmp_path / "investigations.db"))
-    clock = [datetime(2026, 11, 14, 8, tzinfo=timezone.utc)]
-    monkeypatch.setattr(investigations, "utc_now", lambda: clock[0])
-
-    class Clock(datetime):
-        @classmethod
-        def now(cls, tz=None):
-            return clock[0].astimezone(tz) if tz else clock[0].replace(tzinfo=None)
-
-    monkeypatch.setattr(models, "datetime", Clock)
+    monkeypatch.delenv("AKM_INVESTIGATION_CONFIG", raising=False)
     with TestClient(app) as client:
-        client.clock = clock
+        client.clock = investigation_clock
         yield client
 
 
@@ -76,12 +69,25 @@ def test_roundtrip_preserves_canonical_result_and_audit(seeded):
     assert result["guidance"] == [] and result["demo_only"] is True
     assert result["hypotheses"] and all(item["certainty"] == "unconfirmed" for item in result["hypotheses"])
     assert {item["kind"] for item in result["evidence"]} == {"sleep_hours", "co2_ppm", "cabin_temp_c"}
+    explanation = result["explanation"]
+    assert explanation["coverage"]["evaluated_astronaut_ids"] == ["A1", "A2", "A3", "A4"]
+    assert explanation["coverage"]["window_end"] == result["created_at"]
+    assert explanation["check_context"] == {"status": "selected", "reason": result["next_check"]["reason"]}
+    assert "coincidência não estabelece causalidade" in explanation["uncertainty"]
+    references = {item["source_id"]: item for item in explanation["references"]}
+    assert references.keys() == {"AKM-ARCH", "HRR-100", "AKM-08", "NASA-CO2"}
+    assert all(item["url"].startswith("https://") and item["relevance"] for item in references.values())
+    assert explanation["limitations"]
+    review = explanation["human_review"]
+    assert review["mode"] == "conditional"
+    assert "persistir após a rechecagem" in review["instruction"]
+    assert "sem aguardar reanálise" in review["instruction"]
     assert seeded.get(f'/api/investigations/{result["id"]}').json() == result
     with Session(app.state.engine) as session:
         row = session.get(Investigation, result["id"])
         document = json.loads(row.result_json)
         assert document["schema_version"] == 1
-        assert document["response"] == result
+        assert document["response"] == {key: value for key, value in result.items() if key != "explanation"}
         audit = document["audit"]
         assert audit["settings"]["rules_version"] == result["rules_version"]
         assert len(audit["snapshot"]["astronauts"]) == 4
@@ -105,10 +111,17 @@ def test_new_input_changes_fingerprint_but_reuses_pending_target(seeded):
     first = run(seeded)
     seeded.clock[0] += timedelta(minutes=1)
     measure(seeded)
+    dashboard = seeded.get("/api/dashboard").json()
+    assert dashboard["has_unanalyzed_measurements"] is True
+    assert dashboard["last_investigation_at"] == first["created_at"]
+    assert counts() == (1, 1)
     second = run(seeded)
     assert second["input_fingerprint"] != first["input_fingerprint"]
     assert second["followup_id"] == first["followup_id"]
     assert second["reused"] is False
+    dashboard = seeded.get("/api/dashboard").json()
+    assert dashboard["has_unanalyzed_measurements"] is False
+    assert [item["id"] for item in dashboard["pending_followups"]] == [first["followup_id"]]
     assert counts() == (2, 1)
 
 
@@ -133,6 +146,8 @@ def test_fingerprint_tracks_baseline_version_settings_and_canonical_catalog_orde
     assert unavailable["next_check"] is None and unavailable["followup_id"] is None
     assert unavailable["status"] == "attention"
     assert any("disponível" in item for item in unavailable["findings"])
+    assert unavailable["explanation"]["check_context"]["status"] == "unavailable"
+    assert unavailable["explanation"]["human_review"]["mode"] == "conditional"
     assert unavailable["input_fingerprint"] != first["input_fingerprint"]
 
 
@@ -141,7 +156,11 @@ def test_individual_scope_does_not_depend_on_other_profiles(seeded):
     seeded.clock[0] += timedelta(minutes=1)
     measure(seeded, kind="sleep_hours", subject="A2")
     assert run(seeded, "A1")["id"] == original["id"]
-    assert run(seeded, "A4")["status"] == "normal"
+    normal = run(seeded, "A4")
+    assert normal["status"] == "normal"
+    assert normal["explanation"]["check_context"]["status"] == "no_check_needed"
+    assert normal["explanation"]["coverage"]["evaluated_astronaut_ids"] == ["A4"]
+    assert "NASA-CO2" not in {item["source_id"] for item in normal["explanation"]["references"]}
 
 
 @pytest.mark.parametrize("body", [
@@ -163,7 +182,7 @@ def test_missing_resources_and_invalid_identifiers(client):
     for id in (0, -1, 2**63, "invalid"):
         assert client.get(f"/api/investigations/{id}").status_code == 422
         assert finish(client, id, 1).status_code == 422
-    for body in ({"status": "completed"}, {"status": "pending", "measurement_id": 1},
+    for body in ({"status": "pending", "measurement_id": 1},
                  {"status": "completed", "measurement_id": True},
                  {"status": "completed", "measurement_id": 2**63}):
         assert client.patch("/api/followups/1", json=body).status_code == 422
@@ -174,12 +193,73 @@ def test_empty_crew_has_no_invented_check_and_empty_profile_gets_data_gap(client
     assert empty["status"] == "insufficient_data"
     assert empty["next_check"] is empty["followup_id"] is None
     assert empty["evidence"] == []
+    assert "insuficiente" in empty["explanation"]["uncertainty"]
+    assert empty["explanation"]["coverage"]["evaluated_astronaut_ids"] == []
+    assert empty["explanation"]["check_context"]["status"] == "needs_context"
     with Session(app.state.engine) as session:
         session.add(Astronaut(id="A1", name="Demo", baseline_sleep_hours=8))
         session.commit()
     gap = run(client, "A1")
     assert gap["status"] == "insufficient_data"
     assert gap["next_check"]["kind"] == "sleep_hours"
+    assert gap["explanation"]["check_context"]["status"] == "selected"
+
+
+def test_crew_explains_missing_usable_co2_without_claiming_coincidence(seeded):
+    with Session(app.state.engine) as session:
+        for row in session.exec(select(Measurement).where(Measurement.kind == "co2_ppm")):
+            row.quality = "suspect"
+            session.add(row)
+        session.commit()
+    result = run(seeded)
+    assert result["status"] == "attention"
+    assert all("CO₂" not in item["label"] for item in result["hypotheses"])
+    assert "Faltam leituras ambientais utilizáveis" in result["explanation"]["uncertainty"]
+    assert result["next_check"]["kind"] == "co2_ppm"
+
+
+def test_protocol_human_referral_requires_no_measurement_or_critical_state(seeded):
+    settings = app.state.investigation_settings
+    protocol = ValidatedProtocol(reference="demo/protocolo-revisado", validated=True, action="human_review")
+    app.state.investigation_settings = settings.model_copy(update={"protocol": protocol})
+    result = run(seeded)
+    assert result["status"] == "attention"
+    assert result["next_check"] is result["followup_id"] is None
+    assert result["explanation"]["check_context"]["status"] == "protocol_referral"
+    review = result["explanation"]["human_review"]
+    assert review["mode"] == "per_protocol" and review["protocol_reference"] == protocol.reference
+    assert "sem aguardar nova coleta" in review["instruction"]
+    assert counts() == (1, 0)
+
+
+@pytest.mark.parametrize("legacy_shape", ["audit", "flat", "incomplete_audit"])
+def test_legacy_results_keep_identity_and_only_restore_supported_explanation(seeded, legacy_shape):
+    original = run(seeded)
+    with Session(app.state.engine) as session:
+        row = session.get(Investigation, original["id"])
+        document = json.loads(row.result_json)
+        if legacy_shape == "flat":
+            document = document["response"]
+        elif legacy_shape == "incomplete_audit":
+            document["audit"]["detection"] = {}
+            document["audit"]["selection"]["rules_version"] = "wrong-version"
+        legacy_json = json.dumps(document)
+        row.result_json = legacy_json
+        session.commit()
+
+    recovered = seeded.get(f'/api/investigations/{original["id"]}').json()
+    explanation = recovered["explanation"]
+    assert recovered == {**original, "explanation": explanation}
+    assert run(seeded) == {**recovered, "reused": True}
+    if legacy_shape == "audit":
+        assert explanation == original["explanation"]
+    else:
+        assert explanation["coverage"] is explanation["check_context"] is None
+        assert explanation["human_review"]["mode"] == "conditional"
+        assert "causa do padrão de sono permanece em aberto" in explanation["uncertainty"]
+    with Session(app.state.engine) as session:
+        assert session.get(Investigation, original["id"]).result_json == legacy_json
+    assert counts() == (1, 1)
 
 
 def test_atomic_rollback_does_not_leak_partial_rows_or_input(seeded, monkeypatch, caplog):
@@ -213,10 +293,13 @@ def test_completion_is_persisted_idempotent_and_original_analysis_is_immutable(s
     measurement = measure(seeded)
     first = finish(seeded, result["followup_id"], measurement["id"])
     assert first.status_code == 200, first.text
-    assert first.json()["completed_at"] is not None
-    assert first.json()["status"] == "completed"
+    completion = first.json()
+    assert completion["completed_at"] is not None
+    assert completion["status"] == "completed"
+    assert completion["measurement_id"] == measurement["id"]
+    assert seeded.get("/api/followups", params={"status": "completed"}).json() == [completion]
     seeded.clock[0] += timedelta(minutes=1)
-    assert finish(seeded, result["followup_id"], measurement["id"]).json() == first.json()
+    assert finish(seeded, result["followup_id"], measurement["id"]).json() == completion
     other = measure(seeded)
     assert finish(seeded, result["followup_id"], other["id"]).status_code == 409
     assert seeded.get("/api/followups", params={"status": "pending"}).json() == []
@@ -227,12 +310,14 @@ def test_completion_is_persisted_idempotent_and_original_analysis_is_immutable(s
     assert counts() == (2, 2)
 
 
-@pytest.mark.parametrize("case", ["old", "equal", "suspect", "kind", "subject", "future", "missing"])
+@pytest.mark.parametrize("case", ["old", "equal", "suspect", "kind", "subject", "future", "missing", "unlinked"])
 def test_completion_rejects_unusable_or_incompatible_measurement(seeded, case):
     result = run(seeded)
     seeded.clock[0] += timedelta(minutes=1)
-    if case == "missing":
-        id = 99999
+    if case == "unlinked":
+        response = seeded.patch(f'/api/followups/{result["followup_id"]}', json={"status": "completed"})
+    elif case == "missing":
+        response = finish(seeded, result["followup_id"], 99999)
     else:
         measurement = measure(seeded,
             kind="sleep_hours" if case == "subject" else ("cabin_temp_c" if case == "kind" else "co2_ppm"),
@@ -247,9 +332,11 @@ def test_completion_rejects_unusable_or_incompatible_measurement(seeded, case):
                 row.recorded_at = seeded.clock[0] - timedelta(minutes=1, seconds=1 if case == "old" else 0)
                 session.add(row)
                 session.commit()
-    assert finish(seeded, result["followup_id"], id).status_code == (404 if case == "missing" else 422)
-    pending = seeded.get("/api/followups", params={"status": "pending"}).json()
-    assert len(pending) == 1 and pending[0]["measurement_id"] is pending[0]["completed_at"] is None
+        response = finish(seeded, result["followup_id"], id)
+    assert response.status_code == (404 if case == "missing" else 422), response.text
+    pending, = seeded.get("/api/followups", params={"status": "pending"}).json()
+    assert pending["id"] == result["followup_id"]
+    assert pending["measurement_id"] is pending["completed_at"] is None
 
 
 def test_individual_completion_requires_same_astronaut(client):
@@ -464,3 +551,37 @@ def test_configuration_is_validated_and_missing_catalog_does_not_assume_availabi
     config.write_text(json.dumps({"rules_version": "demo-v1"}))
     with pytest.raises(ValueError):
         investigations.load_settings()
+
+
+def test_validated_protocol_controls_the_persisted_next_check(seeded):
+    settings = app.state.investigation_settings
+    pulse = next_check.CheckTarget(kind="heart_rate_bpm", astronaut_id="A1")
+    resource = next_check.CheckResource(
+        kind=pulse.kind, astronaut_id=pulse.astronaut_id, available=True, effort="high",
+    )
+    settings = settings.model_copy(update={"resources": settings.resources + (resource,)})
+    app.state.investigation_settings = settings
+    original = run(seeded)
+    assert original["next_check"]["kind"] == "co2_ppm"
+
+    protocol = next_check.ValidatedProtocol(
+        reference="qa-fixture/protocol-reviewed", validated=True, action="measurement",
+        permitted_checks=(pulse, next_check.CheckTarget(kind="co2_ppm")),
+    )
+    app.state.investigation_settings = settings.model_copy(update={"protocol": protocol})
+
+    result = run(seeded)
+    assert result["status"] == original["status"] == "attention"
+    assert result["input_fingerprint"] != original["input_fingerprint"]
+    check = result["next_check"]
+    assert (check["kind"], check["astronaut_id"], check["effort"]) == ("heart_rate_bpm", "A1", "high")
+    assert protocol.reference in check["reason"]
+    assert result["followup_id"] != original["followup_id"]
+
+    pending = seeded.get("/api/followups", params={"status": "pending"}).json()
+    pulse_check = next(item for item in pending if item["id"] == result["followup_id"])
+    assert (pulse_check["kind"], pulse_check["astronaut_id"], pulse_check["reason"]) == (
+        check["kind"], check["astronaut_id"], check["reason"],
+    )
+    assert run(seeded) == {**result, "reused": True}
+    assert counts() == (2, 2)

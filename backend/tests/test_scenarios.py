@@ -1,14 +1,15 @@
-from datetime import timedelta
+"""Run the ODYSSEY-26 fixture variants through the real investigation API."""
+
+from datetime import datetime, timedelta
 import json
 from pathlib import Path
 
 from fastapi.testclient import TestClient
 import pytest
-from sqlmodel import Session, select
+from sqlmodel import Session
 
 from app.main import app
-from app.models import Astronaut, Investigation, Measurement
-from app.schemas import InvestigationRunRequest
+from app.models import Astronaut, Investigation
 from app.seed import NIGHT_1, NIGHT_2, PROFILES, observations
 
 
@@ -42,83 +43,114 @@ def scenario_observations(case):
 
 
 @pytest.fixture
-def client(tmp_path, monkeypatch):
+def client(tmp_path, monkeypatch, investigation_clock):
     monkeypatch.setenv("AKM_DB_PATH", str(tmp_path / "scenario.db"))
+    monkeypatch.delenv("AKM_INVESTIGATION_CONFIG", raising=False)
     with TestClient(app) as client:
         with Session(app.state.engine) as session, session.begin():
             session.add_all(Astronaut.model_validate(profile.model_dump()) for profile in PROFILES)
         yield client
 
 
-def register(client, case):
+def run_scenario(client, case):
     for payload in scenario_observations(case):
         response = client.post("/api/measurements", json=payload)
         assert response.status_code == 201, response.text
         assert response.json()["source"] == "synthetic"
 
+    response = client.post("/api/investigations/run", json={
+        "scope": case["scope"], "astronaut_id": case["astronaut_id"],
+    })
+    assert response.status_code == 200, response.text
+    result = response.json()
+    with Session(app.state.engine) as session:
+        row = session.get(Investigation, result["id"])
+        audit = json.loads(row.result_json)["audit"]
+    return result, audit
+
 
 @pytest.mark.parametrize("scenario", list(SCENARIOS))
-def test_scenario_inputs_support_expected_result(client, scenario):
-    # Verify the premises of each fixture while the investigation motor is pending.
+def test_scenario_investigation_and_dashboard(client, scenario):
     case = SCENARIOS[scenario]
     expected = case["expected"]
-    request = InvestigationRunRequest(scope=case["scope"], astronaut_id=case["astronaut_id"])
-    register(client, case)
-    with Session(app.state.engine) as session:
-        crew = session.exec(select(Astronaut).order_by(Astronaut.id)).all()
-        sleep = session.exec(
-            select(Measurement).where(Measurement.kind == "sleep_hours", Measurement.quality == "ok")
-            .order_by(Measurement.measured_at)
-        ).all()
-        co2 = session.exec(
-            select(Measurement).where(Measurement.kind == "co2_ppm", Measurement.quality == "ok")
-            .order_by(Measurement.measured_at)
-        ).all()
-        assert session.exec(select(Investigation.id)).all() == []
+    result, audit = run_scenario(client, case)
+    detection = audit["detection"]
 
-    comparable = {}
-    for astronaut in crew:
-        nights = {entry.measured_at: entry.value for entry in sleep if entry.astronaut_id == astronaut.id}
-        if nights.keys() == NIGHT_INDEX.keys():
-            comparable[astronaut.id] = (astronaut.baseline_sleep_hours, list(nights.values()))
-    affected = [
-        astronaut_id for astronaut_id, (baseline, nights) in comparable.items()
-        if all(value <= 0.8 * baseline for value in nights)
-    ]
-    assert affected == expected["affected_astronauts"]
-    if scenario == "collective":
-        assert request.scope == "crew" and len(affected) >= 2
-        assert expected["collective_pattern"] is True
-        assert [entry.value for entry in co2] == [680, 950, 980]
-        assert [entry.measured_at for entry in co2[1:]] == [
-            NIGHT_1 - timedelta(hours=2), NIGHT_2 - timedelta(hours=2),
-        ]
-        assert expected["environmental_hypothesis"] == "unconfirmed"
-        assert expected["next_check"] == {"kind": "co2_ppm", "astronaut_id": None}
-    elif scenario == "individual":
-        assert request.astronaut_id == "A1" and len(comparable) == 4
-        assert expected["collective_pattern"] is False
-        assert len(co2) == 3 and {entry.value for entry in co2} == {680}
-        assert expected["environmental_hypothesis"] is None
-        assert expected["next_check"] == {"kind": "sleep_hours", "astronaut_id": "A1"}
+    assert (result["scope"], result["astronaut_id"]) == (case["scope"], case["astronaut_id"])
+    assert result["status"] == expected["status"]
+    assert result["demo_only"] is True
+    assert result["reused"] is False
+    assert result["findings"]
+    assert any("Limitação:" in finding for finding in result["findings"])
+    assert set(item["quality"] for item in result["evidence"]) == {"ok"}
+    check = result["next_check"]
+    assert {key: check[key] for key in expected["next_check"]} == expected["next_check"]
+    assert check["reason"] and check["effort"] == "low"
+
+    individual_results = detection["individual_results"] if case["scope"] == "crew" else [detection]
+    statuses = {item["astronaut_id"]: item["status"] for item in individual_results}
+    assert [subject for subject, status in statuses.items() if status == "attention"] == expected["affected_astronauts"]
+    assert (result["scope"] == "crew" and result["status"] == "attention") == expected["collective_pattern"]
+
+    if expected["environmental_hypothesis"]:
+        coincident, alternative = result["hypotheses"]
+        assert "CO₂ interno" in coincident["label"]
+        assert coincident["certainty"] == alternative["certainty"] == expected["environmental_hypothesis"]
+        assert "não demonstram causalidade" in coincident["explanation"]
+        assert "alternativas" in alternative["label"]
+        assert "não distinguem" in alternative["explanation"]
+        comparison = next(item for item in detection["environment"] if item["kind"] == "co2_ppm")
+        assert comparison["baseline"]["value"] == 680
+        assert [item["value"] for item in comparison["aligned_readings"]] == [950, 980]
     else:
-        assert request.scope == "crew" and len(comparable) < 2
-        assert expected["status"] == "insufficient_data"
-        assert co2 == []
-        assert expected["next_check"]["astronaut_id"] not in comparable
+        assert result["hypotheses"] == []
+
+    response = client.get("/api/dashboard")
+    assert response.status_code == 200, response.text
+    dashboard = response.json()
+    assert dashboard["has_unanalyzed_measurements"] is (case["scope"] == "individual")
+    levels = {item["id"]: item["status"] for item in dashboard["astronauts"]}
+    assert {subject: levels[subject] for subject in statuses} == statuses
+    if scenario == "collective":
+        assert levels["A4"] == "normal"
+    if scenario == "insufficient":
+        assert [levels[subject] for subject in ("A2", "A3", "A4")] == ["insufficient_data"] * 3
+    alert, = dashboard["alerts"]
+    assert (alert["id"], alert["level"]) == (result["id"], result["status"])
+    followup, = dashboard["pending_followups"]
+    assert (followup["id"], followup["investigation_id"], followup["status"]) == (
+        result["followup_id"], result["id"], "pending",
+    )
+    assert (followup["kind"], followup["astronaut_id"]) == (check["kind"], check["astronaut_id"])
 
 
 @pytest.mark.parametrize("environment", ["suspect", "outside", "missing"])
-def test_environment_variants_have_no_usable_co2_in_demo_window(client, environment):
+def test_uncertain_environment_preserves_collective_sleep_and_limits_hypotheses(client, environment):
     case = SCENARIOS["collective"] | {"environment": environment}
-    register(client, case)
-    with Session(app.state.engine) as session:
-        sleep = session.exec(select(Measurement.id).where(Measurement.kind == "sleep_hours")).all()
-        usable_co2 = session.exec(select(Measurement.id).where(
-            Measurement.kind == "co2_ppm",
-            Measurement.quality == "ok",
-            Measurement.measured_at >= NIGHT_1 - timedelta(hours=12),
-            Measurement.measured_at <= NIGHT_2,
-        )).all()
-    assert len(sleep) == 8
-    assert usable_co2 == []
+    result, audit = run_scenario(client, case)
+    detection = audit["detection"]
+
+    raw_co2 = [row for row in audit["snapshot"]["measurements"] if row["kind"] == "co2_ppm"]
+    if environment == "missing":
+        assert raw_co2 == []
+    elif environment == "suspect":
+        assert len(raw_co2) == 4
+        assert {row["quality"] for row in raw_co2} == {"suspect"}
+    else:
+        assert len(raw_co2) == 4
+        assert any(row["quality"] == "ok" for row in raw_co2)
+        assert all(datetime.fromisoformat(row["measured_at"]) < NIGHT_1 - timedelta(days=1) for row in raw_co2)
+
+    assert result["status"] == "attention"
+    assert detection["affected_astronaut_ids"] == case["expected"]["affected_astronauts"]
+    assert "sleep_hours" in {item["kind"] for item in result["evidence"]}
+    assert "co2_ppm" not in {item["kind"] for item in result["evidence"]}
+    comparison = next(item for item in detection["environment"] if item["kind"] == "co2_ppm")
+    assert comparison["baseline"] is None
+    assert comparison["aligned_readings"] == []
+    alternative, = result["hypotheses"]
+    assert alternative["certainty"] == "unconfirmed" and "alternativas" in alternative["label"]
+    assert any("Qualidade suspeita" in finding for finding in result["findings"])
+    assert result["next_check"]["kind"] == "co2_ppm"
+    assert result["next_check"]["astronaut_id"] is None
+    assert "qualidade" in result["next_check"]["reason"]
