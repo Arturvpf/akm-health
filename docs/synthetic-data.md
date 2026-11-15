@@ -13,7 +13,7 @@ python -m app.seed
 
 Em um banco novo, a primeira execução adiciona **4 perfis e 29 medições**. A segunda adiciona zero. Use `AKM_DB_PATH` para escolher um banco separado. A migração é aplicada antes da carga. A transação consulta a combinação astronauta, tipo, horário de coleta e origem, com suporte a astronauta nulo. Registros existentes, inclusive medições manuais no mesmo horário, são preservados.
 
-O seed padrão mantém a rechecagem fora da carga inicial. Depois de criar um follow-up para CO₂ da cabine, execute `python -m app.seed --with-recheck`. Isso adiciona uma leitura simulada de 850 ppm às 15:00 UTC de 14/11/2026. O cadastro recebe o horário real da execução. Repetir a opção preserva a medição e seu horário de cadastro original. O roteiro pode usar o ID dessa medição para concluir o follow-up e reanalisar quando essas operações estiverem integradas.
+O seed padrão mantém a rechecagem fora da carga inicial. Depois de criar um follow-up para CO₂ da cabine, execute `python -m app.seed --with-recheck`. Isso adiciona uma leitura simulada de 850 ppm às 15:00 UTC de 14/11/2026. O cadastro recebe o horário real da execução. Repetir a opção preserva a medição e seu horário de cadastro original. O ID dessa medição pode concluir o follow-up antes da reanálise. O [roteiro HTTP da AKM-29](akm-29-investigation-engine-validation.md#reprodução) apresenta o fluxo em um banco isolado.
 
 ## Dicionário da amostra
 
@@ -47,4 +47,4 @@ O [arquivo de fixtures](../backend/tests/fixtures/odyssey-26-scenarios.json) rea
 | Dados insuficientes | A2, A3 e A4 têm apenas uma noite disponível e faltam leituras de CO₂. | `insufficient_data` na investigação coletiva. O desvio individual de A1 continua observável. Solicitar uma segunda noite de sono, usando A2 como exemplo de alvo na fixture. |
 | Ambiente incerto | Repetir o padrão coletivo com CO₂ suspeito, fora da janela temporal ou ausente. | Preservar a evidência de sono e indicar falta de suporte para a coincidência ambiental. Coletar ou conferir uma leitura comparável antes de inferir associação. |
 
-Da raiz, execute `python -m pytest -q backend/tests/test_scenarios.py`. Os testes registram os dados pela API em bancos temporários e conferem as premissas de cada cenário. Os resultados de investigação da tabela são expectativas para a AKM-29. A execução ponta a ponta com classificação e reanálise depende do motor e das rotas de investigação.
+Da raiz, execute `python -m pytest -q backend/tests/test_scenarios.py`. Os testes registram os dados pela API em bancos temporários, executam a investigação e conferem os resultados e as limitações. O [relatório da AKM-29](akm-29-investigation-engine-validation.md) inclui as variantes de sensores, a matriz de cobertura e a reprodução do ciclo de follow-up.
