@@ -268,6 +268,23 @@ try {
   assert.equal(investigationWrites, 3);
   passed('T12/T14/T15 NASA separation; all routes at 320/1280 with external network blocked');
 
+  // Exploratory P1/P2 pages ship in the same build; hold them to the same automated bar.
+  const exploratory = { comparador: 'Hypothetical scenario comparator', ambientes: 'Mission environments',
+    corpo: 'Interactive body map', autocuidado: 'Self-care journey' };
+  for (const [route, heading] of Object.entries(exploratory)) {
+    await page.goto('http://127.0.0.1:' + previewPort + '/#/' + route, { waitUntil: 'domcontentloaded' });
+    await page.getByRole('heading', { level: 1, name: heading, exact: true }).waitFor({ state: 'attached' });
+    await page.waitForLoadState('networkidle');
+    for (const width of [1280, 320]) {
+      await page.setViewportSize({ width, height: 900 });
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), route + ' overflow at ' + width);
+      await audit(route + ' ' + width);
+    }
+  }
+  await page.setViewportSize({ width: 1280, height: 900 });
+  assert.equal(investigationWrites, 3);
+  passed('T14/T15 exploratory pages at 320/1280 with external network blocked');
+
   await go('dashboard');
   await page.getByRole('combobox', { name: 'Historical indicator', exact: true }).waitFor();
   await page.route('**/api/nasa/references', route => route.fulfill({ status: 503, body: '{}' }));
