@@ -79,64 +79,46 @@ export function BodyExplorer() {
           <svg className="body-silhouette" viewBox="0 0 300 460" role="img" focusable="false"
             aria-label="Schematic front view of a human body. Use the buttons to select a region.">
             <defs>
-              <linearGradient id="body-fill" gradientUnits="userSpaceOnUse" x1="50" y1="30" x2="250" y2="440">
-                <stop offset="0" stopColor="#c9d6ff" /><stop offset="0.45" stopColor="#8d9cf0" /><stop offset="1" stopColor="#4b52b8" />
+              <linearGradient id="body-fill" gradientUnits="userSpaceOnUse" x1="80" y1="20" x2="220" y2="440">
+                <stop offset="0" stopColor="#c3cffc" /><stop offset="1" stopColor="#7f8fe8" />
               </linearGradient>
-              <linearGradient id="body-shade" gradientUnits="userSpaceOnUse" x1="60" y1="0" x2="240" y2="0">
-                <stop offset="0" stopColor="#1a1f5c" stopOpacity="0.38" /><stop offset="0.35" stopColor="#fff" stopOpacity="0" />
-                <stop offset="0.65" stopColor="#fff" stopOpacity="0" /><stop offset="1" stopColor="#1a1f5c" stopOpacity="0.38" />
-              </linearGradient>
-              <radialGradient id="body-aura"><stop offset="0" stopColor="#8d9cf0" stopOpacity="0.32" /><stop offset="1" stopColor="#8d9cf0" stopOpacity="0" /></radialGradient>
-              <radialGradient id="floor-glow"><stop offset="0" stopColor="#67e8f9" stopOpacity="0.3" /><stop offset="1" stopColor="#67e8f9" stopOpacity="0" /></radialGradient>
+              <radialGradient id="floor-glow"><stop offset="0" stopColor="#67e8f9" stopOpacity="0.26" /><stop offset="1" stopColor="#67e8f9" stopOpacity="0" /></radialGradient>
               <filter id="soft-glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3.5" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
             </defs>
-            <ellipse cx="150" cy="230" rx="140" ry="215" fill="url(#body-aura)" />
-            <g fill="#e8efff" opacity="0.75">
+            <g fill="#e8efff" opacity="0.7">
               <circle cx="30" cy="110" r="1.2" /><circle cx="270" cy="70" r="1.5" /><circle cx="282" cy="250" r="1" />
               <circle cx="20" cy="290" r="1.4" /><circle cx="268" cy="360" r="1.1" /><circle cx="36" cy="400" r="1" />
             </g>
-            <ellipse cx="150" cy="448" rx="80" ry="9" fill="url(#floor-glow)" />
+            <ellipse cx="150" cy="446" rx="70" ry="8" fill="url(#floor-glow)" />
             <g fill="none" strokeLinecap="round" strokeLinejoin="round">
-              <g stroke="#6f7fe0" strokeOpacity="0.9">
-                <path d="M100 132 Q82 164 78 210" strokeWidth="25" /><path d="M78 210 Q72 250 68 286" strokeWidth="20" />
-                <path d="M200 132 Q218 164 222 210" strokeWidth="25" /><path d="M222 210 Q228 250 232 286" strokeWidth="20" />
-                <path d="M134 304 Q132 340 133 374" strokeWidth="34" /><path d="M133 374 Q131 404 130 430" strokeWidth="25" />
-                <path d="M166 304 Q168 340 167 374" strokeWidth="34" /><path d="M167 374 Q169 404 170 430" strokeWidth="25" />
+              <g stroke="#5b66c9">
+                <path d="M112 114 Q96 150 92 190" strokeWidth="19" /><path d="M92 190 Q88 228 84 262" strokeWidth="15" />
+                <path d="M188 114 Q204 150 208 190" strokeWidth="19" /><path d="M208 190 Q212 228 216 262" strokeWidth="15" />
+                <path d="M134 276 L133 360" strokeWidth="29" /><path d="M133 360 L132 424" strokeWidth="21" />
+                <path d="M166 276 L167 360" strokeWidth="29" /><path d="M167 360 L168 424" strokeWidth="21" />
               </g>
               <g stroke="url(#body-fill)">
-                <path d="M100 132 Q82 164 78 210" strokeWidth="22" /><path d="M78 210 Q72 250 68 286" strokeWidth="17" />
-                <path d="M200 132 Q218 164 222 210" strokeWidth="22" /><path d="M222 210 Q228 250 232 286" strokeWidth="17" />
-                <path d="M134 304 Q132 340 133 374" strokeWidth="31" /><path d="M133 374 Q131 404 130 430" strokeWidth="22" />
-                <path d="M166 304 Q168 340 167 374" strokeWidth="31" /><path d="M167 374 Q169 404 170 430" strokeWidth="22" />
+                <path d="M112 114 Q96 150 92 190" strokeWidth="16" /><path d="M92 190 Q88 228 84 262" strokeWidth="12" />
+                <path d="M188 114 Q204 150 208 190" strokeWidth="16" /><path d="M208 190 Q212 228 216 262" strokeWidth="12" />
+                <path d="M134 276 L133 360" strokeWidth="26" /><path d="M133 360 L132 424" strokeWidth="18" />
+                <path d="M166 276 L167 360" strokeWidth="26" /><path d="M167 360 L168 424" strokeWidth="18" />
               </g>
             </g>
-            <g fill="url(#body-fill)" stroke="#6f7fe0" strokeWidth="2.2" strokeLinejoin="round">
-              <ellipse cx="65" cy="300" rx="9" ry="15" transform="rotate(8 65 300)" /><ellipse cx="235" cy="300" rx="9" ry="15" transform="rotate(-8 235 300)" />
-              <path d="M112 436 Q104 454 124 454 Q146 454 142 440 L142 430 L114 430 Z" /><path d="M188 436 Q196 454 176 454 Q154 454 158 440 L158 430 L186 430 Z" />
-              <path d="M138 84 L138 110 L162 110 L162 84 Z" />
-              <path d="M138 104 C120 108 104 112 100 124 C96 146 102 176 106 200 C109 218 112 232 110 246 C108 262 104 276 106 296 C110 312 126 320 150 320 C174 320 190 312 194 296 C196 276 192 262 190 246 C188 232 191 218 194 200 C198 176 204 146 200 124 C196 112 180 108 162 104 Z" />
-              <path d="M150 24 C171 24 181 42 179 60 C177 79 167 94 150 94 C133 94 123 79 121 60 C119 42 129 24 150 24 Z" />
-              <ellipse cx="121" cy="62" rx="4" ry="9" /><ellipse cx="179" cy="62" rx="4" ry="9" />
+            <g fill="url(#body-fill)" stroke="#5b66c9" strokeWidth="1.8" strokeLinejoin="round">
+              <ellipse cx="82" cy="274" rx="7" ry="12" transform="rotate(6 82 274)" /><ellipse cx="218" cy="274" rx="7" ry="12" transform="rotate(-6 218 274)" />
+              <path d="M121 426 Q116 446 130 446 L145 446 Q147 432 143 426 Z" /><path d="M179 426 Q184 446 170 446 L155 446 Q153 432 157 426 Z" />
+              <rect x="142" y="76" width="16" height="26" rx="5" />
+              <path d="M142 98 C128 100 113 102 109 114 C105 132 109 162 114 190 C118 206 122 222 122 236 C121 250 116 262 116 278 C116 291 130 297 150 297 C170 297 184 291 184 278 C184 262 179 250 178 236 C178 222 182 206 186 190 C191 162 195 132 191 114 C187 102 172 100 158 98 Z" />
+              <ellipse cx="150" cy="52" rx="24" ry="29" />
             </g>
-            <path d="M138 104 C120 108 104 112 100 124 C96 146 102 176 106 200 C109 218 112 232 110 246 C108 262 104 276 106 296 C110 312 126 320 150 320 C174 320 190 312 194 296 C196 276 192 262 190 246 C188 232 191 218 194 200 C198 176 204 146 200 124 C196 112 180 108 162 104 Z" fill="url(#body-shade)" />
-            <path d="M150 24 C171 24 181 42 179 60 C177 79 167 94 150 94 C133 94 123 79 121 60 C119 42 129 24 150 24 Z" fill="url(#body-shade)" />
-            <path d="M123 52 C124 32 138 22 150 22 C164 22 177 32 177 52 C170 40 158 35 150 35 C140 35 130 40 123 52 Z" fill="#2a2f7a" opacity="0.85" />
-            <g fill="none" stroke="#fff" strokeOpacity="0.38" strokeWidth="1.8" strokeLinecap="round">
-              <path d="M140 110 Q128 118 114 122" /><path d="M160 110 Q172 118 186 122" />
-              <path d="M150 112 L150 150" strokeOpacity="0.18" /><path d="M150 316 Q149 380 150 436" stroke="#4b52b8" strokeOpacity="0.8" strokeWidth="2" />
-              <path d="M118 176 Q134 188 150 184 Q166 188 182 176" strokeOpacity="0.22" />
-              <path d="M126 250 Q150 262 174 250" strokeOpacity="0.2" /><circle cx="150" cy="232" r="1.6" />
-              <path d="M126 376 Q133 381 140 376" strokeOpacity="0.2" /><path d="M160 376 Q167 381 174 376" strokeOpacity="0.2" />
+            <path d="M150 297 L150 424" fill="none" stroke="#5b66c9" strokeOpacity="0.7" strokeWidth="1.6" />
+            <g className="body-heart" transform="translate(162 150)">
+              <path d="M0 -6 C-8 -15 -20 -3 0 13 C20 -3 8 -15 0 -6 Z" fill="#fb7185" stroke="#ffe4e6" strokeWidth="1" />
             </g>
-            <path d="M104 132 Q108 170 112 214" fill="none" stroke="#fff" strokeOpacity="0.28" strokeWidth="4" strokeLinecap="round" />
-            <g className="body-heart" transform="translate(163 170)">
-              <path d="M0 -7 C-9 -18 -24 -4 0 15 C24 -4 9 -18 0 -7 Z" fill="#fb7185" stroke="#ffe4e6" strokeWidth="1.2" filter="url(#soft-glow)" />
-            </g>
-            <path d="M104 190 L130 190 L136 182 L142 198 L149 186 L156 190 L196 190" fill="none" stroke="#67e8f9" strokeOpacity="0.55" strokeWidth="1.4" strokeLinejoin="round" />
-            <path d="M178 54 L231 46" stroke="#67e8f9" strokeOpacity="0.7" strokeWidth="1.6" strokeDasharray="3 3" fill="none" />
-            <path d="M178 170 L231 172" stroke="#67e8f9" strokeOpacity="0.7" strokeWidth="1.6" strokeDasharray="3 3" fill="none" />
-            {selected === 'head' && <ellipse className="body-pulse" cx="150" cy="59" rx="35" ry="42" fill="none" stroke="#67e8f9" strokeWidth="3.5" filter="url(#soft-glow)" />}
-            {selected === 'chest' && <path className="body-pulse" d="M108 124 Q150 112 192 124 Q196 160 192 204 Q150 214 108 204 Q104 160 108 124 Z" fill="none" stroke="#67e8f9" strokeWidth="3.5" strokeLinejoin="round" filter="url(#soft-glow)" />}
+            <path d="M174 48 L231 44" stroke="#67e8f9" strokeOpacity="0.7" strokeWidth="1.6" strokeDasharray="3 3" fill="none" />
+            <path d="M186 152 L231 152" stroke="#67e8f9" strokeOpacity="0.7" strokeWidth="1.6" strokeDasharray="3 3" fill="none" />
+            {selected === 'head' && <ellipse className="body-pulse" cx="150" cy="52" rx="31" ry="36" fill="none" stroke="#67e8f9" strokeWidth="3.5" filter="url(#soft-glow)" />}
+            {selected === 'chest' && <path className="body-pulse" d="M112 112 Q150 100 188 112 Q192 150 184 198 Q150 208 116 198 Q108 150 112 112 Z" fill="none" stroke="#67e8f9" strokeWidth="3.5" strokeLinejoin="round" filter="url(#soft-glow)" />}
           </svg>
           {(['head', 'chest'] as const).map((id, index) =>
             <button key={id} type="button" className={`body-point body-point-${id}`} aria-pressed={selected === id}

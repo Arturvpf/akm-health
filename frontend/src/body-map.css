@@ -18,8 +18,8 @@
 }
 .body-point:hover { transform: translate(-50%, -50%) scale(1.08); }
 .body-point[aria-pressed="true"], .body-tag[aria-pressed="true"] { background: #6d28d9; border-color: #c4b5fd; color: #fff; }
-.body-point-head { top: 10%; left: 83.5%; }
-.body-point-chest { top: 37.4%; left: 83.5%; }
+.body-point-head { top: 9.6%; left: 83.5%; }
+.body-point-chest { top: 33%; left: 83.5%; }
 .body-tag {
   position: absolute; display: inline-flex; align-items: center; gap: .35rem; min-height: var(--target-min); padding: 0 .75rem;
   border: 1px dashed #8da2d6; border-radius: var(--radius-pill); cursor: pointer; font: inherit; font-size: var(--text-small);
@@ -33,5 +33,5 @@
 @media (prefers-reduced-motion: reduce) { .body-pulse { animation: none; } .body-point { transition: none; } }
 
 .body-heart { transform-box: fill-box; transform-origin: center; animation: body-beat 1.4s ease-in-out infinite; }
-@keyframes body-beat { 0%, 100% { transform: translate(163px, 170px) scale(1); } 15% { transform: translate(163px, 170px) scale(1.18); } 30% { transform: translate(163px, 170px) scale(1); } 45% { transform: translate(163px, 170px) scale(1.1); } }
+@keyframes body-beat { 0%, 100% { transform: translate(162px, 150px) scale(1); } 15% { transform: translate(162px, 150px) scale(1.18); } 30% { transform: translate(162px, 150px) scale(1); } 45% { transform: translate(162px, 150px) scale(1.1); } }
 @media (prefers-reduced-motion: reduce) { .body-heart { animation: none; } }
