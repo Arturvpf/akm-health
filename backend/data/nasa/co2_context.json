@@ -1,0 +1,13 @@
+{
+  "mission_id": "RR-1",
+  "source": "NASA OSDR Environmental Data Application (EDA)",
+  "source_url": "https://visualization.osdr.nasa.gov/eda/",
+  "context": "Full-series ISS cabin CO₂ during NASA Rodent Research-1 (2014). Historical context, not a safety limit or an acceptable range.",
+  "period_start": "2014-09-20",
+  "period_end": "2014-11-01",
+  "sample_count": 12087,
+  "mean_ppm": 3197.27,
+  "median_ppm": 3192.0,
+  "min_ppm": 1862.0,
+  "max_ppm": 4667.0
+}

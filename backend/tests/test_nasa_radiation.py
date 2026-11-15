@@ -40,6 +40,13 @@ def telemetry_csv(values) -> bytes:
     return ("\n".join(lines) + "\n").encode()
 
 
+def test_importer_accepts_the_date_column_name_used_by_the_real_nasa_export():
+    """The EDA radiation export names its date column "Data", not "Date"."""
+    original = radiation_csv().replace(b"Date,", b"Data,", 1)
+    document = importer.build_radiation(original, expected_sha256=hashlib.sha256(original).hexdigest())
+    assert len(document["days"]) == 39 and document["days"][0]["date"] == "2014-09-21"
+
+
 def test_importer_refuses_an_export_with_a_different_hash():
     with pytest.raises(importer.ImportError_, match="hash differs"):
         importer.build_radiation(radiation_csv())

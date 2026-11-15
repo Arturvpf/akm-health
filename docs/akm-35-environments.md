@@ -5,7 +5,7 @@ Page: `#/environments`. Four **hypothetical** environments are selected through 
 | Environment | Reference gravity | Context |
 |---|---|---|
 | Mars surface | 3.73 m/s² ≈ 0.38 g | Partial gravity, distance, closed habitat |
-| Lunar surface | 1.62 m/s² ≈ 0.16 g | Partial gravity, controlled environment |
+| Lunar surface | 1.62 m/s² ≈ 0.165 g | Partial gravity, controlled environment |
 | Earth analog | 9.82 m/s² = 1 g | Simulated isolation; does not reproduce space exposure |
 | ISS / orbit | Microgravity, no number computed in the MVP | Closed environment, orbital adaptation, isolation |
 
