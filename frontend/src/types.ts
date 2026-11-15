@@ -1,20 +1,28 @@
 /** AKM-03 contracts: frontend must not calculate clinical alerts. */
-export type Kind = 'sleep_hours' | 'heart_rate_bpm' | 'mood_score' | 'co2_ppm' | 'cabin_temp_c';
-export type MetricUnit = 'h' | 'bpm' | 'score_1_to_5' | 'ppm' | 'C';
+type UnitByKind = {
+  sleep_hours: 'h';
+  heart_rate_bpm: 'bpm';
+  mood_score: 'score_1_to_5';
+  co2_ppm: 'ppm';
+  cabin_temp_c: 'C';
+};
+export type Kind = keyof UnitByKind;
+export type MetricUnit = UnitByKind[Kind];
 export type MeasurementZone = 'astronaut' | 'habitat';
 export type DataSource = 'manual' | 'synthetic';
 export type Quality = 'ok' | 'suspect';
 export type InvestigationStatus = 'normal' | 'attention' | 'critical' | 'insufficient_data';
 export interface AstronautRead { id: string; name: string; role: string | null; baseline_sleep_hours: number }
 interface MeasurementFields {
-  kind: Kind; value: number; unit: MetricUnit; measured_at: string; source: DataSource;
+  value: number; measured_at: string; source: DataSource;
 }
 type HabitatKind = 'co2_ppm' | 'cabin_temp_c';
-export type MeasurementCreate = MeasurementFields & { quality?: Quality } & (
-  | { kind: Exclude<Kind, HabitatKind>; astronaut_id: string }
-  | { kind: HabitatKind; astronaut_id?: null }
-);
+export type MeasurementCreate = MeasurementFields & { quality?: Quality } & {
+  [Metric in Kind]: { kind: Metric; unit: UnitByKind[Metric] } &
+    (Metric extends HabitatKind ? { astronaut_id?: null } : { astronaut_id: string });
+}[Kind];
 export interface MeasurementRead extends MeasurementFields {
+  kind: Kind; unit: MetricUnit;
   astronaut_id: string | null;
   id: number; measurement_zone: MeasurementZone; recorded_at: string; quality: Quality;
 }
