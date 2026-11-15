@@ -118,7 +118,7 @@ export function DashboardView({ state, onRefresh }: { state: DashboardState; onR
         </Card>
       </section>
     </>}
-    <NasaReferences mission={data?.mission} />
+    <NasaReferences mission={data?.mission} environment={data?.environment} />
   </div>;
 }
 

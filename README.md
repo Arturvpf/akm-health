@@ -83,7 +83,7 @@ Windows commands, repository root. On Bash/Zsh replace the Python prefix with py
 
 ```powershell
 .\.venv\Scripts\python.exe scripts/check.py
-node --test frontend/scripts/test-dashboard.cjs frontend/scripts/test-history.cjs frontend/scripts/test-investigation-api.cjs frontend/scripts/test-registration.cjs
+node --test frontend/scripts/test-dashboard.cjs frontend/scripts/test-nasa-panels.cjs frontend/scripts/test-history.cjs frontend/scripts/test-investigation-api.cjs frontend/scripts/test-registration.cjs
 npm --prefix frontend run test:navigation
 npm --prefix frontend run build
 ```

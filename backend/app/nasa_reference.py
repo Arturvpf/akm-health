@@ -6,7 +6,8 @@ from pathlib import Path
 from pydantic import AwareDatetime, Field, TypeAdapter, ValidationError
 
 from .schemas import (
-    NASAHistoricalObservation, NASAReferenceResponse, ScientificReference, StrictModel, require_utc,
+    NASACo2Context, NASAHistoricalObservation, NASAReferenceResponse, NASARadiationSeries,
+    ScientificReference, StrictModel, require_utc,
 )
 
 
@@ -56,6 +57,17 @@ def _read_history(path: Path) -> list[NASAHistoricalObservation]:
     ]
 
 
+def _read_optional(path: Path, model):
+    """Load a verified local excerpt; a missing or invalid file yields None, never invented values."""
+    try:
+        return model.model_validate_json(path.read_bytes())
+    except FileNotFoundError:
+        return None
+    except (OSError, ValueError):
+        logger.warning("Unable to load %s", path.name, exc_info=True)
+        return None
+
+
 def load_nasa_references() -> NASAReferenceResponse:
     try:
         references = CATALOG.validate_json((DATA_DIR / "hrp_catalog.json").read_bytes())
@@ -63,8 +75,14 @@ def load_nasa_references() -> NASAReferenceResponse:
         logger.error("Unable to load the local NASA HRP catalog", exc_info=True)
         raise RuntimeError("NASA reference catalog unavailable") from error
     history = _read_history(DATA_DIR / "reference.json")
+    radiation = _read_optional(DATA_DIR / "radiation.json", NASARadiationSeries)
+    co2_context = _read_optional(DATA_DIR / "co2_context.json", NASACo2Context)
     return NASAReferenceResponse(
         scientific_references=references,
         historical_series=history,
         historical_data_status="imported" if history else "not_imported",
+        radiation=radiation,
+        radiation_status="imported" if radiation else "not_imported",
+        co2_context=co2_context,
+        co2_context_status="imported" if co2_context else "not_imported",
     )
