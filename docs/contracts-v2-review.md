@@ -57,7 +57,9 @@ No clinical diagnosis, use synthetic heuristics and mark all demonstration data.
 
 ## Implemented vs pending
 
-The foundation provides Pydantic and TypeScript contracts, the SQLModel schema and the synthetic seed. Implemented API operations include health, measurement registration, the dashboard snapshot and NASA references with an empty historical series. The private measurement validation route is for tests. History and astronaut listings, investigation and follow-up routes, the investigation engine, real dataset import and the React application remain pending.
+The foundation provides Pydantic and TypeScript contracts, the SQLModel schema and the synthetic seed. The API serves health, astronaut profiles, measurement writes and history, dashboard snapshots, persisted follow-up listings and NASA references with an empty historical series. Investigation creation and retrieval, follow-up completion, the React application and historical NASA import are planned. The detectors and presentation functions can be exercised separately through local scripts and tests. See the [EP-01 operations table](ep-01-foundation-and-architecture.md#operações-do-contrato).
+
+The TypeScript `MeasurementCreate` contract requires the unit associated with each `kind` and the correct `astronaut_id` for its zone. The server also validates finite values and ranges, parses timestamps and checks that the astronaut exists.
 
 
 ## AKM-06 integrated — clinical and data provenance boundary
@@ -66,4 +68,4 @@ See [AKM-06 protocol](./akm-06-measurement-protocol.md). The five metrics are sl
 
 Crew and dashboard timestamps require an explicit timezone and are normalized to UTC, including MetricSnapshot, HabitatSnapshot and last_investigation_at. NASA reference timestamps remain in their source-native time base; Mars sol must not be converted to Earth UTC without reference metadata. NASA history requires HTTPS source URL plus observed_at or mars_sol, and this schema is not proof of authentic provenance.
 
-The environmental snapshot measured_at field describes the most recent available environmental measurement, not proof CO2 and temperature were sampled simultaneously. Missing data is absent (not zero); quality=ok is not a statement of health. Clinical thresholds, red alerts, diagnosis and equipment certifications remain outside the MVP. The pending business routes are tracked in AKM-18/19/20/39.
+The environmental snapshot measured_at field describes the most recent available environmental measurement. The two sensor readings can have different observation times. Missing data is absent (not zero); quality=ok is not a statement of health. Clinical thresholds, red alerts, diagnosis and equipment certifications remain outside the MVP. The remaining investigation and follow-up operations are tracked in AKM-20/25. NASA historical import is tracked in AKM-39.
