@@ -165,3 +165,45 @@ def test_t06_suspect_only_is_not_normal(tmp_path, monkeypatch, investigation_clo
         assert result["status"] == "insufficient_data"
         assert result["hypotheses"] == []
         assert {x["quality"] for x in client.get("/api/measurements").json()} == {"suspect"}
+
+
+def test_t03_t04_registration_outbox_path(tmp_path, monkeypatch, investigation_clock):
+    """The UI saves through the AKM-33 outbox endpoint; T03/T04 must hold there too."""
+    monkeypatch.setenv("AKM_DB_PATH", str(tmp_path / "outbox.db"))
+    monkeypatch.delenv("AKM_INVESTIGATION_CONFIG", raising=False)
+    base = dict(kind="co2_ppm", astronaut_id=None, value=850, unit="ppm",
+                measured_at="2026-11-14T08:01:00Z", source="manual", quality="ok")
+
+    def sync(operation, **changes):
+        return client.post("/api/sync/measurements",
+                           json={"operation_id": operation, "measurement": base | changes})
+
+    with TestClient(app) as client:
+        seed(app.state.engine)
+        count = len(rows(Measurement))
+        invalid = [
+            (dict(kind="sleep_hours", astronaut_id="A1", unit="ppm"), 422),
+            (dict(kind="sleep_hours", astronaut_id="A99", unit="h", value=6), 404),
+            (dict(kind="mood_score", astronaut_id="A1", unit="score_1_to_5", value=6), 422),
+            (dict(measured_at="2026-11-14T08:00:00"), 422),
+            (dict(astronaut_id="A1"), 422),
+        ]
+        for number, (changes, status) in enumerate(invalid, start=1):
+            assert sync(f"00000000-0000-4000-8000-{number:012d}", **changes).status_code == status
+        assert len(rows(Measurement)) == count
+
+        before = len(rows(Investigation))
+        operation = "00000000-0000-4000-8000-000000000100"
+        first = sync(operation, kind="sleep_hours", astronaut_id="A4", value=7.9, unit="h",
+                     measured_at="2026-11-14T04:01:00-03:00")
+        assert first.status_code == 201
+        receipt = first.json()
+        assert receipt["operation_id"] == operation
+        assert receipt["measurement"]["measured_at"] == "2026-11-14T07:01:00Z"
+        assert receipt["measurement"]["measurement_zone"] == "astronaut"
+        replay = sync(operation, kind="sleep_hours", astronaut_id="A4", value=7.9, unit="h",
+                      measured_at="2026-11-14T04:01:00-03:00")
+        assert replay.status_code == 200
+        assert replay.json()["measurement"]["id"] == receipt["measurement"]["id"]
+        assert len(rows(Measurement)) == count + 1
+        assert len(rows(Investigation)) == before

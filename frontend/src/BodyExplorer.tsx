@@ -88,7 +88,7 @@ export function BodyExplorer() {
           </svg>
           {(['head', 'chest'] as const).map((id, index) =>
             <button key={id} type="button" className={`body-point body-point-${id}`} aria-pressed={selected === id}
-              aria-label={`Select ${REGIONS[id].label}`} onClick={() => setSelected(id)}>
+              aria-label={`${index + 1}. Select ${REGIONS[id].label}`} onClick={() => setSelected(id)}>
               <span aria-hidden="true">{index + 1}</span>
             </button>)}
         </div>

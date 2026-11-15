@@ -12,6 +12,17 @@ const frontend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'
 const repo = path.resolve(frontend, '..');
 const output = path.resolve(process.env.AKM_ACCEPTANCE_OUTPUT || path.join(frontend, 'node_modules/.cache/akm30'));
 const python = process.env.PYTHON || path.join(repo, '.venv', process.platform === 'win32' ? 'Scripts/python.exe' : 'bin/python');
+const port = (name, fallback) => {
+  const value = Number(process.env[name] || fallback);
+  if (!Number.isInteger(value) || value < 1024 || value > 65535) throw new Error(name + ' must be a TCP port between 1024 and 65535');
+  return value;
+};
+// Defaults keep the documented ports; overrides let a shared machine avoid colliding with other services.
+const apiPort = port('AKM_ACCEPTANCE_API_PORT', 8765);
+const previewPort = port('AKM_ACCEPTANCE_PREVIEW_PORT', 8766);
+const emptyPort = port('AKM_ACCEPTANCE_EMPTY_PORT', 8767);
+if (new Set([apiPort, previewPort, emptyPort]).size !== 3) throw new Error('Acceptance ports must be distinct');
+const channel = process.env.AKM_ACCEPTANCE_BROWSER_CHANNEL || undefined;
 await mkdir(output, { recursive: true });
 const fixtureRoot = await mkdtemp(path.join(output, 'fixtures-'));
 const children = [];
@@ -63,7 +74,7 @@ async function audit(name) {
     'Unresolved semantic accessibility review in ' + name);
 }
 async function go(route) {
-  await page.goto('http://127.0.0.1:8766/#/' + route, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.goto('http://127.0.0.1:' + previewPort + '/#/' + route, { waitUntil: 'domcontentloaded', timeout: 60000 });
   const headings = { dashboard: 'Mission dashboard', registrar: 'Register a measurement', historico: 'Measurement history', investigacao: 'Investigation and follow-up' };
   await page.getByRole('heading', { level: 1, name: headings[route], exact: true }).waitFor({ state: 'attached' });
 }
@@ -90,14 +101,13 @@ async function record(kind, value, quality = 'ok') {
   await page.locator('#measurement-quality').focus();
   await page.keyboard.press('Tab');
   assert.equal(await page.locator(':focus').innerText(), 'Save measurement');
+  // AKM-33: the form stores the reading in the local outbox, then delivers it with a stable operation ID.
   const response = page.waitForResponse(r => r.url().endsWith('/api/sync/measurements') && r.request().method() === 'POST');
   await page.keyboard.press('Enter');
   const saved = await response;
   assert.equal(saved.status(), 201);
-  const confirmation = await saved.json();
-  assert.equal(confirmation.operation_id, saved.request().postDataJSON().operation_id);
-  assert.equal(confirmation.reused, false);
-  const receipt = confirmation.measurement;
+  const { operation_id: operation, measurement: receipt } = await saved.json();
+  assert.equal(JSON.parse(saved.request().postData()).operation_id, operation);
   await page.getByRole('heading', { name: 'Measurement #' + receipt.id + ' confirmed', exact: true }).waitFor();
   return receipt;
 }
@@ -109,15 +119,19 @@ async function investigate(replay = false) {
   return r.json();
 }
 try {
-  await Promise.all([8765, 8766, 8767].map(freePort));
-  const seeded = start(8765);
-  const empty = start(8767, true);
-  await Promise.all([ready('http://127.0.0.1:8765/api/health', seeded), ready('http://127.0.0.1:8767/api/health', empty)]);
+  await Promise.all([apiPort, previewPort, emptyPort].map(freePort));
+  const seeded = start(apiPort);
+  const empty = start(emptyPort, true);
+  await Promise.all([ready('http://127.0.0.1:' + apiPort + '/api/health', seeded), ready('http://127.0.0.1:' + emptyPort + '/api/health', empty)]);
   server = await preview({ root: frontend, configFile: path.join(frontend, 'vite.config.ts'),
-    preview: { host: '127.0.0.1', port: 8766, strictPort: true, proxy: { '/api': 'http://127.0.0.1:8765' } } });
-  browser = await chromium.launch({ headless: true, timeout: 60000, args: ['--no-proxy-server', '--disable-gpu'] });
+    preview: { host: '127.0.0.1', port: previewPort, strictPort: true, proxy: { '/api': 'http://127.0.0.1:' + apiPort } } });
+  browser = await chromium.launch({ headless: true, channel, timeout: 60000, args: ['--no-proxy-server', '--disable-gpu'] });
   report.browser = browser.version();
-  const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'en-US' });
+  report.ports = { api: apiPort, preview: previewPort, empty: emptyPort };
+  report.channel = channel || 'playwright-chromium';
+  // The AKM-33 shell service worker would hide page requests from Playwright's routing/response events,
+  // including the external-request block below. Block it so every request stays observable.
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'en-US', serviceWorkers: 'block' });
   await context.route('**/*', route => {
     const url = new URL(route.request().url());
     if (url.hostname === '127.0.0.1') return route.continue();
@@ -143,8 +157,57 @@ try {
   await audit('registration receipt');
   await page.screenshot({ path: path.join(output, 'receipt.png'), fullPage: true });
   await go('historico');
+  await go('registrar');
+  await page.locator('#measurement-kind:enabled').waitFor();
+  // A confirmed reading must not come back as a prefilled draft that could be submitted twice.
+  assert.equal(await page.locator('#measurement-value').inputValue(), '');
+  assert.equal(await page.locator('#measurement-localTime').inputValue(), '');
+  assert.equal(await page.locator('#measurement-kind').inputValue(), 'sleep_hours');
+  passed('T03/T13 confirmed reading is not kept as a resubmittable draft');
+  await go('historico');
   await page.locator('time[datetime="' + sleep.measured_at + '"]').first().waitFor();
   passed('T13 keyboard registration → real receipt → persisted History');
+
+  // T03/T04 via the AKM-33 outbox path: a live server rejection must reach the form as a correctable
+  // error, never as a queued/offline message, and must not stay in the outbox. The request body is
+  // rewritten in transit (labeled mutation) so the real API produces the 422/404.
+  for (const [label, mutate, field] of [
+    ['422 out-of-domain value (model-level rule, no field location)', body => { body.measurement.value = -5; }, null],
+    ['422 invalid quality (field-level)', body => { body.measurement.quality = 'not-a-quality'; }, '#measurement-quality'],
+    ['404 unknown profile', body => { body.measurement.astronaut_id = 'ZZ-UNKNOWN'; }, null],
+  ]) {
+    await go('registrar');
+    const again = page.getByRole('button', { name: 'Register another measurement', exact: true });
+    if (await again.count()) await again.click();
+    await page.locator('#measurement-kind:enabled').waitFor();
+    await page.locator('#measurement-kind').selectOption('sleep_hours');
+    await page.locator('#measurement-astronaut').selectOption('A1');
+    await page.locator('#measurement-value').fill('6');
+    await page.locator('#measurement-localTime').fill(new Date(Date.now() - 1000).toISOString().slice(0, 19));
+    await page.locator('#measurement-offset').fill('+00:00');
+    await page.route('**/api/sync/measurements', route => {
+      const body = JSON.parse(route.request().postData());
+      mutate(body);
+      return route.continue({ postData: JSON.stringify(body) });
+    });
+    const rejected = page.waitForResponse(r => r.url().endsWith('/api/sync/measurements') && r.request().method() === 'POST');
+    await page.getByRole('button', { name: 'Save measurement', exact: true }).click();
+    const status = (await rejected).status();
+    await page.unroute('**/api/sync/measurements');
+    assert.equal(status, label.startsWith('422') ? 422 : 404, label);
+    await page.getByRole('alert').filter({ hasText: /./ }).first().waitFor();
+    const text = await page.locator('body').innerText();
+    assert.ok(!text.includes('stored on this device'), label + ' shown as queued');
+    assert.ok(!text.includes('kept on this device'), label + ' shown as queued');
+    assert.ok(!text.includes('Connection error'), label + ' labeled as a connection problem');
+    assert.ok(text.includes('0 pending · 0 conflict(s)'), label + ' left in outbox');
+    assert.equal(await page.getByRole('heading', { name: /^Measurement #\d+ confirmed$/ }).count(), 0);
+    if (field) assert.equal(await page.locator(field).getAttribute('aria-invalid'), 'true', label);
+    await audit('registration live rejection ' + label);
+  }
+  const afterRejections = await (await fetch('http://127.0.0.1:' + apiPort + '/api/measurements')).json();
+  assert.ok(!afterRejections.some(x => x.value === -5 || x.astronaut_id === 'ZZ-UNKNOWN' || x.quality === 'not-a-quality'));
+  passed('T03/T04 outbox path: live 422/404 rejections show correctable errors, nothing queued or written');
 
   await go('investigacao');
   const first = await investigate();
@@ -186,9 +249,9 @@ try {
   await page.screenshot({ path: path.join(output, 'investigation.png'), fullPage: true });
   passed('T08–T10/T13 suspect exclusion → compatible link → explicit reanalysis');
 
-  const nasa = await (await fetch('http://127.0.0.1:8765/api/nasa/references')).json();
+  const nasa = await (await fetch('http://127.0.0.1:' + apiPort + '/api/nasa/references')).json();
   assert.equal(nasa.historical_series.length, 864);
-  const mission = await (await fetch('http://127.0.0.1:8765/api/measurements')).json();
+  const mission = await (await fetch('http://127.0.0.1:' + apiPort + '/api/measurements')).json();
   assert.ok(mission.every(x => ['manual', 'synthetic'].includes(x.source)));
   for (const route of ['dashboard', 'registrar', 'historico', 'investigacao']) {
     await go(route);
@@ -205,6 +268,23 @@ try {
   assert.equal(investigationWrites, 3);
   passed('T12/T14/T15 NASA separation; all routes at 320/1280 with external network blocked');
 
+  // Exploratory P1/P2 pages ship in the same build; hold them to the same automated bar.
+  const exploratory = { comparador: 'Hypothetical scenario comparator', ambientes: 'Mission environments',
+    corpo: 'Interactive body map', autocuidado: 'Self-care journey' };
+  for (const [route, heading] of Object.entries(exploratory)) {
+    await page.goto('http://127.0.0.1:' + previewPort + '/#/' + route, { waitUntil: 'domcontentloaded' });
+    await page.getByRole('heading', { level: 1, name: heading, exact: true }).waitFor({ state: 'attached' });
+    await page.waitForLoadState('networkidle');
+    for (const width of [1280, 320]) {
+      await page.setViewportSize({ width, height: 900 });
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), route + ' overflow at ' + width);
+      await audit(route + ' ' + width);
+    }
+  }
+  await page.setViewportSize({ width: 1280, height: 900 });
+  assert.equal(investigationWrites, 3);
+  passed('T14/T15 exploratory pages at 320/1280 with external network blocked');
+
   await go('dashboard');
   await page.getByRole('combobox', { name: 'Historical indicator', exact: true }).waitFor();
   await page.route('**/api/nasa/references', route => route.fulfill({ status: 503, body: '{}' }));
@@ -218,7 +298,7 @@ try {
   // Real empty API database, through the same frontend. No invented fixture responses.
   await page.route('**/api/**', async route => {
     const url = new URL(route.request().url());
-    url.port = '8767';
+    url.port = String(emptyPort);
     const response = await route.fetch({ url: url.href });
     await route.fulfill({ response });
   });
@@ -228,7 +308,8 @@ try {
   await audit('empty dashboard');
   await go('registrar');
   await page.locator('#measurement-kind:enabled').waitFor();
-  await page.locator('#measurement-kind').selectOption('sleep_hours'); // A previous draft may restore a habitat metric.
+  // The selected metric is kept between visits (AKM-33 draft); choose a personal metric explicitly.
+  await page.locator('#measurement-kind').selectOption('sleep_hours');
   assert.equal(await page.getByRole('button', { name: 'Save measurement', exact: true }).isDisabled(), true);
   await page.locator('#measurement-kind').selectOption('co2_ppm');
   assert.equal(await page.getByRole('button', { name: 'Save measurement', exact: true }).isEnabled(), true);
@@ -239,13 +320,21 @@ try {
   await page.getByRole('button', { name: 'Refresh data', exact: true }).waitFor();
   await page.route('**/api/dashboard', route => route.fulfill({ status: 503, body: '{}' }));
   await page.getByRole('button', { name: 'Refresh data', exact: true }).click();
-  await page.getByText('Showing cached copy (may be out of date)', { exact: true }).waitFor();
-  assert.ok((await page.locator('body').innerText()).includes('Aurora'));
-  await audit('dashboard failed refresh preserves snapshot');
+  // AKM-33: a failed refresh falls back to the copy saved on this device, labeled as such (never "updated").
+  await page.getByText('Could not get current data from the mission server.', { exact: false }).waitFor();
+  await page.getByText('Showing cached copy (may be out of date)', { exact: false }).waitFor();
+  const stale = await page.locator('body').innerText();
+  assert.ok(stale.includes('Aurora'));
+  assert.ok(stale.includes('Saved on this device'));
+  assert.ok(!stale.includes('Last confirmed refresh'));
+  assert.equal(await page.getByText('Dashboard updated.', { exact: true }).count(), 0);
+  await audit('dashboard failed refresh shows labeled device copy');
+  await page.screenshot({ path: path.join(output, 'dashboard-stale-copy.png'), fullPage: true });
   await page.unroute('**/api/dashboard');
   await page.getByRole('button', { name: 'Refresh data', exact: true }).click();
-  await page.getByText('Showing cached copy (may be out of date)', { exact: true }).waitFor({ state: 'hidden' });
-  passed('T14 refresh error retains confirmed data and recovers');
+  await page.getByText('Dashboard updated.', { exact: true }).waitFor({ state: 'attached' });
+  assert.ok((await page.locator('body').innerText()).includes('Last confirmed refresh'));
+  passed('T14 refresh error keeps data, labels the device copy as stale and recovers');
   assert.deepEqual(report.browserErrors, []);
   report.success = true;
 } catch (error) {

@@ -272,3 +272,31 @@ test('a persisted dashboard summary translates an embedded observation window wi
   assert.ok(!html.includes('Janela observada:'));
   assert.ok(html.includes('Clinical assessment and diagnosis are outside its scope.'));
 });
+
+test('a device copy served while the server fails is never announced as a confirmed refresh', async () => {
+  const savedAt = '2026-11-14T07:00:00.000Z';
+  const controller = createDashboardController(async (_signal, onCached) => { onCached(savedAt); return snapshot(); });
+  await controller.refresh();
+  const state = controller.getState();
+  assert.equal(state.phase, 'ready');
+  assert.equal(state.cachedAt, savedAt);
+  assert.equal(state.receivedAt, savedAt);
+  const html = render(state.data, state);
+  assert.ok(!html.includes('Dashboard updated.'));
+  assert.ok(!html.includes('Last confirmed refresh'));
+  assert.ok(html.includes('Could not get current data from the mission server.'));
+  assert.ok(html.includes('Saved on this device'));
+  assert.ok(html.includes(savedAt));
+  controller.dispose();
+});
+
+test('a live response clears the stale-copy marker', async () => {
+  let cached = true;
+  const controller = createDashboardController(async (_signal, onCached) => { if (cached) onCached('2026-11-14T07:00:00.000Z'); return snapshot(); });
+  await controller.refresh();
+  cached = false;
+  await controller.refresh();
+  assert.equal(controller.getState().cachedAt, null);
+  assert.ok(render(controller.getState().data, controller.getState()).includes('Dashboard updated.'));
+  controller.dispose();
+});

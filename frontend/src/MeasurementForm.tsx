@@ -3,7 +3,7 @@ import { METRIC_LABELS } from './api';
 import { createDashboardController, INITIAL_DASHBOARD_STATE } from './dashboard-state';
 import { ActionButton, ActionLink, Card, DataState, Details, InformationNotice, SourceBadge } from './design-system';
 import { createRegistrationController, INITIAL_REGISTRATION, type RegistrationState } from './measurement-api';
-import { EMPTY_DRAFT, FORM_METRICS, measurementTime, validateDraft, type FieldErrors, type MeasurementDraft } from './measurement-form';
+import { DRAFT_STORAGE_KEY, EMPTY_DRAFT, draftAfterSubmission, FORM_METRICS, measurementTime, validateDraft, type FieldErrors, type MeasurementDraft } from './measurement-form';
 import type { DashboardState } from './dashboard-state';
 import type { Kind } from './types';
 
@@ -11,12 +11,12 @@ export function MeasurementForm() {
   const [context, setContext] = useState(INITIAL_DASHBOARD_STATE);
   const [registration, setRegistration] = useState(INITIAL_REGISTRATION);
   const [draft, setDraft] = useState<MeasurementDraft>(() => {
-    try { return { ...EMPTY_DRAFT, ...JSON.parse(localStorage.getItem('akm-measurement-draft-v1') ?? '{}') }; }
+    try { return { ...EMPTY_DRAFT, ...JSON.parse(localStorage.getItem(DRAFT_STORAGE_KEY) ?? '{}') }; }
     catch { return { ...EMPTY_DRAFT }; }
   });
   const [errors, setErrors] = useState<FieldErrors>({});
   useEffect(() => {
-    try { localStorage.setItem('akm-measurement-draft-v1', JSON.stringify(draft)); } catch { /* storage may be denied */ }
+    try { localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft)); } catch { /* storage may be denied */ }
   }, [draft]);
   const contextController = useRef<ReturnType<typeof createDashboardController> | null>(null);
   const registrationController = useRef<ReturnType<typeof createRegistrationController> | null>(null);
@@ -31,6 +31,7 @@ export function MeasurementForm() {
   }, []);
   useEffect(() => {
     if (registration.phase === 'saved') void contextController.current?.refresh();
+    if (registration.phase === 'saved' || registration.phase === 'queued') setDraft(draftAfterSubmission);
   }, [registration.phase]);
   function change<K extends keyof MeasurementDraft>(field: K, value: MeasurementDraft[K]) {
     setDraft(previous => ({ ...previous, [field]: value, ...(field === 'kind' ? { value: '' } : {}) }));
@@ -55,7 +56,7 @@ export function MeasurementForm() {
   return <MeasurementFormView context={context} registration={registration} draft={draft}
     errors={{ ...registration.fields, ...errors }} onChange={change} onSubmit={submit} onRefresh={refresh}
     onUnlock={() => registrationController.current?.reset()}
-    onNew={() => { setDraft({ ...EMPTY_DRAFT, kind: draft.kind }); setErrors({}); registrationController.current?.reset(); }} />;
+    onNew={() => { setDraft(draftAfterSubmission(draft)); setErrors({}); registrationController.current?.reset(); }} />;
 }
 
 interface Props {

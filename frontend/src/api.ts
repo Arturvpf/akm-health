@@ -58,7 +58,8 @@ export function parseDashboard(value: unknown): DashboardResponse {
   return value as DashboardResponse;
 }
 
-export async function fetchDashboard(signal: AbortSignal): Promise<DashboardResponse> {
+/** onCached receives the device save time when the server was unreachable and a local copy was used. */
+export async function fetchDashboard(signal: AbortSignal, onCached?: (savedAt: string) => void): Promise<DashboardResponse> {
   return parseDashboard(await cachedRead<DashboardResponse>('dashboard', async () => {
     let response: Response;
     try {
@@ -74,7 +75,7 @@ export async function fetchDashboard(signal: AbortSignal): Promise<DashboardResp
     try { body = await response.json(); }
     catch { throw new Error('The server returned an invalid response.'); }
     return parseDashboard(body);
-  }));
+  }, onCached));
 }
 
 export function nasaReferenceUrl(value: string): string | null {
