@@ -149,7 +149,7 @@ export function Landing() {
 
       <section className="lp-section" aria-labelledby="lp-features">
         <h2 id="lp-features" className="lp-h2">What it does</h2>
-        <div className="lp-columns">
+        <div className="lp-columns lp-columns-cards">
           {WHAT_IT_DOES.map(item => (
             <article key={item.title} className="lp-column">
               <h3>{item.title}</h3>

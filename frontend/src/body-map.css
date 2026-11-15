@@ -1,49 +1,47 @@
-/* Body map stage: a suited astronaut on a soft grid, with outside-the-body tags for sleep and cabin air. */
+/* Body map stage: the team's holographic body image with live, selectable data cards on top.
+   The cards and tags are opaque on purpose: they sit over the static artwork so only live values show. */
 .body-stage {
-  position: relative; max-width: 340px; margin: var(--space-3) auto; aspect-ratio: 300 / 460; overflow: hidden;
-  border: 1px solid var(--border); border-radius: 1.25rem;
-  background:
-    radial-gradient(circle at 50% 36%, rgb(103 232 249 / 16%), transparent 58%),
-    repeating-linear-gradient(0deg, rgb(148 163 255 / 7%) 0 1px, transparent 1px 28px),
-    repeating-linear-gradient(90deg, rgb(148 163 255 / 7%) 0 1px, transparent 1px 28px),
-    linear-gradient(180deg, #0d1534, #070b1c);
-  box-shadow: inset 0 0 40px rgb(109 40 217 / 18%);
+  position: relative; max-width: 520px; margin: var(--space-3) auto; aspect-ratio: 667 / 1024; overflow: hidden;
+  border: 1px solid var(--border); border-radius: 1.25rem; background: #070b1c;
+  container-type: inline-size;
 }
-.body-silhouette { width: 100%; height: 100%; display: block; }
-.body-stage { container-type: inline-size; max-width: 420px; }
+.body-photo, .body-silhouette { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.body-photo { object-fit: cover; }
+.body-silhouette { pointer-events: none; }
 .body-card, .body-tag {
-  position: absolute; display: flex; align-items: center; gap: .4rem; min-height: var(--target-min); font: inherit; color: var(--text); cursor: pointer;
-  border: 1px solid rgb(168 140 255 / 55%); border-radius: .8rem; padding: .35rem .5rem; text-align: left;
-  background: linear-gradient(160deg, rgb(76 40 150 / 78%), rgb(30 20 80 / 82%)); backdrop-filter: blur(3px);
+  position: absolute; display: flex; align-items: center; justify-content: center; gap: .35rem; min-height: var(--target-min);
+  font: inherit; color: var(--text); cursor: pointer; text-align: center;
+  border: 1px solid rgb(168 140 255 / 70%); border-radius: .8rem; padding: .3rem;
+  background: linear-gradient(160deg, #4b2a96, #1f1450);
   transition: border-color .15s, box-shadow .15s;
 }
 .body-card:hover, .body-tag:hover { border-color: #7ff3ff; }
 .body-card[aria-pressed="true"], .body-tag[aria-pressed="true"] { border-color: #fff; box-shadow: 0 0 0 2px #7ff3ff, 0 0 16px rgb(127 243 255 / 55%); }
+.body-card { flex-direction: column; }
+.body-tag { background: linear-gradient(160deg, #1b2a5e, #0f1840); border-style: dashed; border-color: rgb(127 243 255 / 70%); }
 .body-card-number::before { content: attr(data-n); }
 .body-card-number {
-  flex: none; width: 1.9rem; height: 1.9rem; display: grid; place-items: center; border-radius: 50%; font-weight: 750;
-  border: 2px solid #7ff3ff; background: rgb(13 18 48 / 85%);
+  flex: none; width: 2.1rem; height: 2.1rem; display: grid; place-items: center; border-radius: 50%; font-weight: 750; font-size: 1.05rem;
+  border: 2px solid #7ff3ff; background: #0d1230;
 }
 .body-card[aria-pressed="true"] .body-card-number { background: #6d28d9; border-color: #fff; }
-.body-card-text, .body-tag-text { display: grid; line-height: 1.15; font-size: .72rem; color: #cfd7f5; min-width: 0; }
-.body-card-text strong, .body-tag-text strong { font-size: .9rem; color: #fff; white-space: nowrap; }
-.body-card-trace { position: absolute; left: .5rem; right: .5rem; bottom: .2rem; width: calc(100% - 1rem); height: .9rem; opacity: .85; }
-.body-card-chest { flex-wrap: wrap; padding-bottom: 1.2rem; }
-.body-card-head { top: 6%; left: 71%; width: 27%; }
-.body-card-chest { top: 29%; left: 71%; width: 27%; }
-.body-tag-sleep { top: 5%; left: 3%; }
-.body-tag-habitat { bottom: 4%; right: 3%; }
+.body-card-text, .body-tag-text { display: grid; line-height: 1.2; font-size: .75rem; color: #cfd7f5; min-width: 0; }
+.body-card-text strong, .body-tag-text strong { font-size: .95rem; color: #fff; white-space: nowrap; }
+.body-tag-text { text-align: left; }
+.body-card-trace { width: 80%; height: .9rem; opacity: .9; }
+/* Positions match the artwork's own card and tag slots so nothing static shows through. */
+.body-card-head { top: 4.6%; left: 74%; width: 18.4%; height: 16.6%; }
+.body-card-chest { top: 27.6%; left: 74%; width: 18.4%; height: 20%; }
+.body-tag-sleep { top: 4.8%; left: 3.2%; width: 26.5%; height: 9.6%; }
+.body-tag-habitat { top: 86%; left: 71.5%; width: 25.5%; height: 9.2%; }
 @container (max-width: 360px) {
   .body-card-trace { display: none; }
   .body-card-text, .body-tag-text > span { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  .body-card { width: auto; padding: .35rem; }
-  .body-card-head { left: 78%; } .body-card-chest { left: 78%; }
-  .body-tag { padding: .35rem .55rem; } .body-tag-text strong { font-size: .8rem; }
+  .body-card-number { width: 1.7rem; height: 1.7rem; font-size: .9rem; }
+  .body-tag { padding: .25rem; } .body-tag-text strong { font-size: .75rem; }
 }
 .body-pulse { animation: body-pulse 2.2s ease-in-out infinite; }
 @keyframes body-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
-@media (prefers-reduced-motion: reduce) { .body-pulse { animation: none; } .body-point { transition: none; } }
-
-.body-heart { transform-box: fill-box; transform-origin: center; animation: body-beat 1.4s ease-in-out infinite; }
-@keyframes body-beat { 0%, 100% { transform: translate(160px, 156px) scale(1); } 15% { transform: translate(160px, 156px) scale(1.12); } 30% { transform: translate(160px, 156px) scale(1); } 45% { transform: translate(160px, 156px) scale(1.07); } }
-@media (prefers-reduced-motion: reduce) { .body-heart { animation: none; } }
+.body-heart { animation: body-beat 1.4s ease-in-out infinite; }
+@keyframes body-beat { 0%, 100% { opacity: .15; } 15% { opacity: .9; } 30% { opacity: .2; } 45% { opacity: .6; } }
+@media (prefers-reduced-motion: reduce) { .body-pulse, .body-heart { animation: none; } .body-heart { opacity: .35; } }

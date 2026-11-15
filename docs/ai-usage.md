@@ -21,5 +21,5 @@ Each member completes their own row before submitting the Space Apps form, and l
 
 ## Generated media
 
-- The application ships no AI-generated photographs, audio or video. Its illustrations (the body map, animated backgrounds, hazard cards) are vector or canvas drawings written as code, with Claude's help where noted above.
+- The application ships no AI-generated audio or video. Its animated backgrounds and hazard cards are vector or canvas drawings written as code, with Claude's help where noted above. The one raster image is the body-map artwork (`frontend/public/body-hologram.webp`), supplied by the team. It looks like AI-generated art, so the team must state its tool and source here before submission. Its static cards and labels are covered by live HTML, so no value shown in the app comes from the image.
 - If the demo video or slides use AI-generated images or a synthetic voice, mark them with a visible watermark or on-screen label, as the Space Apps rules require.
