@@ -39,7 +39,7 @@ const QUALITY: Record<Quality, StatusLabel> = {
 const DATA_STATES = {
   empty: { label: 'No data', icon: 'empty', tone: 'neutral' },
   loading: { label: 'Loading', icon: 'loading', tone: 'info' },
-  error: { label: 'Connection error', icon: 'error', tone: 'neutral' },
+  error: { label: 'Error', icon: 'error', tone: 'neutral' },
   success: { label: 'Update complete', icon: 'check', tone: 'positive' },
 } as const satisfies Record<string, StatusLabel>;
 

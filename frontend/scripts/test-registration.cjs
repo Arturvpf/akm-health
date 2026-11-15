@@ -166,3 +166,9 @@ test('a submitted reading never survives as a reusable draft; only the metric is
   assert.equal(next.localTime, '');
   assert.equal(validateDraft(next, ['A1']).payload, null);
 });
+
+test('a server validation rejection is not labeled as a connection problem', () => {
+  const html = render({ registration: { ...INITIAL_REGISTRATION, phase: 'error', error: 'Review the highlighted field and try again.', fields: { quality: 'Check the quality.' } }, errors: { quality: 'Check the quality.' } });
+  assert.ok(html.includes('Review the highlighted field and try again.'));
+  assert.ok(!html.includes('Connection error'));
+});
