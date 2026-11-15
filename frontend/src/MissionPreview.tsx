@@ -1,10 +1,11 @@
 import { useRef, useState } from 'react';
 import {
-  ActionButton, ActionLink, Card, DataState, DataTable, Details, ProtocolLegend,
-  QualityBadge, SelectField, SourceBadge, StatusBadge, type DataStateKind, type DemoStatus,
+  ActionButton, ActionLink, Card, DataState, Details, ProtocolLegend,
+  SelectField, SourceBadge, StatusBadge, type DataStateKind, type DemoStatus,
 } from './design-system';
+import { MeasurementHistory } from './MeasurementHistory';
 import { pageHref, type PageId } from './navigation';
-import type { MeasurementCreate, NextCheck, Quality } from './types';
+import type { MeasurementCreate, NextCheck } from './types';
 
 const crew = [
   { id: 'A1', name: 'Aurora', role: 'Comando', sleep: '5,4 h' },
@@ -17,12 +18,6 @@ const example = {
   astronaut_id: 'A1', kind: 'sleep_hours', value: 5.4, unit: 'h',
   measured_at: '2026-11-14T07:00:00Z', source: 'synthetic', quality: 'ok',
 } satisfies MeasurementCreate;
-
-const history: ReadonlyArray<MeasurementCreate & { quality: Quality }> = [
-  example,
-  { kind: 'co2_ppm', value: 2200, unit: 'ppm', measured_at: '2026-11-14T05:05:00Z', source: 'synthetic', quality: 'suspect' },
-  { kind: 'co2_ppm', value: 980, unit: 'ppm', measured_at: '2026-11-14T05:00:00Z', source: 'synthetic', quality: 'ok' },
-];
 
 const nextCheck = {
   kind: 'co2_ppm', astronaut_id: null, reason: 'Conferir nova leitura de CO₂ interno', effort: 'low',
@@ -176,30 +171,7 @@ export function MissionPreview({ page }: { page: PageId }) {
         <p>Use o wireframe para experimentar o preenchimento e o registro em memória.</p>
       </Card>;
     case 'historico':
-      return <Card heading="Observações de exemplo">
-        <DataTable label="Histórico simulado" caption="Observações simuladas em 14 de novembro de 2026">
-          <thead>
-            <tr>
-              <th scope="col">Coleta (UTC)</th>
-              <th scope="col">Alvo</th>
-              <th scope="col">Indicador</th>
-              <th scope="col">Valor</th>
-              <th scope="col">Origem</th>
-              <th scope="col">Qualidade</th>
-            </tr>
-          </thead>
-          <tbody>{history.map(row => (
-            <tr key={row.measured_at}>
-              <td><time dateTime={row.measured_at}>{row.measured_at.slice(11, 16)}</time></td>
-              <td>{row.astronaut_id ?? 'Habitat'}</td>
-              <td>{labels[row.kind]}</td>
-              <td>{valueInPt.format(row.value)} {row.unit}</td>
-              <td><SourceBadge source={row.source} /></td>
-              <td><QualityBadge quality={row.quality} /></td>
-            </tr>
-          ))}</tbody>
-        </DataTable>
-      </Card>;
+      return <MeasurementHistory />;
     case 'investigacao':
       return <InvestigationPreview />;
   }
