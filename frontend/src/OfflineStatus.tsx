@@ -48,7 +48,7 @@ export function OfflineStatus() {
     link.click(); URL.revokeObjectURL(href);
   }
   return <aside className="offline-banner" aria-label="Sync status">
-    <div role="status"><strong>{cached ? 'Showing cached copy (may be out of date)' : online ? 'Online' : 'Offline'}</strong> · {pending.length} pending · {conflicts.length} conflict(s)
+    <div role="status"><strong>{cached ? 'Showing cached copy (may be out of date)' : online ? 'Network connected' : 'No network'}</strong> · {pending.length} pending · {conflicts.length} conflict(s)
       {(!online || pending.length > 0) && <span> · Local data may be out of date</span>}
     </div>
     <div className="offline-actions">

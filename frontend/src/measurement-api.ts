@@ -24,25 +24,30 @@ export function parseMeasurement(value: unknown): MeasurementRead {
   return item;
 }
 
+/** Maps a confirmed server rejection (nothing was written) to field-level form feedback. */
+function rejectionError(status: number, body: unknown): RegistrationError {
+  if (status === 404) return new RegistrationError('The selected crew member is unavailable. Refresh the list and select again.', false, { astronaut: 'Select again after refreshing the list.' }, true);
+  if (status !== 422) return new RegistrationError(UNCERTAIN, true);
+  const fields: FieldErrors = {};
+  const names: Record<string, keyof FieldErrors> = { value: 'value', measured_at: 'localTime', astronaut_id: 'astronaut', source: 'source', quality: 'quality', kind: 'kind', unit: 'kind' };
+  const messages: Partial<Record<keyof FieldErrors, string>> = { value: 'The server rejected the value. Check the unit and supported range.', localTime: 'The server rejected the timestamp. Check the time and UTC offset.', astronaut: 'Check the selected crew member.', source: 'Check the source.', quality: 'Check the quality.', kind: 'Check the metric and unit.' };
+  const detail = body && typeof body === 'object' ? (body as { detail?: unknown }).detail : undefined;
+  if (Array.isArray(detail)) for (const error of detail) {
+    const loc = error && typeof error === 'object' ? (error as { loc?: unknown }).loc : undefined;
+    const field = Array.isArray(loc) ? names[String(loc.at(-1))] : undefined;
+    if (field) fields[field] = messages[field];
+  }
+  return new RegistrationError('Review the highlighted field and try again. Check the metric, crew member, value, time, source, and quality.', false, fields);
+}
+
 export async function saveMeasurement(payload: MeasurementCreate, signal: AbortSignal): Promise<MeasurementRead> {
   let response: Response;
   try {
     response = await fetch('/api/measurements', { method: 'POST', signal,
       headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
   } catch { throw new RegistrationError(UNCERTAIN, true); }
-  if (response.status === 404) throw new RegistrationError('The selected crew member is unavailable. Refresh the list and select again.', false, { astronaut: 'Select again after refreshing the list.' }, true);
-  if (response.status === 422) {
-    const fields: FieldErrors = {};
-    const names: Record<string, keyof FieldErrors> = { value: 'value', measured_at: 'localTime', astronaut_id: 'astronaut', source: 'source', quality: 'quality', kind: 'kind', unit: 'kind' };
-    const messages: Partial<Record<keyof FieldErrors, string>> = { value: 'The server rejected the value. Check the unit and supported range.', localTime: 'The server rejected the timestamp. Check the time and UTC offset.', astronaut: 'Check the selected crew member.', source: 'Check the source.', quality: 'Check the quality.', kind: 'Check the metric and unit.' };
-    try {
-      const body = await response.json();
-      if (Array.isArray(body.detail)) for (const error of body.detail) {
-        const field = Array.isArray(error.loc) ? names[String(error.loc.at(-1))] : undefined;
-        if (field) fields[field] = messages[field];
-      }
-    } catch { /* A confirmed validation rejection is safe to correct even without its body. */ }
-    throw new RegistrationError('Review the highlighted field and try again. Check the metric, crew member, value, time, source, and quality.', false, fields);
+  if (response.status === 404 || response.status === 422) {
+    throw rejectionError(response.status, await response.json().catch(() => null));
   }
   // Any unexpected response can follow a committed write; never retry automatically.
   if (response.status !== 201) throw new RegistrationError(UNCERTAIN, true);
@@ -63,6 +68,7 @@ export async function durableSaveMeasurement(payload: MeasurementCreate, signal:
   } catch (error) {
     throw new RegistrationError(`Could not confirm local storage: ${error instanceof Error ? error.message : 'unknown error'}. The measurement was NOT sent.`, false);
   }
+  if (saved.rejection) throw rejectionError(saved.rejection.status, saved.rejection.body);
   if (!saved.receipt) throw new RegistrationError(
     `Measurement kept on this device (operation ${saved.operationId}). Sync when the API is reachable; do not register it again.`,
     false, {}, false, true,

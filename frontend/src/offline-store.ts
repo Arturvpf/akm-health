@@ -95,11 +95,13 @@ export async function cachedRead<T>(key: string, remote: () => Promise<T>): Prom
   }
 }
 
-export type SyncReport = { confirmed: Record<string, MeasurementRead>; pending: number; conflicts: number };
+export type Rejection = { status: number; body: unknown };
+export type SyncReport = { confirmed: Record<string, MeasurementRead>; rejected: Record<string, Rejection>; pending: number; conflicts: number };
 let activeSync: Promise<SyncReport> | null = null;
 
 async function deliver(signal?: AbortSignal): Promise<SyncReport> {
   const confirmed: Record<string, MeasurementRead> = {};
+  const rejected: Record<string, Rejection> = {};
   for (const entry of await listOutbox()) {
     if (signal?.aborted) break;
     if (entry.status === 'conflict') continue;
@@ -111,6 +113,7 @@ async function deliver(signal?: AbortSignal): Promise<SyncReport> {
       });
     } catch { break; } // Indeterminate response: keep same ID for a safe replay.
     if (response.status === 200 || response.status === 201) {
+      if (typeof window !== 'undefined') window.dispatchEvent(new Event('akm-server-reachable'));
       try {
         const body = await response.json() as { operation_id: string; measurement: MeasurementRead };
         if (body.operation_id !== entry.id || !body.measurement || !Number.isSafeInteger(body.measurement.id)
@@ -128,12 +131,15 @@ async function deliver(signal?: AbortSignal): Promise<SyncReport> {
         await removeOutbox(entry.id);
       } catch { break; } // Unreadable receipt: operation stays queued, never duplicate.
     } else if ([404, 409, 422].includes(response.status)) {
+      let detail: unknown = null;
+      try { detail = await response.json(); } catch { /* rejection body is optional */ }
+      rejected[entry.id] = { status: response.status, body: detail };
       await updateOutbox({ ...entry, status: 'conflict', attempts: entry.attempts + 1,
         error: `Server rejected the operation (HTTP ${response.status}); review it before discarding.` });
     } else { break; } // 5xx or network: retry later with stable operation ID.
   }
   const items = await listOutbox();
-  return { confirmed, pending: items.filter(item => item.status === 'pending').length,
+  return { confirmed, rejected, pending: items.filter(item => item.status === 'pending').length,
     conflicts: items.filter(item => item.status === 'conflict').length };
 }
 
@@ -146,10 +152,13 @@ export function synchronizeOutbox(signal?: AbortSignal): Promise<SyncReport> {
   return current;
 }
 
-export async function storeThenSync(payload: MeasurementCreate, signal?: AbortSignal): Promise<{ receipt: MeasurementRead | null; operationId: string }> {
+export async function storeThenSync(payload: MeasurementCreate, signal?: AbortSignal): Promise<{ receipt: MeasurementRead | null; rejection: Rejection | null; operationId: string }> {
   const item = await enqueueMeasurement(payload);
-  const report = await synchronizeOutbox(signal);
+  let report = await synchronizeOutbox(signal);
   // If another sync was in progress before this item was queued, give it another turn.
-  const receipt = report.confirmed[item.id] ?? (await synchronizeOutbox(signal)).confirmed[item.id] ?? null;
-  return { receipt, operationId: item.id };
+  if (!report.confirmed[item.id] && !report.rejected[item.id]) report = await synchronizeOutbox(signal);
+  const rejection = report.rejected[item.id] ?? null;
+  // A live server rejection (404/422) is shown on the form for correction; it is not a pending offline item.
+  if (rejection) await removeOutbox(item.id).catch(() => undefined);
+  return { receipt: report.confirmed[item.id] ?? null, rejection, operationId: item.id };
 }

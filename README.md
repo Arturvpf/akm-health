@@ -124,7 +124,7 @@ These additions are experimental and do not change the P0 investigation engine. 
 - [AKM-36 · Interactive body map](docs/akm-36-body-explorer.md): keyboard-accessible schematic showing the latest stored reading per region; not a diagnostic instrument.
 - AKM-37 · Self-care journey: participation points from stored readings and completed follow-ups; values never change points. See [ZIP, Figma Make and design-document integration](docs/akm-36-37-figma-integration.md).
 
-**Back up an existing SQLite file first.** AKM-33 adds a `sync_operations` table and migrates `PRAGMA user_version` from 1 to 2. The service worker only caches the production build served from a secure origin (localhost or HTTPS): `npm --prefix frontend run build && npm --prefix frontend run preview`. Extra checks: `npm --prefix frontend run test:p2` and `npm --prefix frontend run test:offline`. See the [AKM-33–36 verification record](docs/akm-33-36-verification.md).
+**Use a separate database for this branch.** AKM-33 adds a `sync_operations` table and migrates `PRAGMA user_version` from 1 to 2. The migration is forward-only: code without AKM-33 refuses a version-2 file (`Unsupported AKM database schema version: 2`). Point `AKM_DB_PATH` at a separate file (for example `work/p1p2.db`) and keep the P0 demo database untouched. The service worker only caches the production build served from a secure origin (localhost or HTTPS): `npm --prefix frontend run build && npm --prefix frontend run preview`. Extra checks: `npm --prefix frontend run test:p2` and `npm --prefix frontend run test:offline`. See the [AKM-33–36 verification record](docs/akm-33-36-verification.md).
 
 ## License
 

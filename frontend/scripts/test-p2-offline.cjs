@@ -80,6 +80,14 @@ globalThis.Event = class { constructor(name) { this.type = name; } };
     assert.equal(result.conflicts, 1);
     assert.equal((await store.listOutbox())[0].id, second.id);
     assert.equal((await store.listOutbox())[0].status, 'conflict');
+    // A live 422 for a new registration is returned to the form and never left as a phantom offline item.
+    await store.removeOutbox(second.id);
+    globalThis.fetch = async () => ({ status: 422, json: async () => ({ detail: [{ loc: ['body', 'measurement', 'value'], msg: 'out of range' }] }) });
+    const live = await store.storeThenSync(payload);
+    assert.equal(live.receipt, null);
+    assert.equal(live.rejection.status, 422);
+    assert.equal(live.rejection.body.detail[0].loc.at(-1), 'value');
+    assert.deepEqual(await store.listOutbox(), []);
     console.log('AKM-33 in-memory IndexedDB outbox tests: PASS');
   } finally { fs.rmSync(out, { recursive: true, force: true }); }
 })().catch(error => { console.error(error); process.exitCode = 1; });
