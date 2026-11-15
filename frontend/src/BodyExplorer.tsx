@@ -5,6 +5,7 @@ import { METRICS } from './history-data';
 import type { Kind, MetricSnapshot } from './types';
 import { formatUtc, useDashboardSnapshot } from './use-dashboard';
 import './experiments.css';
+import './body-map.css';
 
 /**
  * AKM-36 — accessible body map.
@@ -75,24 +76,77 @@ export function BodyExplorer() {
           </select>
         </label>
         <div className="body-stage">
-          <svg className="body-silhouette" viewBox="0 0 260 430" role="img" focusable="false"
-            aria-label="Schematic front-facing human silhouette. Use the buttons to select a region.">
-            <g fill="#1b2347" stroke="#8da2d6" strokeWidth="2.5" strokeLinejoin="round">
-              <ellipse cx="130" cy="53" rx="34" ry="41" />
-              <path d="M119 91 L141 91 L147 107 L178 116 Q189 120 190 146 L181 234 L158 248 L152 403 Q143 417 132 405 L122 270 L112 405 Q101 417 92 400 L99 248 L79 234 L70 146 Q71 121 84 116 L114 107 Z" />
-              <path d="M76 123 Q58 123 51 147 L23 264 Q18 282 32 285 Q44 284 49 271 L91 161" />
-              <path d="M184 123 Q202 123 209 147 L237 264 Q242 282 228 285 Q216 284 211 271 L169 161" />
+          <svg className="body-silhouette" viewBox="0 0 300 460" role="img" focusable="false"
+            aria-label="Schematic front view of an astronaut in a spacesuit. Use the buttons to select a region.">
+            <defs>
+              <linearGradient id="suit-fill" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stopColor="#4a5ba3" /><stop offset="0.55" stopColor="#2a3566" /><stop offset="1" stopColor="#1b2347" />
+              </linearGradient>
+              <linearGradient id="suit-dark" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="#3b4a86" /><stop offset="1" stopColor="#1f2852" />
+              </linearGradient>
+              <linearGradient id="visor-fill" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stopColor="#67e8f9" stopOpacity="0.9" /><stop offset="0.5" stopColor="#5b6fd6" /><stop offset="1" stopColor="#1a1442" />
+              </linearGradient>
+              <radialGradient id="floor-glow"><stop offset="0" stopColor="#67e8f9" stopOpacity="0.28" /><stop offset="1" stopColor="#67e8f9" stopOpacity="0" /></radialGradient>
+              <filter id="soft-glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3.5" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+            </defs>
+            <g fill="#e8efff" opacity="0.8">
+              <circle cx="38" cy="96" r="1.2" /><circle cx="262" cy="52" r="1.5" /><circle cx="274" cy="190" r="1" />
+              <circle cx="24" cy="250" r="1.4" /><circle cx="258" cy="318" r="1.1" /><circle cx="46" cy="372" r="1" />
             </g>
-            {selected === 'head' && <ellipse cx="130" cy="53" rx="38" ry="45" fill="none" stroke="#67e8f9" strokeWidth="4" />}
-            {selected === 'chest' && <path d="M84 120 L176 120 L172 200 L88 200 Z" fill="none" stroke="#67e8f9" strokeWidth="4" strokeLinejoin="round" />}
+            <ellipse cx="150" cy="432" rx="86" ry="12" fill="url(#floor-glow)" />
+            <g stroke="#9db0e6" strokeWidth="2.2" strokeLinejoin="round" strokeLinecap="round">
+              <rect x="108" y="112" width="84" height="132" rx="20" fill="#232c58" />
+              <rect x="118" y="260" width="29" height="132" rx="14" fill="url(#suit-fill)" />
+              <rect x="153" y="260" width="29" height="132" rx="14" fill="url(#suit-fill)" />
+              <rect x="118" y="320" width="29" height="8" rx="4" fill="url(#suit-dark)" />
+              <rect x="153" y="320" width="29" height="8" rx="4" fill="url(#suit-dark)" />
+              <path d="M110 394 h36 q6 0 6 6 v14 q0 10 -10 10 h-30 q-12 0 -12 -12 v-6 q0 -12 10 -12 z" fill="url(#suit-dark)" />
+              <path d="M190 394 h-36 q-6 0 -6 6 v14 q0 10 10 10 h30 q12 0 12 -12 v-6 q0 -12 -10 -12 z" fill="url(#suit-dark)" />
+              <path d="M108 124 Q72 136 64 206 L60 262" fill="none" strokeWidth="30" />
+              <path d="M192 124 Q228 136 236 206 L240 262" fill="none" strokeWidth="30" />
+            </g>
+            <g fill="none" strokeLinecap="round">
+              <path d="M108 124 Q72 136 64 206 L60 262" stroke="url(#suit-fill)" strokeWidth="25" />
+              <path d="M192 124 Q228 136 236 206 L240 262" stroke="url(#suit-fill)" strokeWidth="25" />
+              <path d="M64 200 L61 232" stroke="#3b4a86" strokeWidth="25" strokeDasharray="7 100" />
+              <path d="M236 200 L239 232" stroke="#3b4a86" strokeWidth="25" strokeDasharray="7 100" />
+            </g>
+            <g stroke="#9db0e6" strokeWidth="2.2" fill="url(#suit-dark)">
+              <circle cx="59" cy="272" r="15" /><circle cx="241" cy="272" r="15" />
+            </g>
+            <path d="M100 124 Q100 98 126 96 L174 96 Q200 98 200 124 L196 238 Q196 270 168 272 L132 272 Q104 270 104 238 Z"
+              fill="url(#suit-fill)" stroke="#9db0e6" strokeWidth="2.2" strokeLinejoin="round" />
+            <path d="M112 112 Q106 170 112 236" fill="none" stroke="#fff" strokeOpacity="0.14" strokeWidth="5" strokeLinecap="round" />
+            <rect x="104" y="238" width="92" height="9" rx="4.5" fill="url(#suit-dark)" stroke="#9db0e6" strokeWidth="1.6" />
+            <rect x="128" y="90" width="44" height="15" rx="7.5" fill="url(#suit-dark)" stroke="#9db0e6" strokeWidth="2" />
+            <rect x="126" y="134" width="48" height="38" rx="8" fill="#0b1230" stroke="#67e8f9" strokeOpacity="0.75" strokeWidth="1.6" />
+            <circle cx="138" cy="144" r="2.4" fill="#6ee7b7" /><circle cx="150" cy="144" r="2.4" fill="#fbbf24" /><circle cx="162" cy="144" r="2.4" fill="#a78bfa" />
+            <path d="M132 161 L141 161 L145 151 L151 168 L156 161 L168 161" fill="none" stroke="#67e8f9" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="150" cy="56" r="43" fill="url(#suit-fill)" stroke="#9db0e6" strokeWidth="2.2" />
+            <ellipse cx="150" cy="58" rx="31" ry="25" fill="url(#visor-fill)" stroke="#0b1230" strokeWidth="3" />
+            <path d="M129 52 Q137 42 156 43" fill="none" stroke="#fff" strokeOpacity="0.55" strokeWidth="3" strokeLinecap="round" />
+            <path d="M191 46 L214 36" stroke="#67e8f9" strokeOpacity="0.7" strokeWidth="1.6" strokeDasharray="3 3" fill="none" />
+            <path d="M150 172 L150 192" stroke="#67e8f9" strokeOpacity="0.7" strokeWidth="1.6" strokeDasharray="3 3" fill="none" />
+            {selected === 'head' && <circle className="body-pulse" cx="150" cy="56" r="50" fill="none" stroke="#67e8f9" strokeWidth="3.5" filter="url(#soft-glow)" />}
+            {selected === 'chest' && <rect className="body-pulse" x="118" y="126" width="64" height="52" rx="13" fill="none" stroke="#67e8f9" strokeWidth="3.5" filter="url(#soft-glow)" />}
           </svg>
           {(['head', 'chest'] as const).map((id, index) =>
             <button key={id} type="button" className={`body-point body-point-${id}`} aria-pressed={selected === id}
               aria-label={`${index + 1}. Select ${REGIONS[id].label}`} onClick={() => setSelected(id)}>
               <span aria-hidden="true">{index + 1}</span>
             </button>)}
+          <button type="button" className="body-tag body-tag-sleep" aria-pressed={selected === 'sleep'}
+            aria-label={`Select ${REGIONS.sleep.label}`} onClick={() => setSelected('sleep')}>
+            <span aria-hidden="true">☾</span> Sleep
+          </button>
+          <button type="button" className="body-tag body-tag-habitat" aria-pressed={selected === 'habitat'}
+            aria-label={`Select ${REGIONS.habitat.label}`} onClick={() => setSelected('habitat')}>
+            <span aria-hidden="true">◌</span> Cabin
+          </button>
         </div>
-        <p className="body-legend">1 · Head (mood) · 2 · Chest (heart rate). Sleep and cabin readings are not body regions.</p>
+        <p className="body-legend">1 · Head (mood) · 2 · Chest (heart rate). Sleep and cabin readings sit outside the body.</p>
         <div className="body-button-row" role="group" aria-label="All regions and indicators">
           {ORDER.map(id => <button type="button" key={id} className="body-nav-button" aria-pressed={selected === id}
             onClick={() => setSelected(id)}>{REGIONS[id].label}</button>)}
