@@ -24,6 +24,7 @@ NASA historical data and linked web content have their own terms; see [data sour
 | React, React DOM | MIT | frontend/package-lock.json and installed LICENSE |
 | TypeScript | Apache-2.0 | frontend/package-lock.json and installed license |
 | Vite, @vitejs/plugin-react | MIT | frontend/package-lock.json and installed licenses |
+| @fontsource-variable/space-grotesk (Space Grotesk font files, self-hosted) | OFL-1.1 (SIL Open Font License) | frontend/package-lock.json and installed LICENSE |
 | @types/react, @types/react-dom | MIT | frontend/package-lock.json |
 | Playwright Core (AKM-30 browser testing) | Apache-2.0 | Installed package metadata and frontend/package-lock.json |
 | axe-core (AKM-30 accessibility testing) | MPL-2.0 | Installed package metadata and frontend/package-lock.json |
