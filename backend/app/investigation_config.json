@@ -1,0 +1,13 @@
+{
+  "rules_version": "demo-v1",
+  "config": {"individual": {"window": "PT48H", "sleep_ratio": 0.8}, "environment_tolerance": "PT12H"},
+  "resources": [
+    {"kind": "co2_ppm", "astronaut_id": null, "available": true, "effort": "low"},
+    {"kind": "cabin_temp_c", "astronaut_id": null, "available": true, "effort": "low"},
+    {"kind": "sleep_hours", "astronaut_id": "A1", "available": true, "effort": "low"},
+    {"kind": "sleep_hours", "astronaut_id": "A2", "available": true, "effort": "low"},
+    {"kind": "sleep_hours", "astronaut_id": "A3", "available": true, "effort": "low"},
+    {"kind": "sleep_hours", "astronaut_id": "A4", "available": true, "effort": "low"}
+  ],
+  "protocol": null
+}

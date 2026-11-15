@@ -7,10 +7,13 @@ from sqlalchemy import func
 from sqlalchemy.orm import aliased
 from sqlmodel import Session, select
 
+from .alerts import alert_legend
+from .investigations import stored_document
 from .models import Astronaut, Followup, Investigation, Measurement
 from .schemas import (
     AstronautDashboardRead,
     DashboardResponse,
+    DashboardAlert,
     FollowupRead,
     HabitatSnapshot,
     Kind,
@@ -25,15 +28,47 @@ MISSION = MissionContext.model_validate_json(
 
 
 def build_dashboard(session: Session) -> DashboardResponse:
-    latest_crew_analysis = session.exec(
-        select(Investigation.created_at)
-        .where(Investigation.scope == "crew")
-        .order_by(Investigation.created_at.desc())
-        .limit(1)
-    ).first()
+    analyses = session.exec(select(Investigation).order_by(
+        Investigation.created_at.desc(), Investigation.id.desc(),
+    )).all()
+    latest_crew = next((row for row in analyses if row.scope == "crew"), None)
+    latest_crew_analysis = latest_crew.created_at if latest_crew else None
+    statuses = {}
+    alerts = []
+    seen_scopes = set()
+    audited_ids = None
+    styles = {style.status: style for style in alert_legend()}
+    for row in analyses:
+        try:
+            result, audit = stored_document(row)
+        except (ValueError, KeyError, TypeError):
+            # Older development fixtures have no result payload to project.
+            continue
+        if row is latest_crew and "snapshot" in audit:
+            audited_ids = {sample["id"] for sample in audit["snapshot"]["measurements"]
+                           if sample["quality"] == "ok"}
+        key = (row.scope, row.astronaut_id)
+        if key not in seen_scopes:
+            seen_scopes.add(key)
+            if result.status != "normal":
+                alerts.append(DashboardAlert(
+                    id=result.id, level=result.status, label=styles[result.status].label,
+                    explanation=" ".join(result.findings),
+                ))
+        if row.scope == "individual":
+            statuses.setdefault(row.astronaut_id, result.status)
+        else:
+            # A collective status is not the status of every crew member.
+            for subject in audit.get("detection", {}).get("individual_results", []):
+                statuses.setdefault(subject["astronaut_id"], subject["status"])
     new_measurement = select(Measurement.id).where(Measurement.quality == "ok")
     if latest_crew_analysis is not None:
         new_measurement = new_measurement.where(Measurement.recorded_at > latest_crew_analysis)
+    if audited_ids is not None:
+        # Also catches late commits and equal timestamps that were absent from the snapshot.
+        new_measurement = select(Measurement.id).where(
+            Measurement.quality == "ok", Measurement.id.not_in(audited_ids),
+        )
 
     ranked = select(
         Measurement,
@@ -57,7 +92,7 @@ def build_dashboard(session: Session) -> DashboardResponse:
         astronauts=[
             AstronautDashboardRead(
                 id=astronaut.id, name=astronaut.name, latest_metrics=snapshots[astronaut.id],
-                status="insufficient_data",
+                status=statuses.get(astronaut.id, "insufficient_data"),
             )
             for astronaut in session.exec(select(Astronaut).order_by(Astronaut.id))
         ],
@@ -67,7 +102,7 @@ def build_dashboard(session: Session) -> DashboardResponse:
             measured_at=max((sample.measured_at for sample in habitat.values()), default=None),
             measurement_zone="habitat",
         ),
-        alerts=[],
+        alerts=alerts,
         pending_followups=[
             FollowupRead.model_validate(followup, from_attributes=True)
             for followup in session.exec(

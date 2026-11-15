@@ -6,22 +6,29 @@ from math import isfinite
 from sqlite3 import SQLITE_CONSTRAINT_FOREIGNKEY
 from typing import Annotated, Literal
 
-from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, HTTPException, Path, Query, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 from starlette.concurrency import run_in_threadpool
 
 from .dashboard import build_dashboard
 from .db import make_engine, migrate
+from .investigations import (
+    InvestigationSettings, complete_followup, get_investigation, load_settings, run_investigation,
+)
 from .models import Astronaut, Followup, Measurement
 from .nasa_reference import HRP_REFERENCES
 from .schemas import (
     AstronautRead,
     DashboardResponse,
     FollowupRead,
+    FollowupCompleteRequest,
+    InvestigationResult,
+    InvestigationRunRequest,
     MeasurementCreate,
     MeasurementHistoryQuery,
     MeasurementRead,
@@ -35,6 +42,7 @@ async def lifespan(application: FastAPI):
     try:
         await run_in_threadpool(migrate, engine)
         application.state.engine = engine
+        application.state.investigation_settings = load_settings()
         yield
     finally:
         application.state.engine = None
@@ -77,6 +85,14 @@ def get_session(request: Request):
 
 
 DatabaseSession = Annotated[Session, Depends(get_session)]
+
+
+def get_investigation_settings(request: Request) -> InvestigationSettings:
+    return request.app.state.investigation_settings
+
+
+Settings = Annotated[InvestigationSettings, Depends(get_investigation_settings)]
+ResourceId = Annotated[int, Path(gt=0, le=2**63 - 1)]
 HISTORY_QUERY_NAMES = frozenset(
     field.alias or name for name, field in MeasurementHistoryQuery.model_fields.items()
 )
@@ -181,7 +197,30 @@ def create_measurement(body: MeasurementCreate, session: DatabaseSession) -> Mea
 @app.get("/api/dashboard", response_model=DashboardResponse)
 def dashboard(session: DatabaseSession) -> DashboardResponse:
     """Read the local snapshot and indicate observations awaiting investigation."""
-    return build_dashboard(session)
+    with session.begin():
+        session.exec(text("BEGIN"))
+        return build_dashboard(session)
+
+
+@app.post("/api/investigations/run", response_model=InvestigationResult,
+          responses={404: {"description": "Astronaut not found"}, 500: {"description": "Persistence failed"}})
+def investigate(body: InvestigationRunRequest, session: DatabaseSession, settings: Settings):
+    return run_investigation(session, body, settings)
+
+
+@app.get("/api/investigations/{id}", response_model=InvestigationResult,
+         responses={404: {"description": "Investigation not found"}})
+def investigation(id: ResourceId, session: DatabaseSession):
+    return get_investigation(session, id)
+
+
+@app.patch("/api/followups/{id}", response_model=FollowupRead, responses={
+    404: {"description": "Followup or measurement not found"},
+    409: {"description": "Already completed with another measurement"},
+    422: {"description": "Missing or incompatible measurement"},
+})
+def finish_followup(id: ResourceId, body: FollowupCompleteRequest, session: DatabaseSession):
+    return complete_followup(session, id, body.measurement_id)
 
 
 @app.get("/api/nasa/references", response_model=NASAReferenceResponse)
