@@ -15,6 +15,8 @@ These endpoints read the existing four SQLite tables. They do not run the invest
 
 History supports combined optional `astronaut_id`, `kind`, `from` and `to` filters. Period boundaries are inclusive and apply to **observation time**, not recording time. `from` and `to` must be ISO 8601 datetimes with a timezone; offsets are normalized to UTC and `from <= to` is required. Response timestamps use UTC `Z`.
 
+The React History route consumes these endpoints as described in [AKM-15](akm-15-history-trends.md).
+
 Pagination preserves the canonical list response: `limit` defaults to 100 (1–1000), `offset` defaults to 0 (0–9223372036854775807, SQLite's signed 64-bit integer range). Larger offsets return 422 before querying SQLite. Increment offset by limit until a page is shorter than limit. Ordering by observation time and ID breaks ties consistently on a fixed dataset; offset pagination is not a snapshot across concurrent inserts.
 
 An omitted astronaut filter includes crew and habitat observations. Habitat-only metrics can be selected with `kind=co2_ppm` or `kind=cabin_temp_c`; their `astronaut_id` is null. An existing astronaut with no matching observations returns `[]`. An unknown astronaut filter returns 404, and malformed filters, invalid metric/status names, or invalid periods return FastAPI's 422 `detail` response. Empty lists are never padded with artificial measurements.

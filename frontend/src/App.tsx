@@ -26,7 +26,7 @@ const SECTIONS: Record<PageId, Section> = {
   historico: {
     eyebrow: 'Registro verificável',
     heading: 'Histórico de medições',
-    intro: 'Consulta filtrável de observações simuladas, com qualidade, unidade e origem visíveis.',
+    intro: 'Consulte tendências da tripulação e do habitat por indicador e período, com origem e qualidade de cada leitura.',
     next: 'investigacao',
   },
   investigacao: {
@@ -96,7 +96,7 @@ export function App() {
 
           <SimulationNotice />
 
-          <section className="panels" aria-label="Dados de exemplo e navegação">
+          <section className="panels" aria-label={page === 'historico' ? 'Histórico e navegação' : 'Dados de exemplo e navegação'}>
             <MissionPreview page={page} />
             <Card heading="Próxima etapa da jornada">
               <div className="journey-actions">
