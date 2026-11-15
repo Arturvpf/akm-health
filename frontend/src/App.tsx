@@ -90,7 +90,7 @@ export function App() {
 
   const view = SECTIONS[page];
   useEffect(() => {
-    document.title = page === 'home' ? 'AKM Health · Space health monitoring' : `${view.heading} | AKM Health`;
+    document.title = page === 'home' ? 'AKM Health — Space Health Monitoring' : `${view.heading} | AKM Health — Space Health Monitoring`;
     if (previousPage.current !== page) {
       previousPage.current = page;
       window.scrollTo({ top: 0 });
@@ -167,7 +167,7 @@ export function App() {
           </>}
         </main>
         <footer className="footer">
-          <span>AKM Health · NASA Space Apps Challenge 2026 · P0 interface + exploratory P1/P2 tools</span>
+          <span>AKM Health — Space Health Monitoring · NASA Space Apps Challenge 2026 · P0 interface + exploratory P1/P2 tools</span>
           <span className="footer-status">Simulated mission · not a medical device</span>
         </footer>
       </div>

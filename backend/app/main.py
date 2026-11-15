@@ -52,7 +52,7 @@ async def lifespan(application: FastAPI):
         engine.dispose()
 
 
-app = FastAPI(title="AKM Health · backend foundation", version="0.2.0", lifespan=lifespan)
+app = FastAPI(title="AKM Health — Space Health Monitoring API", version="0.2.0", lifespan=lifespan)
 
 
 def json_safe_errors(value):

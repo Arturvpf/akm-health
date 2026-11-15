@@ -1,4 +1,4 @@
-# AKM Health
+# AKM Health — Space Health Monitoring
 
 Experimental NASA Space Apps Challenge prototype: record observations for a fictional crew, inspect history, explicitly investigate patterns and verify a finding with a new observation. ODYSSEY-26, its crew and mission readings are fictional. This is not a medical device, diagnosis, prescription, clinical validation or live astronaut monitoring.
 
