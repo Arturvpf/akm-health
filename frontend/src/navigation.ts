@@ -28,8 +28,6 @@ export function parsePage(hash: string): PageId {
   return match ? match.id : DEFAULT_PAGE;
 }
 
-/** Returns the canonical hash when `hash` uses a legacy id, otherwise null. */
-
 export function pageHref(page: PageId): string {
   return `#/${page}`;
 }
