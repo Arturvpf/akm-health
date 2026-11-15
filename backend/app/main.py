@@ -56,6 +56,54 @@ async def lifespan(application: FastAPI):
 
 app = FastAPI(title="AKM Health — Space Health Monitoring API", version="0.2.0", lifespan=lifespan)
 
+MAX_BODY_BYTES = 64 * 1024
+
+
+class BodyLimitMiddleware:
+    """Reject oversized request bodies before they are parsed (declared length or streamed bytes)."""
+
+    def __init__(self, application):
+        self.application = application
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await self.application(scope, receive, send)
+        declared = dict(scope["headers"]).get(b"content-length")
+        too_large = JSONResponse({"detail": "Request body too large"}, status_code=HTTPStatus.REQUEST_ENTITY_TOO_LARGE)
+        if declared is not None and declared.isdigit() and int(declared) > MAX_BODY_BYTES:
+            return await too_large(scope, receive, send)
+        received = 0
+        rejected = False
+
+        async def limited_receive():
+            nonlocal received, rejected
+            message = await receive()
+            if message["type"] == "http.request":
+                received += len(message.get("body", b""))
+                if received > MAX_BODY_BYTES:
+                    rejected = True
+                    return {"type": "http.request", "body": b"", "more_body": False}
+            return message
+
+        async def guarded_send(message):
+            if rejected:
+                return
+            await send(message)
+
+        await self.application(scope, limited_receive, guarded_send)
+        if rejected:
+            await too_large(scope, receive, send)
+
+
+app.add_middleware(BodyLimitMiddleware)
+
+
+def reject_future_measurement(body: MeasurementCreate) -> None:
+    try:
+        body.ensure_not_in_future()
+    except ValueError as error:
+        raise HTTPException(HTTPStatus.UNPROCESSABLE_ENTITY, str(error)) from None
+
 
 def json_safe_errors(value):
     """Keep non-finite inputs from breaking the validation error response."""
@@ -184,6 +232,7 @@ def followups(
 )
 def create_measurement(body: MeasurementCreate, session: DatabaseSession) -> MeasurementRead:
     """Record a crew or cabin observation and return the stored measurement."""
+    reject_future_measurement(body)
     if body.astronaut_id is not None and session.get(Astronaut, body.astronaut_id) is None:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Astronaut not found")
 
@@ -248,6 +297,7 @@ def nasa_references():
 @app.post("/api/_contract/validate-measurement")
 def validate_measurement(body: MeasurementCreate):
     """Testing-only endpoint. Not part of the ten canonical business API routes."""
+    reject_future_measurement(body)
     return {"kind": body.kind, "measurement_zone": body.zone(), "valid": True}
 
 

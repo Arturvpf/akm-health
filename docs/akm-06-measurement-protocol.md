@@ -23,7 +23,8 @@ Source of truth: the team's internal Notion workspace (Portuguese, not part of t
 ## Contract validation (not medical safety thresholds)
 
 - kind only five P0 metrics; canonical units h/bpm/score_1_to_5/ppm/C; values finite, reject NaN/Inf.
-- sleep_hours in [0,24]; heart_rate_bpm >0; mood_score integer 1..5; co2_ppm >=0; cabin_temp_c finite.
+- sleep_hours in [0,24]; heart_rate_bpm in [20,250]; mood_score integer 1..5; co2_ppm in [0,40000]; cabin_temp_c in [-20,60] °C. These are plausibility limits that catch typing mistakes; they are not clinical thresholds.
+- New observations cannot be dated more than 10 minutes in the future (clock drift allowance), on the direct, sync and contract-validation routes. Request bodies larger than 64 KiB get 413.
 - Individual measures require astronaut_id; environment requires NULL; server derives astronaut/habitat zone, creates recorded_at UTC. measured_at must carry timezone (converted UTC).
 - Absence is never zero; quality suspect is insufficient evidence; coincidence of collective sleep changes with habitat CO2 shifts is not causal.
 - A NASA historical observation must keep native time and public source provenance and must not be inserted as a fictional crew measurement.

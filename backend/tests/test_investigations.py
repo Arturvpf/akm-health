@@ -47,7 +47,7 @@ def counts():
 def measure(client, *, kind="co2_ppm", subject=None, quality="ok", at=None):
     units = {"co2_ppm": "ppm", "cabin_temp_c": "C", "sleep_hours": "h"}
     response = client.post("/api/measurements", json={
-        "kind": kind, "astronaut_id": subject, "value": 6 if kind == "sleep_hours" else 850,
+        "kind": kind, "astronaut_id": subject, "value": {"sleep_hours": 6, "cabin_temp_c": 22}.get(kind, 850),
         "unit": units[kind], "measured_at": (at or client.clock[0]).isoformat(),
         "source": "synthetic", "quality": quality,
     })

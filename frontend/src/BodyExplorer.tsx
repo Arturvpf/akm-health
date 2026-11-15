@@ -77,60 +77,66 @@ export function BodyExplorer() {
         </label>
         <div className="body-stage">
           <svg className="body-silhouette" viewBox="0 0 300 460" role="img" focusable="false"
-            aria-label="Schematic front view of an astronaut in a spacesuit. Use the buttons to select a region.">
+            aria-label="Schematic front view of a human body. Use the buttons to select a region.">
             <defs>
-              <linearGradient id="suit-fill" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="#4a5ba3" /><stop offset="0.55" stopColor="#2a3566" /><stop offset="1" stopColor="#1b2347" />
+              <linearGradient id="body-fill" gradientUnits="userSpaceOnUse" x1="50" y1="30" x2="250" y2="440">
+                <stop offset="0" stopColor="#c9d6ff" /><stop offset="0.45" stopColor="#8d9cf0" /><stop offset="1" stopColor="#4b52b8" />
               </linearGradient>
-              <linearGradient id="suit-dark" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stopColor="#3b4a86" /><stop offset="1" stopColor="#1f2852" />
+              <linearGradient id="body-shade" gradientUnits="userSpaceOnUse" x1="60" y1="0" x2="240" y2="0">
+                <stop offset="0" stopColor="#1a1f5c" stopOpacity="0.38" /><stop offset="0.35" stopColor="#fff" stopOpacity="0" />
+                <stop offset="0.65" stopColor="#fff" stopOpacity="0" /><stop offset="1" stopColor="#1a1f5c" stopOpacity="0.38" />
               </linearGradient>
-              <linearGradient id="visor-fill" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="#67e8f9" stopOpacity="0.9" /><stop offset="0.5" stopColor="#5b6fd6" /><stop offset="1" stopColor="#1a1442" />
-              </linearGradient>
-              <radialGradient id="floor-glow"><stop offset="0" stopColor="#67e8f9" stopOpacity="0.28" /><stop offset="1" stopColor="#67e8f9" stopOpacity="0" /></radialGradient>
+              <radialGradient id="body-aura"><stop offset="0" stopColor="#8d9cf0" stopOpacity="0.32" /><stop offset="1" stopColor="#8d9cf0" stopOpacity="0" /></radialGradient>
+              <radialGradient id="floor-glow"><stop offset="0" stopColor="#67e8f9" stopOpacity="0.3" /><stop offset="1" stopColor="#67e8f9" stopOpacity="0" /></radialGradient>
               <filter id="soft-glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3.5" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
             </defs>
-            <g fill="#e8efff" opacity="0.8">
-              <circle cx="38" cy="96" r="1.2" /><circle cx="262" cy="52" r="1.5" /><circle cx="274" cy="190" r="1" />
-              <circle cx="24" cy="250" r="1.4" /><circle cx="258" cy="318" r="1.1" /><circle cx="46" cy="372" r="1" />
+            <ellipse cx="150" cy="230" rx="140" ry="215" fill="url(#body-aura)" />
+            <g fill="#e8efff" opacity="0.75">
+              <circle cx="30" cy="110" r="1.2" /><circle cx="270" cy="70" r="1.5" /><circle cx="282" cy="250" r="1" />
+              <circle cx="20" cy="290" r="1.4" /><circle cx="268" cy="360" r="1.1" /><circle cx="36" cy="400" r="1" />
             </g>
-            <ellipse cx="150" cy="432" rx="86" ry="12" fill="url(#floor-glow)" />
-            <g stroke="#9db0e6" strokeWidth="2.2" strokeLinejoin="round" strokeLinecap="round">
-              <rect x="108" y="112" width="84" height="132" rx="20" fill="#232c58" />
-              <rect x="118" y="260" width="29" height="132" rx="14" fill="url(#suit-fill)" />
-              <rect x="153" y="260" width="29" height="132" rx="14" fill="url(#suit-fill)" />
-              <rect x="118" y="320" width="29" height="8" rx="4" fill="url(#suit-dark)" />
-              <rect x="153" y="320" width="29" height="8" rx="4" fill="url(#suit-dark)" />
-              <path d="M110 394 h36 q6 0 6 6 v14 q0 10 -10 10 h-30 q-12 0 -12 -12 v-6 q0 -12 10 -12 z" fill="url(#suit-dark)" />
-              <path d="M190 394 h-36 q-6 0 -6 6 v14 q0 10 10 10 h30 q12 0 12 -12 v-6 q0 -12 -10 -12 z" fill="url(#suit-dark)" />
-              <path d="M108 124 Q72 136 64 206 L60 262" fill="none" strokeWidth="30" />
-              <path d="M192 124 Q228 136 236 206 L240 262" fill="none" strokeWidth="30" />
+            <ellipse cx="150" cy="448" rx="80" ry="9" fill="url(#floor-glow)" />
+            <g fill="none" strokeLinecap="round" strokeLinejoin="round">
+              <g stroke="#6f7fe0" strokeOpacity="0.9">
+                <path d="M100 132 Q82 164 78 210" strokeWidth="25" /><path d="M78 210 Q72 250 68 286" strokeWidth="20" />
+                <path d="M200 132 Q218 164 222 210" strokeWidth="25" /><path d="M222 210 Q228 250 232 286" strokeWidth="20" />
+                <path d="M134 304 Q132 340 133 374" strokeWidth="34" /><path d="M133 374 Q131 404 130 430" strokeWidth="25" />
+                <path d="M166 304 Q168 340 167 374" strokeWidth="34" /><path d="M167 374 Q169 404 170 430" strokeWidth="25" />
+              </g>
+              <g stroke="url(#body-fill)">
+                <path d="M100 132 Q82 164 78 210" strokeWidth="22" /><path d="M78 210 Q72 250 68 286" strokeWidth="17" />
+                <path d="M200 132 Q218 164 222 210" strokeWidth="22" /><path d="M222 210 Q228 250 232 286" strokeWidth="17" />
+                <path d="M134 304 Q132 340 133 374" strokeWidth="31" /><path d="M133 374 Q131 404 130 430" strokeWidth="22" />
+                <path d="M166 304 Q168 340 167 374" strokeWidth="31" /><path d="M167 374 Q169 404 170 430" strokeWidth="22" />
+              </g>
             </g>
-            <g fill="none" strokeLinecap="round">
-              <path d="M108 124 Q72 136 64 206 L60 262" stroke="url(#suit-fill)" strokeWidth="25" />
-              <path d="M192 124 Q228 136 236 206 L240 262" stroke="url(#suit-fill)" strokeWidth="25" />
-              <path d="M64 200 L61 232" stroke="#3b4a86" strokeWidth="25" strokeDasharray="7 100" />
-              <path d="M236 200 L239 232" stroke="#3b4a86" strokeWidth="25" strokeDasharray="7 100" />
+            <g fill="url(#body-fill)" stroke="#6f7fe0" strokeWidth="2.2" strokeLinejoin="round">
+              <ellipse cx="65" cy="300" rx="9" ry="15" transform="rotate(8 65 300)" /><ellipse cx="235" cy="300" rx="9" ry="15" transform="rotate(-8 235 300)" />
+              <path d="M112 436 Q104 454 124 454 Q146 454 142 440 L142 430 L114 430 Z" /><path d="M188 436 Q196 454 176 454 Q154 454 158 440 L158 430 L186 430 Z" />
+              <path d="M138 84 L138 110 L162 110 L162 84 Z" />
+              <path d="M138 104 C120 108 104 112 100 124 C96 146 102 176 106 200 C109 218 112 232 110 246 C108 262 104 276 106 296 C110 312 126 320 150 320 C174 320 190 312 194 296 C196 276 192 262 190 246 C188 232 191 218 194 200 C198 176 204 146 200 124 C196 112 180 108 162 104 Z" />
+              <path d="M150 24 C171 24 181 42 179 60 C177 79 167 94 150 94 C133 94 123 79 121 60 C119 42 129 24 150 24 Z" />
+              <ellipse cx="121" cy="62" rx="4" ry="9" /><ellipse cx="179" cy="62" rx="4" ry="9" />
             </g>
-            <g stroke="#9db0e6" strokeWidth="2.2" fill="url(#suit-dark)">
-              <circle cx="59" cy="272" r="15" /><circle cx="241" cy="272" r="15" />
+            <path d="M138 104 C120 108 104 112 100 124 C96 146 102 176 106 200 C109 218 112 232 110 246 C108 262 104 276 106 296 C110 312 126 320 150 320 C174 320 190 312 194 296 C196 276 192 262 190 246 C188 232 191 218 194 200 C198 176 204 146 200 124 C196 112 180 108 162 104 Z" fill="url(#body-shade)" />
+            <path d="M150 24 C171 24 181 42 179 60 C177 79 167 94 150 94 C133 94 123 79 121 60 C119 42 129 24 150 24 Z" fill="url(#body-shade)" />
+            <path d="M123 52 C124 32 138 22 150 22 C164 22 177 32 177 52 C170 40 158 35 150 35 C140 35 130 40 123 52 Z" fill="#2a2f7a" opacity="0.85" />
+            <g fill="none" stroke="#fff" strokeOpacity="0.38" strokeWidth="1.8" strokeLinecap="round">
+              <path d="M140 110 Q128 118 114 122" /><path d="M160 110 Q172 118 186 122" />
+              <path d="M150 112 L150 150" strokeOpacity="0.18" /><path d="M150 316 Q149 380 150 436" stroke="#4b52b8" strokeOpacity="0.8" strokeWidth="2" />
+              <path d="M118 176 Q134 188 150 184 Q166 188 182 176" strokeOpacity="0.22" />
+              <path d="M126 250 Q150 262 174 250" strokeOpacity="0.2" /><circle cx="150" cy="232" r="1.6" />
+              <path d="M126 376 Q133 381 140 376" strokeOpacity="0.2" /><path d="M160 376 Q167 381 174 376" strokeOpacity="0.2" />
             </g>
-            <path d="M100 124 Q100 98 126 96 L174 96 Q200 98 200 124 L196 238 Q196 270 168 272 L132 272 Q104 270 104 238 Z"
-              fill="url(#suit-fill)" stroke="#9db0e6" strokeWidth="2.2" strokeLinejoin="round" />
-            <path d="M112 112 Q106 170 112 236" fill="none" stroke="#fff" strokeOpacity="0.14" strokeWidth="5" strokeLinecap="round" />
-            <rect x="104" y="238" width="92" height="9" rx="4.5" fill="url(#suit-dark)" stroke="#9db0e6" strokeWidth="1.6" />
-            <rect x="128" y="90" width="44" height="15" rx="7.5" fill="url(#suit-dark)" stroke="#9db0e6" strokeWidth="2" />
-            <rect x="126" y="134" width="48" height="38" rx="8" fill="#0b1230" stroke="#67e8f9" strokeOpacity="0.75" strokeWidth="1.6" />
-            <circle cx="138" cy="144" r="2.4" fill="#6ee7b7" /><circle cx="150" cy="144" r="2.4" fill="#fbbf24" /><circle cx="162" cy="144" r="2.4" fill="#a78bfa" />
-            <path d="M132 161 L141 161 L145 151 L151 168 L156 161 L168 161" fill="none" stroke="#67e8f9" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            <circle cx="150" cy="56" r="43" fill="url(#suit-fill)" stroke="#9db0e6" strokeWidth="2.2" />
-            <ellipse cx="150" cy="58" rx="31" ry="25" fill="url(#visor-fill)" stroke="#0b1230" strokeWidth="3" />
-            <path d="M129 52 Q137 42 156 43" fill="none" stroke="#fff" strokeOpacity="0.55" strokeWidth="3" strokeLinecap="round" />
-            <path d="M191 46 L214 36" stroke="#67e8f9" strokeOpacity="0.7" strokeWidth="1.6" strokeDasharray="3 3" fill="none" />
-            <path d="M150 172 L150 192" stroke="#67e8f9" strokeOpacity="0.7" strokeWidth="1.6" strokeDasharray="3 3" fill="none" />
-            {selected === 'head' && <circle className="body-pulse" cx="150" cy="56" r="50" fill="none" stroke="#67e8f9" strokeWidth="3.5" filter="url(#soft-glow)" />}
-            {selected === 'chest' && <rect className="body-pulse" x="118" y="126" width="64" height="52" rx="13" fill="none" stroke="#67e8f9" strokeWidth="3.5" filter="url(#soft-glow)" />}
+            <path d="M104 132 Q108 170 112 214" fill="none" stroke="#fff" strokeOpacity="0.28" strokeWidth="4" strokeLinecap="round" />
+            <g className="body-heart" transform="translate(163 170)">
+              <path d="M0 -7 C-9 -18 -24 -4 0 15 C24 -4 9 -18 0 -7 Z" fill="#fb7185" stroke="#ffe4e6" strokeWidth="1.2" filter="url(#soft-glow)" />
+            </g>
+            <path d="M104 190 L130 190 L136 182 L142 198 L149 186 L156 190 L196 190" fill="none" stroke="#67e8f9" strokeOpacity="0.55" strokeWidth="1.4" strokeLinejoin="round" />
+            <path d="M178 54 L231 46" stroke="#67e8f9" strokeOpacity="0.7" strokeWidth="1.6" strokeDasharray="3 3" fill="none" />
+            <path d="M178 170 L231 172" stroke="#67e8f9" strokeOpacity="0.7" strokeWidth="1.6" strokeDasharray="3 3" fill="none" />
+            {selected === 'head' && <ellipse className="body-pulse" cx="150" cy="59" rx="35" ry="42" fill="none" stroke="#67e8f9" strokeWidth="3.5" filter="url(#soft-glow)" />}
+            {selected === 'chest' && <path className="body-pulse" d="M108 124 Q150 112 192 124 Q196 160 192 204 Q150 214 108 204 Q104 160 108 124 Z" fill="none" stroke="#67e8f9" strokeWidth="3.5" strokeLinejoin="round" filter="url(#soft-glow)" />}
           </svg>
           {(['head', 'chest'] as const).map((id, index) =>
             <button key={id} type="button" className={`body-point body-point-${id}`} aria-pressed={selected === id}

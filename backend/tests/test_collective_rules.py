@@ -113,7 +113,7 @@ def test_two_profiles_are_enough_and_temperature_cannot_trigger_a_sleep_alert():
     assert detect_collective_patterns(pair, "demo-v1").status == "attention"
     normal = scenario_snapshot("individual")
     changed_temperature = [
-        row.model_copy(update={"value": 100.0}) if row.kind == "cabin_temp_c" else row
+        row.model_copy(update={"value": 60.0}) if row.kind == "cabin_temp_c" else row
         for row in normal.measurements
     ]
     result = detect_collective_patterns(with_rows(normal, changed_temperature), "demo-v1")

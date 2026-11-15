@@ -25,7 +25,7 @@ const context = { phase: 'ready', error: null, receivedAt: null, data: { mission
 const render = (extra = {}) => renderToStaticMarkup(React.createElement(MeasurementFormView, { context, registration: INITIAL_REGISTRATION, draft: draft(), errors: {}, onChange() {}, onSubmit() {}, onRefresh() {}, onUnlock() {}, onNew() {}, ...extra }));
 test('all five metrics produce canonical target, unit, provenance and UTC payload', () => {
   for (const [kind, metric] of Object.entries(FORM_METRICS)) {
-    const result = validateDraft(draft({ kind, value: kind === 'mood_score' ? '3' : '0.5' }), ['A1']);
+    const result = validateDraft(draft({ kind, value: kind === 'mood_score' ? '3' : kind === 'heart_rate_bpm' ? '70' : '0.5' }), ['A1']);
     assert.deepEqual(result.errors, {});
     assert.equal(result.payload.unit, metric.unit);
     assert.equal(result.payload.astronaut_id, metric.zone === 'habitat' ? null : 'A1');
@@ -38,8 +38,8 @@ test('all five metrics produce canonical target, unit, provenance and UTC payloa
 });
 test('technical ranges reject missing and nonfinite data, preserve true zeros and negative temperature', () => {
   for (const value of ['', ' ', 'NaN', 'Infinity', '1e999', '1,000.5', '0x10', '--1']) assert.ok(validateDraft(draft({ value }), ['A1']).errors.value, value);
-  for (const [kind, value] of [['sleep_hours','-1'],['sleep_hours','24.1'],['heart_rate_bpm','0'],['mood_score','3.5'],['mood_score','6'],['co2_ppm','-1']]) assert.ok(validateDraft(draft({kind,value}), ['A1']).errors.value);
-  for (const [kind,value] of [['sleep_hours','0'],['sleep_hours','24'],['co2_ppm','0'],['cabin_temp_c','-20'],['heart_rate_bpm','9999']]) assert.ok(validateDraft(draft({kind,value}), ['A1']).payload);
+  for (const [kind, value] of [['sleep_hours','-1'],['sleep_hours','24.1'],['heart_rate_bpm','0'],['heart_rate_bpm','19'],['heart_rate_bpm','251'],['co2_ppm','40001'],['cabin_temp_c','-21'],['cabin_temp_c','61'],['mood_score','3.5'],['mood_score','6'],['co2_ppm','-1']]) assert.ok(validateDraft(draft({kind,value}), ['A1']).errors.value);
+  for (const [kind,value] of [['sleep_hours','0'],['sleep_hours','24'],['co2_ppm','0'],['cabin_temp_c','-20'],['heart_rate_bpm','250'],['heart_rate_bpm','20'],['co2_ppm','40000'],['cabin_temp_c','60']]) assert.ok(validateDraft(draft({kind,value}), ['A1']).payload);
   assert.ok(validateDraft(draft({astronaut:'missing'}), ['A1']).errors.astronaut);
   assert.ok(validateDraft(draft({kind:'co2_ppm'}), []).payload);
 });
@@ -115,7 +115,7 @@ test('uncertain UI locks fields with explicit history check, confirmed receipt s
 });
 
 test('real API accepts frontend payloads, receipts render, history updates and no investigation runs on save', () => {
-  const payloads = Object.keys(FORM_METRICS).map((kind,index) => validateDraft(draft({kind,value:kind === 'mood_score' ? '3' : kind === 'cabin_temp_c' ? '-2' : '0.5', source:index % 2 ? 'synthetic':'manual',quality:kind === 'cabin_temp_c' ? 'suspect':'ok'}),['A1']).payload);
+  const payloads = Object.keys(FORM_METRICS).map((kind,index) => validateDraft(draft({kind,value:kind === 'mood_score' ? '3' : kind === 'heart_rate_bpm' ? '70' : kind === 'cabin_temp_c' ? '-2' : '0.5', source:index % 2 ? 'synthetic':'manual',quality:kind === 'cabin_temp_c' ? 'suspect':'ok'}),['A1']).payload);
   const python = process.env.PYTHON || path.join(frontend,'..','.venv',process.platform === 'win32' ? 'Scripts/python.exe':'bin/python');
   const source = [
     'import json, os, sys, tempfile',
@@ -171,4 +171,9 @@ test('a server validation rejection is not labeled as a connection problem', () 
   const html = render({ registration: { ...INITIAL_REGISTRATION, phase: 'error', error: 'Review the highlighted field and try again.', fields: { quality: 'Check the quality.' } }, errors: { quality: 'Check the quality.' } });
   assert.ok(html.includes('Review the highlighted field and try again.'));
   assert.ok(!html.includes('Connection error'));
+});
+test('an observation time in the future is rejected, a few minutes of drift is allowed', () => {
+  const at = ms => new Date(Date.now() + ms).toISOString().slice(0, 16);
+  assert.ok(validateDraft(draft({ localTime: at(3 * 3600_000), offset: '+00:00' }), ['A1']).errors.localTime);
+  assert.deepEqual(validateDraft(draft({ localTime: at(2 * 60_000), offset: '+00:00' }), ['A1']).errors, {});
 });

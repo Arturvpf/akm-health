@@ -154,3 +154,19 @@
   .planet-orbit, .planet-ping { animation: none; }
   html { scroll-behavior: auto; }
 }
+
+/* Hazard cards: each hazard sits in its own box so the four read as separate items. */
+.lp-columns-four { align-items: stretch; }
+.lp-columns-four .lp-column {
+  --hazard-accent: var(--brand-cyan);
+  display: flex; flex-direction: column; padding: var(--space-5);
+  border: 1px solid rgb(148 163 255 / 28%); border-top: 3px solid var(--hazard-accent); border-radius: var(--radius-card);
+  background: linear-gradient(180deg, rgb(20 28 62 / 82%), rgb(11 16 34 / 82%));
+  box-shadow: 0 10px 28px rgb(0 0 0 / 28%);
+}
+.lp-columns-four .lp-column:nth-child(2) { --hazard-accent: var(--brand-violet); }
+.lp-columns-four .lp-column:nth-child(3) { --hazard-accent: var(--brand-mint); }
+.lp-columns-four .lp-column:nth-child(4) { --hazard-accent: #fbbf24; }
+.lp-columns-four .lp-column h3 { color: #fff; font-size: 1.1rem; }
+.lp-columns-four .lp-column p { color: #d5dcec; }
+.lp-columns-four .lp-column-link { margin-top: auto !important; padding-top: var(--space-4); }

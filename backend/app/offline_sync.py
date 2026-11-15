@@ -37,6 +37,10 @@ def register_sync_measurement(session: Session, body: SyncMeasurementRequest) ->
                 measurement=MeasurementRead.model_validate(existing, from_attributes=True),
                 reused=True,
             ), HTTPStatus.OK
+        try:
+            body.measurement.ensure_not_in_future()
+        except ValueError as error:
+            raise HTTPException(HTTPStatus.UNPROCESSABLE_ENTITY, str(error)) from None
         if body.measurement.astronaut_id is not None and session.get(
             Astronaut, body.measurement.astronaut_id
         ) is None:
