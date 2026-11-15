@@ -31,6 +31,13 @@ const SOURCES: Record<Source, string> = {
   nasa_historical: 'Dado NASA histórico',
 };
 
+const ENGLISH_SOURCES: Record<Source, string> = {
+  synthetic: 'Simulated data',
+  manual: 'Manual entry',
+  nasa_reference: 'NASA research reference',
+  nasa_historical: 'NASA historical data',
+};
+
 const QUALITY: Record<Quality, StatusLabel> = {
   ok: { label: 'Válida', icon: 'check', tone: 'neutral' },
   suspect: { label: 'Suspeita', icon: 'warning', tone: 'caution' },
@@ -57,8 +64,9 @@ export function StatusBadge({ status }: { status: DemoStatus }) {
   return <Badge {...STATUSES[status]} />;
 }
 
-export function SourceBadge({ source }: { source: Source }) {
-  return <Badge label={SOURCES[source]} icon="source" tone="neutral" />;
+export function SourceBadge({ source, language = 'pt-BR' }: { source: Source; language?: 'en' | 'pt-BR' }) {
+  const labels = language === 'en' ? ENGLISH_SOURCES : SOURCES;
+  return <Badge label={labels[source]} icon="source" tone="neutral" />;
 }
 
 export function QualityBadge({ quality }: { quality: Quality }) {

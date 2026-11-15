@@ -77,6 +77,8 @@ Start a topic branch from `main`. Group commits by deliverable and open a PR wit
 
 [EP-05 scientific foundation and safety evidence, including NASA RR-1 provenance](docs/ep-05-scientific-foundation-and-safety.md)
 
+[AKM-39 NASA references](docs/akm-39-nasa-references.md) credits the NASA OSDR Environmental Data Application for the RR-1 historical excerpt and documents the source, access date, reuse terms and local reproduction. Dashboard and Investigation show the archive in a separate NASA reference section.
+
 [AKM-24 alert presentation](docs/akm-24-alert-presentation.md) describes status labels, icons, colors and the reserved red legend (`python scripts/demo_alerts.py`).
 
 [AKM-23 next check](docs/akm-23-next-check.md) documents explainable scoring, resource availability, protocol priority and feasible alternatives (`python scripts/demo_next_check.py`).

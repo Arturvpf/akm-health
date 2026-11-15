@@ -6,6 +6,7 @@ import {
 } from './investigation-api';
 import { ResultDetails, targetName } from './investigation-result';
 import { ActionButton, ActionLink, Card, DataState, ProtocolLegend, SelectField } from './design-system';
+import { NasaReferences } from './NasaReferences';
 import { pageHref } from './navigation';
 import type { FollowupRead, InvestigationRequest, InvestigationResult } from './types';
 import './investigation.css';
@@ -323,6 +324,7 @@ export function InvestigationPage() {
         profiles={people} active={activeCheck} select={select} recover={id => void recover(id, true)}
         completing={completing} complete={id => void complete(id)} linkMessage={agendaMessage}
         recovering={operation !== null} heading={checkHeading} />
+      <NasaReferences mission={dashboard.data?.mission} />
     </div>
   );
 }

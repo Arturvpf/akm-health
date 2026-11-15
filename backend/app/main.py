@@ -22,7 +22,7 @@ from .investigations import (
     InvestigationSettings, complete_followup, get_investigation, load_settings, run_investigation,
 )
 from .models import Astronaut, Followup, Measurement
-from .nasa_reference import HRP_REFERENCES
+from .nasa_reference import load_nasa_references
 from .schemas import (
     AstronautRead,
     DashboardResponse,
@@ -226,13 +226,13 @@ def finish_followup(id: ResourceId, body: FollowupCompleteRequest, session: Data
     return complete_followup(session, id, body.measurement_id)
 
 
-@app.get("/api/nasa/references", response_model=NASAReferenceResponse)
+@app.get("/api/nasa/references", response_model=NASAReferenceResponse,
+         responses={503: {"description": "NASA reference catalog unavailable"}})
 def nasa_references():
-    return NASAReferenceResponse(
-        scientific_references=list(HRP_REFERENCES),
-        historical_series=[],
-        historical_data_status="not_imported",
-    )
+    try:
+        return load_nasa_references()
+    except RuntimeError as error:
+        raise HTTPException(503, "NASA reference catalog unavailable") from error
 
 
 @app.post("/api/_contract/validate-measurement")

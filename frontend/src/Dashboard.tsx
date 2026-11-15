@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { METRIC_LABELS, nasaReferenceUrl } from './api';
+import { METRIC_LABELS } from './api';
+import { NasaReferences } from './NasaReferences';
 import { createDashboardController, INITIAL_DASHBOARD_STATE, type DashboardState } from './dashboard-state';
 import { ActionButton, ActionLink, Card, DataState, Details, InformationNotice, ProtocolLegend, SourceBadge, StatusBadge } from './design-system';
 import { pageHref } from './navigation';
@@ -39,7 +40,6 @@ export function DashboardView({ state, onRefresh }: { state: DashboardState; onR
   const { data, phase, error, receivedAt } = state;
   const refreshing = phase === 'loading';
   const evaluated = data?.last_investigation_at !== null && data?.last_investigation_at !== undefined;
-  const reference = data ? nasaReferenceUrl(data.mission.context_source_url) : null;
   return <div className="dashboard-page" aria-busy={refreshing}>
     <div className="dashboard-toolbar">
       <p>Consulta da missão fictícia. As outras áreas ainda apresentam exemplos locais.</p>
@@ -61,7 +61,6 @@ export function DashboardView({ state, onRefresh }: { state: DashboardState; onR
           <Details items={[
             { label: 'Contexto', value: 'Missão fictícia · habitat na superfície de Marte' },
             { label: 'Dia da missão', value: data.mission.day },
-            { label: 'Gravidade de referência', value: `${number.format(data.mission.gravity_g_reference)} g` },
           ]} />
         </Card>
         <Card heading="Última investigação registrada">
@@ -104,7 +103,7 @@ export function DashboardView({ state, onRefresh }: { state: DashboardState; onR
           </Card>
         </div>
       </section>
-      <section className="dashboard-grid" aria-label="Avaliações e referências">
+      <section aria-label="Avaliações">
         <Card heading="Avaliações registradas">
           {!evaluated ? <DataState kind="empty">As avaliações do motor aparecerão após uma investigação explícita no servidor.</DataState>
             : data.alerts.length === 0 ? <p>Nenhum alerta registrado na resposta atual.</p>
@@ -114,15 +113,9 @@ export function DashboardView({ state, onRefresh }: { state: DashboardState; onR
             </li>)}</ul>}
           <ProtocolLegend />
         </Card>
-        <Card heading="Referência pública NASA">
-          <SourceBadge source="nasa_reference" />
-          <p>{reference ? <a href={reference} target="_blank" rel="noopener noreferrer">NASA · contexto planetário <span className="sr-only">(abre em nova aba)</span></a>
-            : 'Referência pública indisponível nesta resposta.'}</p>
-          <p>A referência fornece contexto planetário. As observações da missão estão identificadas como registros manuais ou dados simulados.</p>
-          <p>Séries históricas NASA não são exibidas neste resumo.</p>
-        </Card>
       </section>
     </>}
+    <NasaReferences mission={data?.mission} />
   </div>;
 }
 

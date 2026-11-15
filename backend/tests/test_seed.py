@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 import pytest
 from sqlmodel import Session, select
 
+from app import nasa_reference
 from app.db import make_engine, migrate
 from app.main import app
 from app.models import Astronaut, Followup, Investigation, Measurement
@@ -113,7 +114,7 @@ def test_optional_recheck_is_newer_than_request_and_can_be_linked(engine):
         assert len(session.exec(select(Measurement)).all()) == 30
 
 
-def test_seed_stays_separate_from_unavailable_nasa_history(engine, tmp_path, monkeypatch):
+def test_seed_stays_separate_from_imported_nasa_history(engine, tmp_path, monkeypatch):
     monkeypatch.setenv("AKM_DB_PATH", str(tmp_path / "demo.db"))
     with TestClient(app) as client:
         before_seed = client.get("/api/nasa/references")
@@ -122,8 +123,38 @@ def test_seed_stays_separate_from_unavailable_nasa_history(engine, tmp_path, mon
         response = client.get("/api/nasa/references")
         assert response.status_code == 200
         assert response.json() == before_seed.json()
+        measurements = client.get("/api/measurements").json()
+        assert len(measurements) == 29
+        assert {row["source"] for row in measurements} == {"synthetic"}
+        assert all(row["measured_at"].startswith("2026-") for row in measurements)
+        assert client.get("/api/dashboard").json()["environment"]["co2_ppm"] == 980
     body = response.json()
-    assert body["historical_data_status"] == "not_imported"
-    assert body["historical_series"] == []
+    assert body["historical_data_status"] == "imported"
     assert len(body["scientific_references"]) == 3
     assert all(reference["source"] == "NASA HRP" for reference in body["scientific_references"])
+    history = body["historical_series"]
+    assert len(history) == 864
+    assert {row["mission_id"] for row in history} == {"RR-1"}
+    assert {row["source_url"] for row in history} == {nasa_reference.SOURCE_URL}
+    assert {row["observed_at"] for row in history[:3]} == {"2014-10-01T00:00:00Z"}
+    assert {(row["parameter"], row["unit"], row["value"]) for row in history[:3]} == {
+        ("temperature_c", "°C", 22.8), ("relative_humidity_pct", "%", 43.0), ("co2_ppm", "ppm", 2975.0),
+    }
+    assert history[-1]["observed_at"] == "2014-10-01T23:56:00Z"
+    assert all(row["instrument"] for row in history)
+
+
+@pytest.mark.parametrize("content", [None, "{invalid json", "[]", '[{"observed_at":"2014-10-01T12:00:00Z"}]'])
+def test_unavailable_or_invalid_nasa_history_retains_hrp_catalog(content, tmp_path, monkeypatch):
+    catalog = (nasa_reference.DATA_DIR / "hrp_catalog.json").read_bytes()
+    (tmp_path / "hrp_catalog.json").write_bytes(catalog)
+    if content is not None:
+        (tmp_path / "reference.json").write_text(content, encoding="utf-8")
+    monkeypatch.setattr(nasa_reference, "DATA_DIR", tmp_path)
+    monkeypatch.setenv("AKM_DB_PATH", str(tmp_path / "demo.db"))
+    with TestClient(app) as client:
+        response = client.get("/api/nasa/references")
+    assert response.status_code == 200
+    assert response.json()["historical_data_status"] == "not_imported"
+    assert response.json()["historical_series"] == []
+    assert len(response.json()["scientific_references"]) == 3
