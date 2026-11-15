@@ -7,10 +7,10 @@ export const NAVIGATION = [
 ] as const;
 
 export const EXPERIMENTAL_NAVIGATION = [
-  { id: 'scenarios', label: 'Scenario comparator', description: 'AKM-34 · Simulated comparison' },
-  { id: 'environments', label: 'Mission environments', description: 'AKM-35 · NASA context' },
-  { id: 'body', label: 'Body map', description: 'AKM-36 · Educational links' },
-  { id: 'self-care', label: 'Self-care journey', description: 'AKM-37 · Participation points' },
+  { id: 'scenarios', label: 'Scenario comparator', description: 'Simulated comparison' },
+  { id: 'environments', label: 'Mission environments', description: 'NASA context' },
+  { id: 'body', label: 'Body map', description: 'Educational links' },
+  { id: 'self-care', label: 'Self-care journey', description: 'Participation points' },
 ] as const;
 /** Landing page: the front door of the site, outside the four mission pages. */
 export const HOME = { id: 'home', label: 'Home', description: 'Overview of AKM Health' } as const;

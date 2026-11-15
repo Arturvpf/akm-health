@@ -61,7 +61,7 @@ export function BodyExplorer() {
   }
 
   return <div className="experiment-stack">
-    <InformationNotice label="AKM-36 · Illustrative map, not an anatomical exam">
+    <InformationNotice label="Illustrative map, not an anatomical exam">
       Original vector diagram with no clinical images. Each region opens the latest stored reading for the selected crew member.
       It does not diagnose. Use Tab and Enter or Space to move between regions.
     </InformationNotice>
@@ -102,7 +102,7 @@ export function BodyExplorer() {
         <section aria-live="polite" aria-atomic="true">
           <h3>{region.label}{region.kinds[0] !== 'co2_ppm' && astronaut ? ` · ${astronaut.name}` : ''}</h3>
           <div role="status">
-            {dashboard.phase === 'loading' && !dashboard.data && <DataState kind="loading">Loading the latest readings from the local API.</DataState>}
+            {dashboard.phase === 'loading' && !dashboard.data && <DataState kind="loading">Loading the latest readings.</DataState>}
             {dashboard.phase === 'error' && <DataState kind="error">{dashboard.error} <ActionButton onClick={dashboard.retry}>Retry</ActionButton></DataState>}
           </div>
           {dashboard.data && region.kinds.map(kind => {

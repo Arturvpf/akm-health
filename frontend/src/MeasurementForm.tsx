@@ -90,7 +90,7 @@ export function MeasurementFormView({ context, registration, draft, errors, onCh
       Enter readings for the simulated mission only. Leave missing readings blank.
     </InformationNotice>
     <div className="dashboard-toolbar">
-      <p>{context.data ? `${context.data.mission.name} · Destination: Mars · Cabin` : 'Loading mission information from the local API.'}</p>
+      <p>{context.data ? `${context.data.mission.name} · Destination: Mars · Cabin` : 'Loading mission information.'}</p>
       <ActionButton onClick={onRefresh} disabled={context.phase === 'loading' || busy}>Refresh mission and crew</ActionButton>
     </div>
     <div role="status">

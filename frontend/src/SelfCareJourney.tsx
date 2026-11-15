@@ -87,12 +87,12 @@ export function SelfCareJourney() {
   }
 
   return <div className="experiment-stack">
-    <InformationNotice label="AKM-37 · Participation, not health scoring">
+    <InformationNotice label="Participation, not health scoring">
       Points recognize completed routine activities, never health results. A reading counts the same whatever its value.
       Nothing is deducted for pending items, and crew members are not ranked against each other.
     </InformationNotice>
     <div role="status">
-      {dashboard.phase === 'loading' && !dashboard.data && <DataState kind="loading">Loading crew activity from the local API.</DataState>}
+      {dashboard.phase === 'loading' && !dashboard.data && <DataState kind="loading">Loading crew activity.</DataState>}
       {dashboard.phase === 'error' && <DataState kind="error">{dashboard.error} <ActionButton onClick={dashboard.retry}>Retry</ActionButton></DataState>}
       {dashboard.data && !crew.length && <DataState kind="empty">No crew profiles are available. Seed the database to use the journey.</DataState>}
     </div>

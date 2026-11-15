@@ -128,7 +128,7 @@ Start a task branch from main. Consult the [executable architecture](docs/archit
 
 ## Exploratory P1/P2 tools (AKM-33 to AKM-37)
 
-These additions are experimental and do not change the P0 investigation engine. Open them from **Exploratory tools (P1/P2)** in the sidebar.
+These additions are experimental and do not change the P0 investigation engine. Open them from the **Labs** tabs in the header.
 
 - [AKM-33 · Offline persistence and sync conflicts](docs/akm-33-offline-sync.md): new manual measurements are queued in IndexedDB with a stable UUID and sent to `POST /api/sync/measurements`, which is idempotent and returns 409 on a conflicting body. Only **new measurements** are queued offline; investigations and follow-up completion still need the API online.
 - [AKM-34 · Hypothetical scenarios](docs/akm-34-hypothetical-scenarios.md): arithmetic comparison over immutable synthetic seed values, with assumptions shown.

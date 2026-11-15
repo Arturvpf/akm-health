@@ -9,6 +9,7 @@ import { BodyExplorer } from './BodyExplorer';
 import { SelfCareJourney } from './SelfCareJourney';
 import { OfflineStatus } from './OfflineStatus';
 import { Landing } from './Landing';
+import { SceneBackground } from './SceneBackground';
 import { ActionLink, Card, SimulationNotice } from './design-system';
 
 type Section = {
@@ -32,7 +33,7 @@ const SECTIONS: Record<PageId, Section> = {
     next: 'dashboard',
   },
   dashboard: {
-    eyebrow: 'Demo mission · API summary',
+    eyebrow: 'Demo mission',
     heading: 'Mission dashboard',
     intro: 'Crew readings, cabin conditions, and pending checks.',
     next: 'register',
@@ -56,19 +57,19 @@ const SECTIONS: Record<PageId, Section> = {
     next: 'dashboard',
   },
   scenarios: {
-    eyebrow: 'AKM-34 · Assumption analysis', heading: 'Hypothetical scenario comparator',
+    eyebrow: 'Assumption analysis', heading: 'Hypothetical scenario comparator',
     intro: 'Compare simulated values. This page does not predict health risks or clinical outcomes.', next: 'environments',
   },
   environments: {
-    eyebrow: 'AKM-35 · NASA physical context', heading: 'Mission environments',
+    eyebrow: 'NASA physical context', heading: 'Mission environments',
     intro: 'Explore hypothetical conditions. The recorded mission and its rules stay unchanged.', next: 'body',
   },
   body: {
-    eyebrow: 'AKM-36 · Accessible exploration', heading: 'Interactive body map',
-    intro: 'Explore educational links between MVP metrics and NASA research.', next: 'self-care',
+    eyebrow: 'Accessible exploration', heading: 'Interactive body map',
+    intro: 'Explore educational links between the health metrics AKM Health tracks and NASA research.', next: 'self-care',
   },
   'self-care': {
-    eyebrow: 'AKM-37 · Participation', heading: 'Self-care journey',
+    eyebrow: 'Participation', heading: 'Self-care journey',
     intro: 'Track completed routine activities. Points reward participation, never health results.', next: 'dashboard',
   },
 };
@@ -102,6 +103,8 @@ export function App() {
   }
 
   return (
+    <>
+    <SceneBackground page={page} />
     <div className="app-shell">
       <a className="skip-link" href="#main-content" onClick={skipToContent}>Skip to content</a>
       <header className="site-header">
@@ -118,14 +121,14 @@ export function App() {
               </a>
             ))}
           </nav>
-          <nav className="tab-nav tab-nav-labs" aria-label="Exploratory tools">
+          <nav className="tab-nav tab-nav-labs" aria-label="More tools">
             <span className="tab-group-label" aria-hidden="true">Labs</span>
             {EXPERIMENTAL_NAVIGATION.map(item => (
               <a key={item.id} href={pageHref(item.id)} aria-current={page === item.id ? 'page' : undefined}
                 title={item.label} className="tab-link">{TAB_LABELS[item.id] ?? item.label}</a>
             ))}
           </nav>
-          <span className="version-chip">{EXPLORATORY.includes(page) ? 'Exploratory · P1/P2' : 'Simulated mission'}</span>
+          <span className="version-chip">Simulated mission</span>
         </div>
       </header>
       <div className="content-shell">
@@ -165,10 +168,11 @@ export function App() {
           </>}
         </main>
         <footer className="footer">
-          <span>AKM Health — Space Health Monitoring · NASA Space Apps Challenge 2026 · P0 interface + exploratory P1/P2 tools</span>
+          <span>AKM Health — Space Health Monitoring · NASA Space Apps Challenge 2026</span>
           <span className="footer-status">Simulated mission · not a medical device</span>
         </footer>
       </div>
     </div>
+    </>
   );
 }
