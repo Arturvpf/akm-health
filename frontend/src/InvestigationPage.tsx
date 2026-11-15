@@ -312,7 +312,7 @@ export function InvestigationPage() {
         ) : operation === null ? (
           <>
             <p>Run an experimental investigation or retrieve a saved result.</p>
-            <ActionLink href={pageHref('registrar')}>Add measurement</ActionLink>
+            <ActionLink href={pageHref('register')}>Add measurement</ActionLink>
           </>
         ) : null}
         <details className="investigation-disclosure">

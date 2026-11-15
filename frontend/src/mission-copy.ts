@@ -1,4 +1,5 @@
-// English presentation of the built-in investigation narratives, including saved results.
+// Compatibility layer: translates the built-in Portuguese narratives of investigation results saved before
+// the backend returned English at the source. New results are already English and pass through unchanged.
 // Free-form mission protocol references and custom routines retain their original text.
 const builtInCopy: Record<string, string> = {
   "Sem padrão pela regra da demo": "No pattern under the demo rule",

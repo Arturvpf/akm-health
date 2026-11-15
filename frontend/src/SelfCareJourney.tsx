@@ -78,9 +78,9 @@ export function SelfCareJourney() {
     if (evidence[item.id]) return <span className="ds-badge tone-positive">+{item.points} pts</span>;
     if (item.id === 'checkin') return <ActionButton onClick={acknowledge} disabled={!astronaut}>Check in</ActionButton>;
     if (item.id === 'follow') return pendingFollowups.length
-      ? <ActionLink href="#/investigacao">Open {pendingFollowups.length} pending check(s)</ActionLink>
+      ? <ActionLink href="#/investigation">Open {pendingFollowups.length} pending check(s)</ActionLink>
       : <span>No follow-up requested</span>;
-    return <ActionLink href="#/registrar">Register</ActionLink>;
+    return <ActionLink href="#/register">Register</ActionLink>;
   }
 
   return <div className="experiment-stack">

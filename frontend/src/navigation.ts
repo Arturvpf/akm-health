@@ -1,25 +1,46 @@
 /** AKM-12 — named P0 sections, deliberately without a router dependency. */
 export const NAVIGATION = [
   { id: 'dashboard', label: 'Dashboard', description: 'Mission overview' },
-  { id: 'registrar', label: 'Register', description: 'New measurement' },
-  { id: 'historico', label: 'History', description: 'Recorded measurements' },
-  { id: 'investigacao', label: 'Investigation', description: 'Analysis and follow-up' },
+  { id: 'register', label: 'Register', description: 'New measurement' },
+  { id: 'history', label: 'History', description: 'Recorded measurements' },
+  { id: 'investigation', label: 'Investigation', description: 'Analysis and follow-up' },
 ] as const;
 
 export const EXPERIMENTAL_NAVIGATION = [
-  { id: 'comparador', label: 'Scenario comparator', description: 'AKM-34 · Simulated comparison' },
-  { id: 'ambientes', label: 'Mission environments', description: 'AKM-35 · NASA context' },
-  { id: 'corpo', label: 'Body map', description: 'AKM-36 · Educational links' },
-  { id: 'autocuidado', label: 'Self-care journey', description: 'AKM-37 · Participation points' },
+  { id: 'scenarios', label: 'Scenario comparator', description: 'AKM-34 · Simulated comparison' },
+  { id: 'environments', label: 'Mission environments', description: 'AKM-35 · NASA context' },
+  { id: 'body', label: 'Body map', description: 'AKM-36 · Educational links' },
+  { id: 'self-care', label: 'Self-care journey', description: 'AKM-37 · Participation points' },
 ] as const;
 export const ALL_NAVIGATION = [...NAVIGATION, ...EXPERIMENTAL_NAVIGATION] as const;
 export type PageId = (typeof ALL_NAVIGATION)[number]['id'];
 export const DEFAULT_PAGE: PageId = 'dashboard';
 
+/** Earlier builds used Portuguese hash ids; they still resolve to the English routes. */
+export const LEGACY_ROUTES: Readonly<Record<string, PageId>> = {
+  registrar: 'register',
+  historico: 'history',
+  investigacao: 'investigation',
+  comparador: 'scenarios',
+  ambientes: 'environments',
+  corpo: 'body',
+  autocuidado: 'self-care',
+};
+
+function routeCandidate(hash: string): string {
+  return hash.replace(/^#\/?/, '').replace(/\/$/, '');
+}
+
 export function parsePage(hash: string): PageId {
-  const candidate = hash.replace(/^#\/?/, '').replace(/\/$/, '');
+  const candidate = routeCandidate(hash);
   const match = ALL_NAVIGATION.find((item) => item.id === candidate);
-  return match ? match.id : DEFAULT_PAGE;
+  return match ? match.id : LEGACY_ROUTES[candidate] ?? DEFAULT_PAGE;
+}
+
+/** Returns the canonical hash when `hash` uses a legacy id, otherwise null. */
+export function legacyRedirect(hash: string): string | null {
+  const target = LEGACY_ROUTES[routeCandidate(hash)];
+  return target ? pageHref(target) : null;
 }
 
 export function pageHref(page: PageId): string {

@@ -74,7 +74,7 @@ export function DashboardView({ state, onRefresh }: { state: DashboardState; onR
       </section>
       {data.has_unanalyzed_measurements && <div className="dashboard-update" role="status">
         <InformationNotice label="New measurements available — rerun investigation">Previously recorded assessments remain visible.</InformationNotice>
-        <ActionLink href={pageHref('investigacao')}>Go to Investigation</ActionLink>
+        <ActionLink href={pageHref('investigation')}>Go to Investigation</ActionLink>
       </div>}
       <section className="dashboard-grid" aria-label="Crew and habitat">
         <Card heading="Crew">

@@ -75,11 +75,11 @@ async function audit(name) {
 }
 async function go(route) {
   await page.goto('http://127.0.0.1:' + previewPort + '/#/' + route, { waitUntil: 'domcontentloaded', timeout: 60000 });
-  const headings = { dashboard: 'Mission dashboard', registrar: 'Register a measurement', historico: 'Measurement history', investigacao: 'Investigation and follow-up' };
+  const headings = { dashboard: 'Mission dashboard', register: 'Register a measurement', history: 'Measurement history', investigation: 'Investigation and follow-up' };
   await page.getByRole('heading', { level: 1, name: headings[route], exact: true }).waitFor({ state: 'attached' });
 }
 async function record(kind, value, quality = 'ok') {
-  await go('registrar');
+  await go('register');
   const another = page.getByRole('button', { name: 'Register another measurement', exact: true });
   if (await another.count()) await another.click();
   await page.locator('#measurement-kind:enabled').waitFor();
@@ -156,15 +156,15 @@ try {
   const sleep = await record('sleep_hours', '5.2');
   await audit('registration receipt');
   await page.screenshot({ path: path.join(output, 'receipt.png'), fullPage: true });
-  await go('historico');
-  await go('registrar');
+  await go('history');
+  await go('register');
   await page.locator('#measurement-kind:enabled').waitFor();
   // A confirmed reading must not come back as a prefilled draft that could be submitted twice.
   assert.equal(await page.locator('#measurement-value').inputValue(), '');
   assert.equal(await page.locator('#measurement-localTime').inputValue(), '');
   assert.equal(await page.locator('#measurement-kind').inputValue(), 'sleep_hours');
   passed('T03/T13 confirmed reading is not kept as a resubmittable draft');
-  await go('historico');
+  await go('history');
   await page.locator('time[datetime="' + sleep.measured_at + '"]').first().waitFor();
   passed('T13 keyboard registration → real receipt → persisted History');
 
@@ -176,7 +176,7 @@ try {
     ['422 invalid quality (field-level)', body => { body.measurement.quality = 'not-a-quality'; }, '#measurement-quality'],
     ['404 unknown profile', body => { body.measurement.astronaut_id = 'ZZ-UNKNOWN'; }, null],
   ]) {
-    await go('registrar');
+    await go('register');
     const again = page.getByRole('button', { name: 'Register another measurement', exact: true });
     if (await again.count()) await again.click();
     await page.locator('#measurement-kind:enabled').waitFor();
@@ -209,7 +209,7 @@ try {
   assert.ok(!afterRejections.some(x => x.value === -5 || x.astronaut_id === 'ZZ-UNKNOWN' || x.quality === 'not-a-quality'));
   passed('T03/T04 outbox path: live 422/404 rejections show correctable errors, nothing queued or written');
 
-  await go('investigacao');
+  await go('investigation');
   const first = await investigate();
   assert.equal(first.status, 'attention');
   assert.ok(first.hypotheses.every(x => x.certainty === 'unconfirmed'));
@@ -223,13 +223,13 @@ try {
   const suspect = await record('co2_ppm', '2200', 'suspect');
   const recheck = await record('co2_ppm', '850');
   assert.equal(investigationWrites, 2);
-  await go('historico');
+  await go('history');
   await page.getByRole('combobox', { name: 'Measurement target', exact: true }).selectOption('habitat');
   await page.getByRole('button', { name: 'Apply filters', exact: true }).click();
   await page.locator('time[datetime="' + suspect.measured_at + '"]').first().waitFor();
   assert.ok((await page.locator('body').innerText()).includes('Suspect'));
 
-  await go('investigacao');
+  await go('investigation');
   await page.getByRole('button', { name: 'Select check #' + first.followup_id, exact: true }).click();
   const measurements = page.getByRole('combobox', { name: 'Measurement to link', exact: true });
   await measurements.waitFor();
@@ -253,11 +253,11 @@ try {
   assert.equal(nasa.historical_series.length, 864);
   const mission = await (await fetch('http://127.0.0.1:' + apiPort + '/api/measurements')).json();
   assert.ok(mission.every(x => ['manual', 'synthetic'].includes(x.source)));
-  for (const route of ['dashboard', 'registrar', 'historico', 'investigacao']) {
+  for (const route of ['dashboard', 'register', 'history', 'investigation']) {
     await go(route);
-    if (route === 'registrar') await page.locator('#measurement-kind:enabled').waitFor();
-    if (route === 'historico') await page.getByRole('button', { name: 'Apply filters', exact: true }).waitFor();
-    if (route === 'dashboard' || route === 'investigacao') await page.getByRole('combobox', { name: 'Historical indicator', exact: true }).waitFor();
+    if (route === 'register') await page.locator('#measurement-kind:enabled').waitFor();
+    if (route === 'history') await page.getByRole('button', { name: 'Apply filters', exact: true }).waitFor();
+    if (route === 'dashboard' || route === 'investigation') await page.getByRole('combobox', { name: 'Historical indicator', exact: true }).waitFor();
     for (const width of [1280, 320]) {
       await page.setViewportSize({ width, height: 900 });
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), route + ' overflow at ' + width);
@@ -269,8 +269,8 @@ try {
   passed('T12/T14/T15 NASA separation; all routes at 320/1280 with external network blocked');
 
   // Exploratory P1/P2 pages ship in the same build; hold them to the same automated bar.
-  const exploratory = { comparador: 'Hypothetical scenario comparator', ambientes: 'Mission environments',
-    corpo: 'Interactive body map', autocuidado: 'Self-care journey' };
+  const exploratory = { scenarios: 'Hypothetical scenario comparator', environments: 'Mission environments',
+    body: 'Interactive body map', 'self-care': 'Self-care journey' };
   for (const [route, heading] of Object.entries(exploratory)) {
     await page.goto('http://127.0.0.1:' + previewPort + '/#/' + route, { waitUntil: 'domcontentloaded' });
     await page.getByRole('heading', { level: 1, name: heading, exact: true }).waitFor({ state: 'attached' });
@@ -306,7 +306,7 @@ try {
   await page.reload(); // The selected API fixture changed while the hash route stayed the same.
   await page.getByText('No crew profiles are available.', { exact: true }).waitFor();
   await audit('empty dashboard');
-  await go('registrar');
+  await go('register');
   await page.locator('#measurement-kind:enabled').waitFor();
   // The selected metric is kept between visits (AKM-33 draft); choose a personal metric explicitly.
   await page.locator('#measurement-kind').selectOption('sleep_hours');

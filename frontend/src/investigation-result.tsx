@@ -91,7 +91,7 @@ export function ResultDetails({ result, profiles, check, openCheck }: {
         {findings.length ? (
           <ul>{findings.map((finding, i) => <li key={i}>{englishMissionCopy(finding)}</li>)}</ul>
         ) : <p>This saved result has no findings.</p>}
-        {result.status === 'insufficient_data' ? <ActionLink href={pageHref('registrar')}>Add measurement</ActionLink> : null}
+        {result.status === 'insufficient_data' ? <ActionLink href={pageHref('register')}>Add measurement</ActionLink> : null}
       </section>
       <section>
         <h3>Coverage</h3>
