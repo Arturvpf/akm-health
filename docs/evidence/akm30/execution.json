@@ -1,0 +1,57 @@
+{
+  "executed_at": "2026-11-15T17:20:00Z",
+  "tested_tree": "ac6e9ab85e8a17eabe09d16e757804aa01f227b4",
+  "components": {
+    "main": "f714cbce01160f6747eb342739779a013bf8f950",
+    "pr32": "21d7d67",
+    "pr34": "6479dec"
+  },
+  "environment": {
+    "os": "Ubuntu 24.04.5 LTS",
+    "browser": "Google Chrome for Testing 153.0.8010.12 (headless)",
+    "python": "3.13.18",
+    "node": "22.23.4",
+    "playwright_core": "1.65.1",
+    "axe_core": "4.14.0"
+  },
+  "backend": {
+    "passed": 348,
+    "ruff": "passed",
+    "mvp_acceptance": 3
+  },
+  "frontend": {
+    "passed": 48,
+    "navigation": "passed",
+    "typecheck": "passed",
+    "build": "passed"
+  },
+  "browser": {
+    "cases": 11,
+    "axe_audits": 23,
+    "violations": 0,
+    "javascript_errors": 0,
+    "external_browser_network": "blocked",
+    "external_requests": 0,
+    "success": true
+  },
+  "supplementary": {
+    "routes": 8,
+    "service_worker": "allowed",
+    "dns": "loopback only",
+    "non_local_requests": 0,
+    "axe_violations": 0,
+    "nasa_values": 864
+  },
+  "remaining": [
+    "Human screen-reader walkthrough (T14)",
+    "Visual focus check on datetime-local inputs",
+    "OS-level disconnected run if required (T15)"
+  ],
+  "fixes": [
+    "Clear submitted reading from persisted draft",
+    "Label cached dashboard copy as stale",
+    "Generic error label 'Error' instead of 'Connection error'",
+    "Body map label-in-name and self-care prohibited aria-label",
+    "Browser suite follows AKM-33 outbox; configurable ports/channel"
+  ]
+}

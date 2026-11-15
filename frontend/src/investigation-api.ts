@@ -1,3 +1,4 @@
+import { cachedRead } from './offline-store';
 import type {
   AstronautRead, FollowupCompleteRequest, FollowupRead, InvestigationRequest,
   InvestigationResult, MeasurementRead,
@@ -19,8 +20,14 @@ async function getResponse(path: string, options?: RequestInit) {
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const response = await getResponse(path, options);
-  return response.json();
+  if (options?.method && options.method !== 'GET') {
+    const response = await getResponse(path, options);
+    return response.json();
+  }
+  return cachedRead(`investigation:${path}`, async () => {
+    const response = await getResponse(path, options);
+    return response.json() as Promise<T>;
+  });
 }
 
 function jsonRequest(method: 'POST' | 'PATCH', body: InvestigationRequest | FollowupCompleteRequest): RequestInit {

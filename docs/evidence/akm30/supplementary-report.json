@@ -1,0 +1,424 @@
+{
+ "routes": {
+  "dashboard": {
+   "h1": "Mission dashboard",
+   "1280": {
+    "overflow_px": 0,
+    "violations": [],
+    "incomplete": [
+     "color-contrast"
+    ],
+    "passes": 31
+   },
+   "320": {
+    "overflow_px": 0,
+    "violations": [],
+    "incomplete": [
+     "color-contrast"
+    ],
+    "passes": 30
+   },
+   "notice_missing": [
+    {
+     "cls": "ds-badge tone-neutral",
+     "icon": false,
+     "text": "i Awaiting investigation"
+    },
+    {
+     "cls": "ds-badge tone-neutral",
+     "icon": false,
+     "text": "i Awaiting investigation"
+    },
+    {
+     "cls": "ds-badge tone-neutral",
+     "icon": false,
+     "text": "i Awaiting investigation"
+    },
+    {
+     "cls": "ds-badge tone-neutral",
+     "icon": false,
+     "text": "i Awaiting investigation"
+    }
+   ],
+   "notice_count": 28,
+   "keyboard": {
+    "tab_stops": 19,
+    "first": [
+     [
+      "A",
+      "",
+      "Skip to content"
+     ],
+     [
+      "A",
+      "",
+      "Dashboard"
+     ],
+     [
+      "A",
+      "",
+      "Register"
+     ]
+    ],
+    "problems": []
+   },
+   "skip_link": {
+    "first_tab": "Dashboard",
+    "focus_after_enter": ""
+   }
+  },
+  "registrar": {
+   "h1": "Register a measurement",
+   "1280": {
+    "overflow_px": 0,
+    "violations": [],
+    "incomplete": [],
+    "passes": 27
+   },
+   "320": {
+    "overflow_px": 0,
+    "violations": [],
+    "incomplete": [],
+    "passes": 26
+   },
+   "notice_missing": [],
+   "notice_count": 1,
+   "keyboard": {
+    "tab_stops": 26,
+    "first": [
+     [
+      "BUTTON",
+      "",
+      "Refresh mission and crew"
+     ],
+     [
+      "SELECT",
+      "measurement-kind",
+      "Sleep\nHeart rate\nEmotional well-being\nCa"
+     ],
+     [
+      "SELECT",
+      "measurement-astronaut",
+      "Select a crew member\nAurora \u00b7 A1\nOrion \u00b7"
+     ]
+    ],
+    "problems": [
+     {
+      "tag": "INPUT",
+      "id": "measurement-localTime",
+      "name": "Wake-up date and time",
+      "visible": true,
+      "indicator": false
+     }
+    ]
+   }
+  },
+  "historico": {
+   "h1": "Measurement history",
+   "1280": {
+    "overflow_px": 0,
+    "violations": [],
+    "incomplete": [
+     "color-contrast"
+    ],
+    "passes": 31
+   },
+   "320": {
+    "overflow_px": 0,
+    "violations": [],
+    "incomplete": [
+     "color-contrast"
+    ],
+    "passes": 31
+   },
+   "notice_missing": [],
+   "notice_count": 5,
+   "keyboard": {
+    "tab_stops": 26,
+    "first": [
+     [
+      "SELECT",
+      "",
+      "Aurora \u00b7 A1\nOrion \u00b7 A2\nVega \u00b7 A3\nLyra \u00b7 "
+     ],
+     [
+      "SELECT",
+      "",
+      "Sleep duration (h)\nHeart rate (bpm)\nMood"
+     ],
+     [
+      "INPUT",
+      "",
+      "Start (UTC)"
+     ]
+    ],
+    "problems": [
+     {
+      "tag": "INPUT",
+      "id": "",
+      "name": "Start (UTC)",
+      "visible": true,
+      "indicator": false
+     },
+     {
+      "tag": "INPUT",
+      "id": "",
+      "name": "End (UTC)",
+      "visible": true,
+      "indicator": false
+     }
+    ]
+   }
+  },
+  "investigacao": {
+   "h1": "Investigation and follow-up",
+   "1280": {
+    "overflow_px": 0,
+    "violations": [],
+    "incomplete": [
+     "color-contrast"
+    ],
+    "passes": 30
+   },
+   "320": {
+    "overflow_px": 0,
+    "violations": [],
+    "incomplete": [
+     "color-contrast"
+    ],
+    "passes": 29
+   },
+   "notice_missing": [
+    {
+     "cls": "ds-badge tone-positive",
+     "icon": true,
+     "text": ""
+    },
+    {
+     "cls": "ds-badge tone-caution",
+     "icon": true,
+     "text": ""
+    },
+    {
+     "cls": "ds-badge tone-neutral",
+     "icon": true,
+     "text": ""
+    },
+    {
+     "cls": "ds-badge ds-badge-protocol",
+     "icon": true,
+     "text": ""
+    }
+   ],
+   "notice_count": 9,
+   "keyboard": {
+    "tab_stops": 27,
+    "first": [
+     [
+      "SELECT",
+      "",
+      "Crew\nIndividual"
+     ],
+     [
+      "BUTTON",
+      "",
+      "Run investigation"
+     ],
+     [
+      "SUMMARY",
+      "",
+      "Retrieve an investigation by number"
+     ]
+    ],
+    "problems": []
+   }
+  },
+  "comparador": {
+   "h1": "Hypothetical scenario comparator",
+   "1280": {
+    "overflow_px": 0,
+    "violations": [],
+    "incomplete": [],
+    "passes": 30
+   },
+   "320": {
+    "overflow_px": 0,
+    "violations": [],
+    "incomplete": [
+     "color-contrast"
+    ],
+    "passes": 31
+   },
+   "notice_missing": [],
+   "notice_count": 2,
+   "keyboard": {
+    "tab_stops": 20,
+    "first": [
+     [
+      "SELECT",
+      "compare-profile",
+      "Aurora \u00b7 A1\nOrion \u00b7 A2\nVega \u00b7 A3\nLyra \u00b7 "
+     ],
+     [
+      "INPUT",
+      "hypo-sleep_hours",
+      "5.4"
+     ],
+     [
+      "INPUT",
+      "hypo-heart_rate_bpm",
+      "74"
+     ]
+    ],
+    "problems": []
+   }
+  },
+  "ambientes": {
+   "h1": "Mission environments",
+   "1280": {
+    "overflow_px": 0,
+    "violations": [],
+    "incomplete": [],
+    "passes": 27
+   },
+   "320": {
+    "overflow_px": 0,
+    "violations": [],
+    "incomplete": [],
+    "passes": 27
+   },
+   "notice_missing": [],
+   "notice_count": 1,
+   "keyboard": {
+    "tab_stops": 13,
+    "first": [
+     [
+      "SELECT",
+      "environment-choice",
+      "Mars surface\nLunar surface\nLow Earth orb"
+     ],
+     [
+      "A",
+      "",
+      "NASA Planetary Fact Sheet"
+     ],
+     [
+      "A",
+      "",
+      "NASA HRP \u2014 Five Hazards"
+     ]
+    ],
+    "problems": []
+   }
+  },
+  "corpo": {
+   "h1": "Interactive body map",
+   "1280": {
+    "overflow_px": 0,
+    "violations": [],
+    "incomplete": [
+     "color-contrast"
+    ],
+    "passes": 28
+   },
+   "320": {
+    "overflow_px": 0,
+    "violations": [],
+    "incomplete": [
+     "color-contrast"
+    ],
+    "passes": 28
+   },
+   "notice_missing": [],
+   "notice_count": 2,
+   "keyboard": {
+    "tab_stops": 21,
+    "first": [
+     [
+      "SELECT",
+      "body-astronaut",
+      "Aurora \u00b7 A1\nOrion \u00b7 A2\nVega \u00b7 A3\nLyra \u00b7 "
+     ],
+     [
+      "BUTTON",
+      "",
+      "1. Select Head \u00b7 Self-reported mood"
+     ],
+     [
+      "BUTTON",
+      "",
+      "2. Select Chest \u00b7 Heart rate"
+     ]
+    ],
+    "problems": []
+   }
+  },
+  "autocuidado": {
+   "h1": "Self-care journey",
+   "1280": {
+    "overflow_px": 0,
+    "violations": [],
+    "incomplete": [
+     "color-contrast"
+    ],
+    "passes": 25
+   },
+   "320": {
+    "overflow_px": 0,
+    "violations": [],
+    "incomplete": [
+     "color-contrast"
+    ],
+    "passes": 25
+   },
+   "notice_missing": [
+    {
+     "cls": "ds-badge tone-positive",
+     "icon": false,
+     "text": "+15 pts"
+    },
+    {
+     "cls": "ds-badge tone-positive",
+     "icon": false,
+     "text": "+15 pts"
+    }
+   ],
+   "notice_count": 3,
+   "keyboard": {
+    "tab_stops": 13,
+    "first": [
+     [
+      "SELECT",
+      "journey-astronaut",
+      "Aurora \u00b7 A1\nOrion \u00b7 A2\nVega \u00b7 A3\nLyra \u00b7 "
+     ],
+     [
+      "BUTTON",
+      "",
+      "Check in"
+     ],
+     [
+      "BUTTON",
+      "",
+      "Show activity evidence"
+     ]
+    ],
+    "problems": []
+   }
+  }
+ },
+ "external": [],
+ "errors": [],
+ "console_errors": [],
+ "requests": 31,
+ "browser": "153.0.8010.12",
+ "nasa": {
+  "historical_values": 864,
+  "keys": [
+   "scientific_references",
+   "historical_series",
+   "historical_data_status"
+  ]
+ },
+ "non_local_requests": []
+}

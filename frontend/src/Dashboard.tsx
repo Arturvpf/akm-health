@@ -39,6 +39,7 @@ function Reading({ kind, sample, legacyValue }: { kind: Kind; sample?: MetricSna
 
 export function DashboardView({ state, onRefresh }: { state: DashboardState; onRefresh: () => void }) {
   const { data, phase, error, receivedAt } = state;
+  const cachedAt = state.cachedAt ?? null;
   const refreshing = phase === 'loading';
   const evaluated = data?.last_investigation_at !== null && data?.last_investigation_at !== undefined;
   return <div className="dashboard-page" aria-busy={refreshing}>
@@ -54,7 +55,8 @@ export function DashboardView({ state, onRefresh }: { state: DashboardState; onR
       {phase === 'error' && <DataState kind="error">{error} {data
         ? 'Showing the last confirmed snapshot. Check its timestamp.'
         : 'Check that the local server is running and try again.'}</DataState>}
-      {phase === 'ready' && <span className="sr-only">Dashboard updated.</span>}
+      {phase === 'ready' && cachedAt === null && <span className="sr-only">Dashboard updated.</span>}
+      {phase === 'ready' && cachedAt !== null && <DataState kind="error">Could not get current data from the mission server. Showing a copy saved on this device at <Timestamp value={cachedAt} />. It may be out of date.</DataState>}
     </div>
     {data && <>
       <section className="dashboard-summary" aria-label="Mission summary">
@@ -67,7 +69,7 @@ export function DashboardView({ state, onRefresh }: { state: DashboardState; onR
         <Card heading="Latest investigation">
           <p><Timestamp value={data.last_investigation_at} missing="No investigation has been run" /></p>
           <p>This timestamp applies to the most recent investigation. Its scope may cover a subset of the crew.</p>
-          <small>Last confirmed refresh: <Timestamp value={receivedAt} /></small>
+          <small>{cachedAt === null ? 'Last confirmed refresh' : 'Saved on this device'}: <Timestamp value={receivedAt} /></small>
         </Card>
       </section>
       {data.has_unanalyzed_measurements && <div className="dashboard-update" role="status">
