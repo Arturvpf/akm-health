@@ -22,12 +22,6 @@ try {
   assert.equal(nav.parsePage('#/home'), 'home');
   assert.equal(nav.parsePage('#/dashboard'), 'dashboard');
   assert.equal(nav.parsePage('#/history/'), 'history');
-  for (const [legacy, current] of Object.entries({registrar: 'register', historico: 'history', investigacao: 'investigation',
-    comparador: 'scenarios', ambientes: 'environments', corpo: 'body', autocuidado: 'self-care'})) {
-    assert.equal(nav.parsePage(`#/${legacy}`), current);
-    assert.equal(nav.legacyRedirect(`#/${legacy}/`), `#/${current}`);
-  }
-  assert.equal(nav.legacyRedirect('#/history'), null);
   assert.equal(nav.parsePage('#/self-care'), 'self-care');
   console.log('AKM-12 navigation checks: PASS (4 destinations, links and fallback)');
 } finally {

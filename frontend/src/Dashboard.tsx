@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { METRIC_LABELS } from './api';
 import { NasaReferences } from './NasaReferences';
-import { englishMissionCopy } from './mission-copy';
 import { createDashboardController, INITIAL_DASHBOARD_STATE, type DashboardState } from './dashboard-state';
 import { ActionButton, ActionLink, Card, DataState, Details, InformationNotice, ProtocolLegend, SourceBadge, StatusBadge } from './design-system';
 import { pageHref } from './navigation';
@@ -123,7 +122,7 @@ export function DashboardView({ state, onRefresh }: { state: DashboardState; onR
               : <ol className="dashboard-followups">{data.pending_followups.map(check => <li key={check.id}>
                 <h3>{METRIC_LABELS[check.kind]}</h3>
                 <p><strong>{check.astronaut_id === null ? 'Habitat' : data.astronauts.find(person => person.id === check.astronaut_id)?.name ?? check.astronaut_id}</strong> · Check #{check.id}</p>
-                <p>{englishMissionCopy(check.reason)}</p>
+                <p>{check.reason}</p>
                 <small>Due: <Timestamp value={check.due_at} missing="No due date" /></small>
               </li>)}</ol>}
           </Card>
@@ -135,7 +134,7 @@ export function DashboardView({ state, onRefresh }: { state: DashboardState; onR
             : data.alerts.length === 0 ? <p>No alerts in the current snapshot.</p>
             : <ul className="dashboard-alerts">{data.alerts.map(alert => <li key={alert.id}>
               <AssessmentStatus status={alert.level} evaluated />
-              <h3>{englishMissionCopy(alert.label)}</h3><p>{englishMissionCopy(alert.explanation)}</p>
+              <h3>{alert.label}</h3><p>{alert.explanation}</p>
             </li>)}</ul>}
           <ProtocolLegend />
         </Card>

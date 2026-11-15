@@ -3,7 +3,6 @@ import { ActionButton, ActionLink, Card, DataState, Details, SelectField, Source
 import { readCompatibleMeasurements } from './investigation-api';
 import { formatTime, metricNames, metricValue, targetName, UtcTime } from './investigation-result';
 import { pageHref } from './navigation';
-import { englishMissionCopy } from './mission-copy';
 import type { AstronautRead, FollowupRead, MeasurementRead } from './types';
 
 export interface Agenda {
@@ -151,7 +150,7 @@ export function InvestigationAgenda({ agenda, loading, error, refresh, profiles,
             <li key={check.id} className="investigation-check-box">
               <h4>{metricNames[check.kind]} · {targetName(check.astronaut_id, profiles)}</h4>
               <div className="badge-row"><span className="ds-badge tone-caution">Pending · #{check.id}</span></div>
-              <p>{englishMissionCopy(check.reason)}</p>
+              <p>{check.reason}</p>
               <Details items={[
                 { label: 'Requested at', value: <UtcTime value={check.created_at} /> },
                 { label: 'Due', value: check.due_at ? <UtcTime value={check.due_at} /> : 'No due date' },

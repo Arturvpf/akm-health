@@ -21,7 +21,7 @@ const draft = (extra = {}) => ({ ...EMPTY_DRAFT, astronaut: 'A1', value: '5,2', 
 const payload = () => validateDraft(draft(), ['A1']).payload;
 const receipt = () => ({ ...payload(), id: 42, measurement_zone: 'astronaut', recorded_at: '2026-11-15T00:00:00Z' });
 function deferred() { let resolve, reject; const promise = new Promise((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; }
-const context = { phase: 'ready', error: null, receivedAt: null, data: { mission: { name: 'TEST-26' }, astronauts: [{ id: 'A1', name: 'Teste' }] } };
+const context = { phase: 'ready', error: null, receivedAt: null, data: { mission: { name: 'TEST-26' }, astronauts: [{ id: 'A1', name: 'Test' }] } };
 const render = (extra = {}) => renderToStaticMarkup(React.createElement(MeasurementFormView, { context, registration: INITIAL_REGISTRATION, draft: draft(), errors: {}, onChange() {}, onSubmit() {}, onRefresh() {}, onUnlock() {}, onNew() {}, ...extra }));
 test('all five metrics produce canonical target, unit, provenance and UTC payload', () => {
   for (const [kind, metric] of Object.entries(FORM_METRICS)) {
@@ -89,12 +89,12 @@ test('unmount ignores an eventual confirmation and aborts the active transport',
   let updates=0;c.subscribe(()=>updates++);const job=c.submit(payload());c.dispose();assert.equal(signal.aborted,true);pending.resolve(receipt());await job;assert.equal(updates,1);
 });
 test('validation rejection preserves retry capability without automatic retry', async () => {
-  let calls=0;const c=createRegistrationController(async()=>{calls++;throw new RegistrationError('Revise',false,{value:'Inválido'});});
+  let calls=0;const c=createRegistrationController(async()=>{calls++;throw new RegistrationError('Review',false,{value:'Invalid'});});
   await c.submit(payload());assert.equal(c.getState().phase,'error');assert.equal(calls,1);await c.submit(payload());assert.equal(calls,2);c.dispose();
 });
 test('render labels, inline errors, instructions, provenance and explicit timezone are accessible', () => {
-  const html=render({errors:{value:'Informe o valor'}});
-  for(const text of ['measurement-value','aria-invalid="true"','error-value','measurement-instructions','UTC offset','MED-SONO','Manual demo entry','Valid for analysis','TEST-26','Teste · A1']) assert.ok(html.includes(text),text);
+  const html=render({errors:{value:'Enter a value'}});
+  for(const text of ['measurement-value','aria-invalid="true"','error-value','measurement-instructions','UTC offset','MED-SLEEP','Manual demo entry','Valid for analysis','TEST-26','Test · A1']) assert.ok(html.includes(text),text);
   assert.ok(!html.includes('value="NASA"'));
   const mood=render({draft:draft({kind:'mood_score',value:'3'})});for(const label of ['Very poor','Poor','Neutral','Good','Very good']) assert.ok(mood.includes(label));
   const habitat=render({draft:draft({kind:'co2_ppm'})});assert.ok(!habitat.includes('id="measurement-astronaut"'));assert.ok(habitat.includes('Habitat · cabin air'));
@@ -104,10 +104,10 @@ test('empty crew permits habitat and blocks personal; loading and failure retain
   assert.ok(render({context:empty}).includes('No crew profiles are available'));
   assert.match(render({context:empty}),/type="submit" disabled/);
   assert.doesNotMatch(render({context:empty,draft:draft({kind:'co2_ppm'})}),/type="submit" disabled/);
-  for(const phase of ['loading','error']){const html=render({context:{...context,phase,error:'Falha'}});assert.ok(html.includes('value="5,2"'));assert.match(html,/fieldset disabled/);}
+  for(const phase of ['loading','error']){const html=render({context:{...context,phase,error:'Failed'}});assert.ok(html.includes('value="5,2"'));assert.match(html,/fieldset disabled/);}
 });
 test('uncertain UI locks fields with explicit history check, confirmed receipt separates recorded time and analysis', () => {
-  const uncertain=render({registration:{...INITIAL_REGISTRATION,phase:'uncertain',error:'Confira o histórico'}});
+  const uncertain=render({registration:{...INITIAL_REGISTRATION,phase:'uncertain',error:'Check the history'}});
   assert.match(uncertain,/fieldset disabled/);assert.ok(uncertain.includes('the reading is missing'));assert.ok(uncertain.includes('target="_blank"'));
   const saved=render({registration:{...INITIAL_REGISTRATION,phase:'saved',receipt:receipt()}});
   for(const text of ['#42','2026-11-14T14:00:00.000Z','2026-11-15T00:00:00Z','Measurement saved.','Review saved readings in History','Register another measurement'])assert.ok(saved.includes(text),text);

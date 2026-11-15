@@ -24,22 +24,11 @@ execFileSync(process.execPath, [require.resolve('typescript/bin/tsc'), '--target
 const { parseDashboard, fetchDashboard, nasaReferenceUrl } = require(path.join(output, 'api.js'));
 const { createDashboardController, INITIAL_DASHBOARD_STATE } = require(path.join(output, 'dashboard-state.js'));
 const { DashboardView } = require(path.join(output, 'Dashboard.js'));
-const { englishMissionCopy } = require(path.join(output, 'mission-copy.js'));
-
-test('localizes saved investigation copy and preserves measurements, scope and custom protocol text', () => {
-  const source = 'Padrão experimental de sono compartilhado por 3 astronautas: A1, A2, A3. '
-    + 'Janela observada: 2026-11-13T08:00:00+00:00 a 2026-11-15T08:00:00+00:00.';
-  assert.equal(englishMissionCopy(source),
-    'Experimental sleep pattern shared by 3 crew members: A1, A2, A3. '
-    + 'Observation window: 2026-11-13T08:00:00+00:00 to 2026-11-15T08:00:00+00:00.');
-  assert.match(englishMissionCopy('As duas observações de sono são menores ou iguais a 80% da baseline sintética: padrão experimental a verificar.'), /80% of the simulated baseline/);
-  assert.equal(englishMissionCopy('Custom protocol reference: Orion/2026.'), 'Custom protocol reference: Orion/2026.');
-});
 
 const stamp = '2026-11-14T08:00:00Z';
 function snapshot() {
   return {
-    mission: { name: 'Missão de teste', day: 184, destination: 'mars_surface', gravity_g_reference: 0.38,
+    mission: { name: 'Test mission', day: 184, destination: 'mars_surface', gravity_g_reference: 0.38,
       context_source_url: 'https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html', demo_only: true },
     astronauts: [{ id: 'A1', name: 'Aurora', status: 'attention', latest_metrics: {
       sleep_hours: { value: 5.4, unit: 'h', measured_at: stamp, source: 'synthetic' },
@@ -49,9 +38,9 @@ function snapshot() {
       co2_ppm: { value: 980, unit: 'ppm', measured_at: '2026-11-14T05:00:00Z', source: 'synthetic' },
       cabin_temp_c: { value: 0, unit: 'C', measured_at: stamp, source: 'manual' },
     } },
-    alerts: [{ id: 7, level: 'attention', label: 'Achado registrado', explanation: 'Explicação retornada pelo servidor.' }],
+    alerts: [{ id: 7, level: 'attention', label: 'Recorded finding', explanation: 'Explanation returned by the server.' }],
     pending_followups: [{ id: 9, investigation_id: 7, astronaut_id: null, kind: 'co2_ppm',
-      reason: 'Conferir nova leitura.', status: 'pending', due_at: null, created_at: stamp,
+      reason: 'Check the new reading.', status: 'pending', due_at: null, created_at: stamp,
       completed_at: null, measurement_id: null }],
     last_investigation_at: stamp, has_unanalyzed_measurements: true,
   };
@@ -114,8 +103,8 @@ test('invalid response fields are rejected instead of inventing a status or obse
 
 test('render uses API names, values, origins, independent timestamps, pending reason and freshness', () => {
   const html = render(parseDashboard(snapshot()));
-  for (const text of ['Missão de teste', 'Aurora', '5.4', '72', '0', 'Simulated data', 'Manual entry',
-    'Conferir nova leitura.', 'Achado registrado', 'Explicação retornada pelo servidor.',
+  for (const text of ['Test mission', 'Aurora', '5.4', '72', '0', 'Simulated data', 'Manual entry',
+    'Check the new reading.', 'Recorded finding', 'Explanation returned by the server.',
     'New measurements available', '2026-11-14T05:00:00Z', '2026-11-14T08:00:00Z',
     'NASA references', 'Mission destination · Mars surface', 'NASA planetary fact sheet']) {
     assert.ok(html.includes(text), text);
@@ -133,8 +122,8 @@ test('before a persisted investigation no motor assessment or alert is presented
   const html = render(data);
   assert.ok(html.includes('No investigation has been run'));
   assert.ok(html.includes('Awaiting investigation'));
-  assert.ok(!html.includes('Achado registrado'));
-  assert.ok(!html.includes('Explicação retornada pelo servidor.'));
+  assert.ok(!html.includes('Recorded finding'));
+  assert.ok(!html.includes('Explanation returned by the server.'));
 });
 
 test('empty storage and absent observations remain explicit; old API metadata is not invented', () => {
@@ -186,7 +175,7 @@ test('refresh keeps confirmed data through loading and failure, then allows reco
   const pending = controller.refresh();
   assert.equal(controller.getState().phase, 'loading');
   assert.equal(controller.getState().data, confirmed.data);
-  next.reject(new Error('Falha de teste'));
+  next.reject(new Error('Test failure'));
   await pending;
   assert.equal(controller.getState().phase, 'error');
   assert.equal(controller.getState().data, confirmed.data);
@@ -232,7 +221,7 @@ test('failure of an older request cannot replace a newer successful result', asy
   const controller = createDashboardController(() => ++call === 1 ? first.promise : second.promise);
   const old = controller.refresh(); const newest = controller.refresh();
   second.resolve(snapshot()); await newest;
-  first.reject(new Error('Erro atrasado')); await old;
+  first.reject(new Error('Late error')); await old;
   assert.equal(controller.getState().phase, 'ready');
   assert.equal(controller.getState().error, null);
   controller.dispose();
@@ -260,17 +249,6 @@ test('a transport that ignores abort still times out without making up a respons
   assert.match(controller.getState().error, /timed out/);
   assert.equal(controller.getState().data, null);
   controller.dispose();
-});
-
-test('a persisted dashboard summary translates an embedded observation window without changing timestamps', () => {
-  const data = snapshot();
-  const start = '2026-11-12T08:00:00.123456+00:00';
-  const end = '2026-11-14T08:00:00.123456+00:00';
-  data.alerts[0].explanation = 'Padrão experimental de sono compartilhado por 3 astronautas: A1, A2, A3. Janela observada: ' + start + ' a ' + end + '. Limitação: Regra experimental com tripulação fictícia; não é avaliação clínica nem diagnóstico.';
-  const html = render(data);
-  assert.ok(html.includes('Observation window: ' + start + ' to ' + end + '.'));
-  assert.ok(!html.includes('Janela observada:'));
-  assert.ok(html.includes('Clinical assessment and diagnosis are outside its scope.'));
 });
 
 test('a device copy served while the server fails is never announced as a confirmed refresh', async () => {

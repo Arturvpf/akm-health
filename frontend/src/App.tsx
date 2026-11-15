@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
-import { NAVIGATION, EXPERIMENTAL_NAVIGATION, ALL_NAVIGATION, legacyRedirect, pageHref, parsePage, type PageId } from './navigation';
+import { NAVIGATION, EXPERIMENTAL_NAVIGATION, ALL_NAVIGATION, pageHref, parsePage, type PageId } from './navigation';
 import { Dashboard } from './Dashboard';
 import { MeasurementForm } from './MeasurementForm';
 import { MissionPreview } from './MissionPreview';
@@ -79,8 +79,6 @@ export function App() {
 
   useEffect(() => {
     const onHashChange = () => {
-      const redirect = legacyRedirect(window.location.hash);
-      if (redirect) window.history.replaceState(null, '', redirect);
       setPage(parsePage(window.location.hash));
     };
     onHashChange();

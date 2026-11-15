@@ -73,6 +73,7 @@ It uses FastAPI TestClient, temporary SQLite and a frozen demo clock. It checks 
 - [Exact sources, hashes, transformations, reuse terms and import](docs/data-sources.md), [third-party notices](docs/third-party-notices.md), [AI assistance disclosure](docs/ai-usage.md).
 - The engine is deterministic Python, not an LLM service. Only POST /api/investigations/run executes investigation; GET does not run rules. Recording does not automatically complete follow-ups or reclassify saved results.
 - Demo thresholds are software parameters, not clinical thresholds. No automatic critical medical alarm or proven causal relation is produced. Missing/suspect evidence and uncertainty remain explicit.
+- The offline shell (service worker) is registered only in production builds: use `npm --prefix frontend run build` and `npm --prefix frontend run preview` (or the deployed site) to demo offline; `npm run dev` has no offline shell. The first visit precaches the whole app shell and fonts, so a reload offline works right after it.
 - Local offline use requires installed packages and local NASA files. New measurements can be queued offline in the browser and synced later (AKM-33); investigations still need the API. This guide does not claim a full mobile offline app, connected sensors, authentication or production deployment. Keep loopback bindings: there is no authentication layer.
 
 ## Check the checkout

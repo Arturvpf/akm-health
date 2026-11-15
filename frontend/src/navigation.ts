@@ -18,17 +18,6 @@ export const ALL_NAVIGATION = [HOME, ...NAVIGATION, ...EXPERIMENTAL_NAVIGATION] 
 export type PageId = (typeof ALL_NAVIGATION)[number]['id'];
 export const DEFAULT_PAGE: PageId = 'home';
 
-/** Earlier builds used Portuguese hash ids; they still resolve to the English routes. */
-export const LEGACY_ROUTES: Readonly<Record<string, PageId>> = {
-  registrar: 'register',
-  historico: 'history',
-  investigacao: 'investigation',
-  comparador: 'scenarios',
-  ambientes: 'environments',
-  corpo: 'body',
-  autocuidado: 'self-care',
-};
-
 function routeCandidate(hash: string): string {
   return hash.replace(/^#\/?/, '').replace(/\/$/, '');
 }
@@ -36,14 +25,10 @@ function routeCandidate(hash: string): string {
 export function parsePage(hash: string): PageId {
   const candidate = routeCandidate(hash);
   const match = ALL_NAVIGATION.find((item) => item.id === candidate);
-  return match ? match.id : LEGACY_ROUTES[candidate] ?? DEFAULT_PAGE;
+  return match ? match.id : DEFAULT_PAGE;
 }
 
 /** Returns the canonical hash when `hash` uses a legacy id, otherwise null. */
-export function legacyRedirect(hash: string): string | null {
-  const target = LEGACY_ROUTES[routeCandidate(hash)];
-  return target ? pageHref(target) : null;
-}
 
 export function pageHref(page: PageId): string {
   return `#/${page}`;
