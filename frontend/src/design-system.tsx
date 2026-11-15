@@ -19,19 +19,12 @@ type Source = DataSource | 'nasa_reference' | 'nasa_historical';
 type StatusLabel = { label: string; icon: IconName; tone: Tone };
 
 const STATUSES = {
-  normal: { label: 'Sem padrão pela regra da demo', icon: 'check', tone: 'positive' },
-  attention: { label: 'Padrão experimental a verificar', icon: 'warning', tone: 'caution' },
-  insufficient_data: { label: 'Dados insuficientes', icon: 'info', tone: 'neutral' },
+  normal: { label: 'No pattern under the demo rule', icon: 'check', tone: 'positive' },
+  attention: { label: 'Experimental pattern to check', icon: 'warning', tone: 'caution' },
+  insufficient_data: { label: 'Insufficient data', icon: 'info', tone: 'neutral' },
 } as const satisfies Record<DemoStatus, StatusLabel>;
 
 const SOURCES: Record<Source, string> = {
-  synthetic: 'Dado simulado',
-  manual: 'Registro manual',
-  nasa_reference: 'Referência científica NASA',
-  nasa_historical: 'Dado NASA histórico',
-};
-
-const ENGLISH_SOURCES: Record<Source, string> = {
   synthetic: 'Simulated data',
   manual: 'Manual entry',
   nasa_reference: 'NASA research reference',
@@ -39,15 +32,15 @@ const ENGLISH_SOURCES: Record<Source, string> = {
 };
 
 const QUALITY: Record<Quality, StatusLabel> = {
-  ok: { label: 'Válida', icon: 'check', tone: 'neutral' },
-  suspect: { label: 'Suspeita', icon: 'warning', tone: 'caution' },
+  ok: { label: 'Valid', icon: 'check', tone: 'neutral' },
+  suspect: { label: 'Suspect', icon: 'warning', tone: 'caution' },
 };
 
 const DATA_STATES = {
-  empty: { label: 'Sem dados', icon: 'empty', tone: 'neutral' },
-  loading: { label: 'Carregando', icon: 'loading', tone: 'info' },
-  error: { label: 'Falha de conexão', icon: 'error', tone: 'neutral' },
-  success: { label: 'Atualização concluída', icon: 'check', tone: 'positive' },
+  empty: { label: 'No data', icon: 'empty', tone: 'neutral' },
+  loading: { label: 'Loading', icon: 'loading', tone: 'info' },
+  error: { label: 'Connection error', icon: 'error', tone: 'neutral' },
+  success: { label: 'Update complete', icon: 'check', tone: 'positive' },
 } as const satisfies Record<string, StatusLabel>;
 
 export type DataStateKind = keyof typeof DATA_STATES;
@@ -64,9 +57,8 @@ export function StatusBadge({ status }: { status: DemoStatus }) {
   return <Badge {...STATUSES[status]} />;
 }
 
-export function SourceBadge({ source, language = 'pt-BR' }: { source: Source; language?: 'en' | 'pt-BR' }) {
-  const labels = language === 'en' ? ENGLISH_SOURCES : SOURCES;
-  return <Badge label={labels[source]} icon="source" tone="neutral" />;
+export function SourceBadge({ source }: { source: Source }) {
+  return <Badge label={SOURCES[source]} icon="source" tone="neutral" />;
 }
 
 export function QualityBadge({ quality }: { quality: Quality }) {
@@ -76,16 +68,16 @@ export function QualityBadge({ quality }: { quality: Quality }) {
 export function ProtocolLegend() {
   return (
     <section className="ds-legend">
-      <h3>Legenda da investigação</h3>
+      <h3>Investigation legend</h3>
       <ul>
-        <li><StatusBadge status="normal" /> A regra experimental não identificou um padrão nos dados avaliados.</li>
-        <li><StatusBadge status="attention" /> O achado pede uma nova observação.</li>
-        <li><StatusBadge status="insufficient_data" /> Faltam observações para aplicar a regra.</li>
+        <li><StatusBadge status="normal" /> The experimental rule found no pattern in the available data.</li>
+        <li><StatusBadge status="attention" /> Collect another reading to check the finding.</li>
+        <li><StatusBadge status="insufficient_data" /> More observations are needed to apply the rule.</li>
         <li>
           <span className="ds-badge ds-badge-protocol">
-            <Icon name="protocol" />Seguir protocolo da missão
+            <Icon name="protocol" />Follow mission protocol
           </span>
-          Uso reservado ao protocolo autorizado da missão.
+          Reserved for the approved mission protocol.
         </li>
       </ul>
     </section>
@@ -136,9 +128,9 @@ function Notice({ label, icon, tone, children }: StatusLabel & { children: React
 
 export function SimulationNotice() {
   return (
-    <aside className="simulation-notice" aria-label="Contexto da demonstração">
-      <Notice label="Dados simulados" icon="info" tone="info">
-        Os exemplos abaixo são demonstrações locais.
+    <aside className="simulation-notice" aria-label="Demonstration context">
+      <Notice label="Simulated mission" icon="info" tone="info">
+        Mission readings are simulated or entered locally.
       </Notice>
     </aside>
   );

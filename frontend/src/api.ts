@@ -1,8 +1,8 @@
 import type { DashboardResponse, Kind } from './types';
 
 export const METRIC_LABELS: Record<Kind, string> = {
-  sleep_hours: 'Sono', heart_rate_bpm: 'Frequência cardíaca', mood_score: 'Bem-estar emocional',
-  co2_ppm: 'CO₂ interno', cabin_temp_c: 'Temperatura interna',
+  sleep_hours: 'Sleep', heart_rate_bpm: 'Heart rate', mood_score: 'Emotional well-being',
+  co2_ppm: 'Cabin CO₂', cabin_temp_c: 'Cabin temperature',
 };
 const UNITS: Record<Kind, string> = {
   sleep_hours: 'h', heart_rate_bpm: 'bpm', mood_score: 'score_1_to_5', co2_ppm: 'ppm', cabin_temp_c: 'C',
@@ -53,7 +53,7 @@ export function parseDashboard(value: unknown): DashboardResponse {
         && check.completed_at === null && check.measurement_id === null)
       && optionalDate(value.last_investigation_at) && typeof value.has_unanalyzed_measurements === 'boolean';
   }
-  if (!valid) throw new Error('O servidor retornou dados de dashboard inválidos.');
+  if (!valid) throw new Error('The server returned invalid dashboard data.');
   return value as DashboardResponse;
 }
 
@@ -65,12 +65,12 @@ export async function fetchDashboard(signal: AbortSignal): Promise<DashboardResp
     });
   } catch (error) {
     if (signal.aborted) throw error;
-    throw new Error('Não foi possível conectar ao servidor da missão.');
+    throw new Error('Could not connect to the mission server.');
   }
-  if (!response.ok) throw new Error('Não foi possível consultar os dados da missão.');
+  if (!response.ok) throw new Error('Could not retrieve mission data.');
   let body: unknown;
   try { body = await response.json(); }
-  catch { throw new Error('O servidor retornou uma resposta inválida.'); }
+  catch { throw new Error('The server returned an invalid response.'); }
   return parseDashboard(body);
 }
 

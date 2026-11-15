@@ -79,93 +79,93 @@ export function MeasurementFormView({ context, registration, draft, errors, onCh
   const receipt = registration.receipt;
   const stamp = measurementTime(draft.localTime, draft.offset);
   return <div className="measurement-page">
-    <InformationNotice label="Registro experimental">
-      Missão e tripulação fictícias, sem sensores conectados. Registre somente dados da demonstração. Ausência de informação não é zero.
+    <InformationNotice label="Experimental registration">
+      Enter readings for the simulated mission only. Leave missing readings blank.
     </InformationNotice>
     <div className="dashboard-toolbar">
-      <p>{context.data ? `${context.data.mission.name} · Destino: Marte · Habitat interno` : 'Consultando o contexto da missão na API local.'}</p>
-      <ActionButton onClick={onRefresh} disabled={context.phase === 'loading' || busy}>Atualizar missão e tripulação</ActionButton>
+      <p>{context.data ? `${context.data.mission.name} · Destination: Mars · Cabin` : 'Loading mission information from the local API.'}</p>
+      <ActionButton onClick={onRefresh} disabled={context.phase === 'loading' || busy}>Refresh mission and crew</ActionButton>
     </div>
     <div role="status">
-      {context.phase === 'loading' && <DataState kind="loading">Carregando missão e tripulação. O formulário permanece preservado.</DataState>}
-      {context.phase === 'error' && <DataState kind="error">{context.error} {context.data ? 'O contexto exibido pode estar desatualizado.' : 'O envio estará disponível após carregar a missão.'} Atualize para tentar novamente. Um registro já confirmado permanece salvo.</DataState>}
-      {ready && !context.data?.astronauts.length && <DataState kind="empty">Nenhum tripulante cadastrado. As medições do habitat continuam disponíveis; as pessoais exigem um perfil retornado pela API.</DataState>}
+      {context.phase === 'loading' && <DataState kind="loading">Loading mission and crew. Your draft remains available.</DataState>}
+      {context.phase === 'error' && <DataState kind="error">{context.error} {context.data ? 'Mission information may be out of date.' : 'You can submit once mission data loads.'} Refresh to try again. Confirmed readings remain saved.</DataState>}
+      {ready && !context.data?.astronauts.length && <DataState kind="empty">No crew profiles are available. You can still register cabin readings.</DataState>}
     </div>
     <div ref={feedback} tabIndex={-1} className="registration-feedback" role={registration.error ? 'alert' : 'status'}>
-      {busy && <DataState kind="loading">Salvando uma medição. Aguarde a confirmação antes de sair desta tela.</DataState>}
+      {busy && <DataState kind="loading">Saving measurement. Wait for confirmation before leaving this page.</DataState>}
       {registration.error && <DataState kind="error">{registration.error}</DataState>}
       {registration.phase === 'uncertain' && <div className="status-actions">
-        <ActionLink href="#/historico" target="_blank" rel="noopener noreferrer">Conferir histórico em nova aba</ActionLink>
-        <ActionButton onClick={onUnlock}>Conferi o histórico: a medição não consta; liberar envio</ActionButton>
-        <p>O envio anterior pode ter sido salvo. Reenviar sem conferir pode criar uma duplicata. Os campos estão preservados.</p>
+        <ActionLink href="#/historico" target="_blank" rel="noopener noreferrer">Check History in a new tab</ActionLink>
+        <ActionButton onClick={onUnlock}>I checked History and the reading is missing. Enable resubmission.</ActionButton>
+        <p>The previous attempt may have saved the reading. Check History before resubmitting to avoid a duplicate. Your draft remains available.</p>
       </div>}
-      {receipt && <Card heading={`Medição #${receipt.id} confirmada`}>
+      {receipt && <Card heading={`Measurement #${receipt.id} confirmed`}>
         <div className="badge-row"><SourceBadge source={receipt.source} /></div>
         <Details items={[
-          { label: 'Indicador', value: `${METRIC_LABELS[receipt.kind]} · ${receipt.value.toLocaleString('pt-BR')} ${FORM_METRICS[receipt.kind].displayUnit}` },
-          { label: 'Alvo', value: receipt.astronaut_id ? `${context.data?.astronauts.find(person => person.id === receipt.astronaut_id)?.name ?? receipt.astronaut_id} · ${receipt.astronaut_id}` : 'Habitat · ar interno' },
-          { label: 'Momento medido (UTC)', value: <time dateTime={receipt.measured_at}>{receipt.measured_at}</time> },
-          { label: 'Cadastro no servidor (UTC)', value: <time dateTime={receipt.recorded_at}>{receipt.recorded_at}</time> },
-          { label: 'Qualidade técnica', value: receipt.quality === 'suspect' ? 'Suspeita — confira instrumento, unidade e horário antes de uma nova leitura.' : 'Aproveitável tecnicamente — não significa saúde normal.' },
+          { label: 'Metric', value: `${METRIC_LABELS[receipt.kind]} · ${receipt.value.toLocaleString('en-US')} ${FORM_METRICS[receipt.kind].displayUnit}` },
+          { label: 'Target', value: receipt.astronaut_id ? `${context.data?.astronauts.find(person => person.id === receipt.astronaut_id)?.name ?? receipt.astronaut_id} · ${receipt.astronaut_id}` : 'Habitat · cabin air' },
+          { label: 'Observed (UTC)', value: <time dateTime={receipt.measured_at}>{receipt.measured_at}</time> },
+          { label: 'Recorded by server (UTC)', value: <time dateTime={receipt.recorded_at}>{receipt.recorded_at}</time> },
+          { label: 'Technical quality', value: receipt.quality === 'suspect' ? 'Suspect — check the instrument, unit, and timestamp before collecting another reading.' : 'Valid for analysis. Quality describes the reading only.' },
         ]} />
-        <p>A medição foi salva. A investigação e as verificações pendentes não foram executadas ou concluídas automaticamente. Novas medições disponíveis — atualizar investigação.</p>
-        <p>Registros salvos não podem ser editados nesta versão. Confira o histórico antes de registrar uma nova observação.</p>
-        <div className="badge-row"><ActionLink href="#/dashboard">Ver dashboard atualizado</ActionLink><ActionLink href="#/historico">Consultar histórico</ActionLink><ActionLink href="#/investigacao">Ir para investigação</ActionLink><ActionButton onClick={onNew}>Registrar outra medição</ActionButton></div>
+        <p>Measurement saved. Run an investigation to analyze it. Pending checks require a separate confirmation.</p>
+        <p>Review saved readings in History before registering another observation.</p>
+        <div className="badge-row"><ActionLink href="#/dashboard">View updated Dashboard</ActionLink><ActionLink href="#/historico">View History</ActionLink><ActionLink href="#/investigacao">Go to Investigation</ActionLink><ActionButton onClick={onNew}>Register another measurement</ActionButton></div>
       </Card>}
     </div>
     {!receipt && <div className="measurement-grid">
-      <Card heading="Dados da medição">
+      <Card heading="Measurement details">
         <form ref={form} noValidate onSubmit={onSubmit} aria-busy={busy}>
           <fieldset disabled={locked || !ready} className="measurement-fields">
-            <legend>Preencha os campos obrigatórios</legend>
-            <label className="ds-field" htmlFor="measurement-kind">Indicador
+            <legend>Complete the required fields</legend>
+            <label className="ds-field" htmlFor="measurement-kind">Metric
               <select className="ds-control" {...fields('kind')} value={draft.kind} onChange={event => onChange('kind', event.target.value as Kind)}>
                 {(Object.keys(FORM_METRICS) as Kind[]).map(kind => <option value={kind} key={kind}>{METRIC_LABELS[kind]}</option>)}
               </select>{error('kind')}
             </label>
-            <p className="measurement-zone">Zona automática: <strong>{metric.zone === 'habitat' ? 'Habitat · ar interno da cabine' : 'Astronauta · medição individual'}</strong></p>
-            {metric.zone === 'astronaut' && <label className="ds-field" htmlFor="measurement-astronaut">Tripulante
+            <p className="measurement-zone">Measurement zone: <strong>{metric.zone === 'habitat' ? 'Habitat · cabin air' : 'Astronaut · individual reading'}</strong></p>
+            {metric.zone === 'astronaut' && <label className="ds-field" htmlFor="measurement-astronaut">Crew member
               <select className="ds-control" {...fields('astronaut')} required value={draft.astronaut} onChange={event => onChange('astronaut', event.target.value)}>
-                <option value="">Selecione um tripulante</option>
+                <option value="">Select a crew member</option>
                 {context.data?.astronauts.map(person => <option key={person.id} value={person.id}>{person.name} · {person.id}</option>)}
               </select>{error('astronaut')}
             </label>}
-            <label className="ds-field" htmlFor="measurement-value">{draft.kind === 'mood_score' ? 'Bem-estar emocional' : 'Valor'} ({metric.displayUnit})
+            <label className="ds-field" htmlFor="measurement-value">{draft.kind === 'mood_score' ? 'Emotional well-being' : 'Value'} ({metric.displayUnit})
               {draft.kind === 'mood_score' ? <select className="ds-control" {...fields('value', 'measurement-instructions')} required value={draft.value} onChange={event => onChange('value', event.target.value)}>
-                <option value="">Selecione uma opção</option>{['Muito ruim', 'Ruim', 'Neutro', 'Bom', 'Muito bom'].map((label, index) => <option value={index + 1} key={label}>{index + 1} — {label}</option>)}
+                <option value="">Select an option</option>{['Very poor', 'Poor', 'Neutral', 'Good', 'Very good'].map((label, index) => <option value={index + 1} key={label}>{index + 1} — {label}</option>)}
               </select> : <input className="ds-control" {...fields('value', 'measurement-instructions')} required type="text" inputMode="decimal" autoComplete="off" value={draft.value} onChange={event => onChange('value', event.target.value)} />}
               {error('value')}
             </label>
             <div className="measurement-time-grid">
-              <label className="ds-field" htmlFor="measurement-localTime">Data e hora {draft.kind === 'sleep_hours' ? 'ao acordar' : 'da leitura'}
+              <label className="ds-field" htmlFor="measurement-localTime">{draft.kind === 'sleep_hours' ? 'Wake-up date and time' : 'Observation date and time'}
                 <input className="ds-control" {...fields('localTime', 'measurement-time-help')} required type="datetime-local" step="1" value={draft.localTime} onChange={event => onChange('localTime', event.target.value)} />{error('localTime')}
               </label>
-              <label className="ds-field" htmlFor="measurement-offset">Fuso em relação a UTC
+              <label className="ds-field" htmlFor="measurement-offset">UTC offset
                 <input className="ds-control" {...fields('offset', 'measurement-time-help')} required type="text" placeholder="-03:00" value={draft.offset} onChange={event => onChange('offset', event.target.value)} />{error('offset')}
               </label>
             </div>
-            <p id="measurement-time-help">Informe o fuso da leitura: +00:00 é UTC; -03:00 é UTC−3. O horário será convertido para UTC.{stamp && <> Envio: <time dateTime={stamp}>{stamp}</time>.</>}</p>
-            <label className="ds-field" htmlFor="measurement-source">Origem
+            <p id="measurement-time-help">Enter the UTC offset, such as +00:00 or -03:00. The app converts the timestamp to UTC.{stamp && <> UTC timestamp: <time dateTime={stamp}>{stamp}</time>.</>}</p>
+            <label className="ds-field" htmlFor="measurement-source">Source
               <select className="ds-control" {...fields('source')} value={draft.source} onChange={event => onChange('source', event.target.value as MeasurementDraft['source'])}>
-                <option value="manual">Registro manual da demonstração</option><option value="synthetic">Dado simulado</option>
+                <option value="manual">Manual demo entry</option><option value="synthetic">Simulated data</option>
               </select>{error('source')}
             </label>
-            <label className="ds-field" htmlFor="measurement-quality">Qualidade técnica
+            <label className="ds-field" htmlFor="measurement-quality">Technical quality
               <select className="ds-control" {...fields('quality', 'measurement-quality-help')} value={draft.quality} onChange={event => onChange('quality', event.target.value as MeasurementDraft['quality'])}>
-                <option value="ok">Aproveitável tecnicamente</option><option value="suspect">Suspeita / leitura instável</option>
+                <option value="ok">Valid for analysis</option><option value="suspect">Suspect / unstable reading</option>
               </select>{error('quality')}
             </label>
-            <p id="measurement-quality-help">Qualidade descreve a leitura, sem avaliar saúde. Leituras suspeitas ficam registradas, com limitação de uso na investigação.</p>
+            <p id="measurement-quality-help">Quality describes the reading. Suspect readings stay in History and are excluded from investigation evidence.</p>
           </fieldset>
-          <button className="ds-action ds-action-primary" type="submit" disabled={locked || !ready || registration.missingAstronaut || (metric.zone === 'astronaut' && !context.data?.astronauts.length)}>Salvar medição</button>
+          <button className="ds-action ds-action-primary" type="submit" disabled={locked || !ready || registration.missingAstronaut || (metric.zone === 'astronaut' && !context.data?.astronauts.length)}>Save measurement</button>
         </form>
       </Card>
-      <Card heading="Como registrar">
+      <Card heading="How to record">
         <section id="measurement-instructions" aria-live="polite"><h3>{METRIC_LABELS[draft.kind]} · {metric.displayUnit}</h3><p>{metric.instruction}</p><p>{metric.limit}</p></section>
-        <ol className="measurement-steps"><li>Confira o indicador e o alvo.</li><li>Informe a leitura, o momento medido e o fuso.</li><li>Identifique origem e qualidade; revise antes de salvar.</li><li>Aguarde o número do registro confirmado.</li></ol>
-        <p>Os campos podem ser corrigidos antes do envio. A API atual não permite editar medições salvas.</p>
-        <p>Referências NASA são contexto educativo. Dados históricos NASA pertencem à área de referências e não devem ser cadastrados como leitura desta missão.</p>
-        <p><a href={metric.url}>Fonte contextual NASA · {metric.id}</a></p>
+        <ol className="measurement-steps"><li>Check the metric and target.</li><li>Enter the reading, observation time, and UTC offset.</li><li>Select the source and quality. Review the details before saving.</li><li>Wait for the measurement confirmation number.</li></ol>
+        <p>Edit fields before submitting. Saved measurements are read-only.</p>
+        <p>Find historical NASA data in the NASA references section.</p>
+        <p><a href={metric.url}>NASA reference · {metric.id}</a></p>
       </Card>
     </div>}
   </div>;

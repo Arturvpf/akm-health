@@ -73,37 +73,37 @@ function useRead<T>(read: (signal: AbortSignal) => Promise<T>) {
 function investigationError(error: unknown, operation: 'run' | 'recover') {
   if (error instanceof InvestigationApiError) {
     if (error.status === 404) return operation === 'run'
-      ? 'O tripulante selecionado não está disponível. Atualize a lista e escolha um perfil.'
-      : 'Investigação não encontrada. Confira o número informado.';
+      ? 'The selected crew member is unavailable. Refresh the list and select a profile.'
+      : 'Investigation not found. Check the number.';
     if (error.status === 422) return operation === 'run'
-      ? 'Confira o escopo e o tripulante antes de executar.'
-      : 'Confira o número da investigação.';
+      ? 'Check the scope and selected crew member before running the investigation.'
+      : 'Check the investigation number.';
   }
   return operation === 'run'
-    ? 'Não foi possível confirmar a execução. Tente novamente com o mesmo escopo.'
-    : 'Não foi possível carregar a investigação. Tente recuperar novamente.';
+    ? 'Could not confirm the investigation. Try again with the same scope.'
+    : 'Could not load the investigation. Try again.';
 }
 
 function linkError(error: unknown) {
   if (error instanceof InvestigationApiError) {
-    if (error.status === 409) return 'A checagem já tem outro vínculo. Consulte a conclusão atual na agenda.';
-    if (error.status === 404) return 'A checagem ou a medição não foi encontrada. Confira a agenda e atualize as medições.';
+    if (error.status === 409) return 'The check is already linked to a different measurement. Review the completed check.';
+    if (error.status === 404) return 'The check or measurement was not found. Review the schedule and refresh the measurements.';
     if (error.status === 422) {
       switch (error.detail) {
         case 'Measurement does not match followup kind, zone and astronaut':
-          return 'Escolha uma medição do mesmo indicador, zona e alvo da checagem.';
+          return 'Choose a measurement with the same metric, zone, and target.';
         case 'Followup requires a usable measurement':
-          return 'Escolha uma medição com qualidade válida.';
+          return 'Choose a valid reading.';
         case 'Measurement must be recorded after followup creation':
-          return 'O cadastro da medição precisa ser posterior à solicitação.';
+          return 'The measurement must have been recorded after the check was requested.';
         case 'Future measurement cannot complete a followup':
-          return 'A coleta e o cadastro precisam estar no passado ou no horário atual.';
+          return 'Choose a reading whose observation and recording times have already passed.';
         default:
-          return 'Confira a medição selecionada e tente novamente.';
+          return 'Check the selected measurement and try again.';
       }
     }
   }
-  return 'Não foi possível confirmar o vínculo. A agenda será consultada antes de outra tentativa.';
+  return 'Could not confirm the link. The schedule will be checked before another attempt.';
 }
 
 export function InvestigationPage() {
@@ -154,8 +154,8 @@ export function InvestigationPage() {
     const measurementId = activeCheck.measurement_id;
     agendaMessage = {
       text: measurementId === linkMessage.attemptedMeasurementId
-        ? `A agenda confirmou a conclusão da checagem #${activeCheck.id} com a medição #${measurementId}.`
-        : `A agenda confirmou a conclusão da checagem #${activeCheck.id} com outra medição, #${measurementId}.`,
+        ? `The schedule confirmed check #${activeCheck.id} with measurement #${measurementId}.`
+        : `The schedule confirmed check #${activeCheck.id} with a different measurement, #${measurementId}.`,
     };
   }
 
@@ -173,8 +173,8 @@ export function InvestigationPage() {
       setResult(value);
       remember(value.id);
       setResultMessage({
-        text: value.reused ? `Investigação #${value.id} reutilizada. O horário original foi preservado.`
-          : `Investigação #${value.id} concluída.`,
+        text: value.reused ? `Investigation #${value.id} reused with its original timestamp.`
+          : `Investigation #${value.id} complete.`,
       });
       agenda.refresh();
       dashboard.refresh();
@@ -199,7 +199,7 @@ export function InvestigationPage() {
       setScope(value.scope);
       if (value.astronaut_id !== null) setAstronautId(value.astronaut_id);
       remember(value.id);
-      setResultMessage({ text: `Investigação #${value.id} recuperada.` });
+      setResultMessage({ text: `Investigation #${value.id} retrieved.` });
       agenda.refresh();
     } catch (error) {
       setResultMessage({ text: investigationError(error, 'recover'), error: true });
@@ -238,7 +238,7 @@ export function InvestigationPage() {
         pending: (current?.pending ?? []).filter(item => item.id !== completed.id),
         completed: [...(current?.completed ?? []).filter(item => item.id !== completed.id), completed],
       }));
-      setLinkMessage({ text: `Checagem #${completed.id} concluída com a medição #${completed.measurement_id}.` });
+      setLinkMessage({ text: `Check #${completed.id} completed with measurement #${completed.measurement_id}.` });
       checkHeading.current?.focus();
     } catch (error) {
       setLinkMessage({ text: linkError(error), error: true, attemptedMeasurementId: measurementId });
@@ -251,72 +251,72 @@ export function InvestigationPage() {
 
   return (
     <div className="investigation-page">
-      <Card heading="Executar investigação experimental">
+      <Card heading="Run an experimental investigation">
         <form className="investigation-fields" onSubmit={run}>
           <div className="investigation-field-grid">
-            <SelectField label="Escopo" value={scope} disabled={operation !== null}
+            <SelectField label="Scope" value={scope} disabled={operation !== null}
               onChange={event => setScope(event.currentTarget.value === 'individual' ? 'individual' : 'crew')}>
-              <option value="crew">Tripulação (coletivo)</option>
+              <option value="crew">Crew</option>
               <option value="individual">Individual</option>
             </SelectField>
             {scope === 'individual' ? (
-              <SelectField label="Tripulante" value={hasSelectedAstronaut ? astronautId : ''}
+              <SelectField label="Crew member" value={hasSelectedAstronaut ? astronautId : ''}
                 disabled={profiles.loading || operation !== null}
                 onChange={event => setAstronautId(event.currentTarget.value)}>
-                <option value="">Selecione um tripulante</option>
+                <option value="">Select a crew member</option>
                 {people.map(person => <option key={person.id} value={person.id}>{targetName(person.id, people)}</option>)}
               </SelectField>
             ) : null}
           </div>
           <div role="status">
-            {profiles.loading ? <p>Carregando os perfis da missão…</p> : null}
-            {profiles.error ? <p>Não foi possível atualizar a lista de tripulantes.</p> : null}
-            {!profiles.loading && !profiles.error && !people.length ? <p>Nenhum perfil cadastrado na missão.</p> : null}
+            {profiles.loading ? <p>Loading crew profiles…</p> : null}
+            {profiles.error ? <p>Could not refresh the crew list.</p> : null}
+            {!profiles.loading && !profiles.error && !people.length ? <p>No crew profiles are available.</p> : null}
             {!dashboard.loading && !dashboard.error && dashboard.data?.has_unanalyzed_measurements ? (
-              <p>Há medições novas na missão aguardando investigação.</p>
+              <p>New mission readings are waiting for investigation.</p>
             ) : null}
           </div>
           <div className="investigation-actions">
             <ActionButton type="submit" aria-disabled={operation !== null || (scope === 'individual' && !hasSelectedAstronaut)}>
-              {operation === 'run' ? 'Investigando…' : sameScope ? 'Reanalisar este escopo' : 'Executar investigação'}
+              {operation === 'run' ? 'Running investigation…' : sameScope ? 'Reanalyze this scope' : 'Run investigation'}
             </ActionButton>
-            {profiles.error ? <ActionButton onClick={profiles.refresh}>Tentar carregar tripulantes novamente</ActionButton> : null}
+            {profiles.error ? <ActionButton onClick={profiles.refresh}>Retry loading crew</ActionButton> : null}
           </div>
         </form>
         <details className="investigation-disclosure">
-          <summary>Recuperar investigação por número</summary>
+          <summary>Retrieve an investigation by number</summary>
           <form className="investigation-fields" onSubmit={submitRecovery}>
             <label className="ds-field">
-              <span>Número da investigação</span>
+              <span>Investigation number</span>
               <input className="ds-control" inputMode="numeric" ref={recoveryControl}
                 aria-invalid={invalidId} aria-describedby={invalidId ? 'investigation-invalid-id' : undefined}
                 value={recoveryId} onChange={event => { setRecoveryId(event.currentTarget.value); setInvalidId(false); }} />
             </label>
-            {invalidId ? <p id="investigation-invalid-id" role="alert">Informe um número inteiro positivo válido.</p> : null}
-            <div><ActionButton type="submit" disabled={operation !== null}>Recuperar resultado</ActionButton></div>
+            {invalidId ? <p id="investigation-invalid-id" role="alert">Enter a positive whole number.</p> : null}
+            <div><ActionButton type="submit" disabled={operation !== null}>Retrieve result</ActionButton></div>
           </form>
         </details>
       </Card>
-      <Card heading="Resultado da investigação">
-        <h3 tabIndex={-1} ref={resultHeading}>{result ? 'Último resultado confirmado exibido' : 'Resultado experimental'}</h3>
+      <Card heading="Investigation result">
+        <h3 tabIndex={-1} ref={resultHeading}>{result ? 'Last confirmed result' : 'Experimental result'}</h3>
         <div className="state-feedback" role="status">
           {operation !== null ? <DataState kind="loading">
-            {operation === 'run' ? 'Aguardando a análise do servidor.' : 'Consultando a investigação salva.'}
+            {operation === 'run' ? 'Waiting for the server to analyze the readings.' : 'Loading the saved investigation.'}
           </DataState> : null}
           {resultMessage ? <p className={`investigation-message ${resultMessage.error ? 'tone-caution' : 'tone-positive'}`}>
-            {resultMessage.text}{resultMessage.error && result ? ' O resultado confirmado permanece abaixo.' : ''}
+            {resultMessage.text}{resultMessage.error && result ? ' The last confirmed result remains below.' : ''}
           </p> : null}
         </div>
         {result ? (
           <ResultDetails result={result} profiles={people} check={findCheck(result.followup_id)} openCheck={select} />
         ) : operation === null ? (
           <>
-            <p>Execute uma investigação experimental ou recupere um resultado salvo.</p>
-            <ActionLink href={pageHref('registrar')}>Adicionar medição</ActionLink>
+            <p>Run an experimental investigation or retrieve a saved result.</p>
+            <ActionLink href={pageHref('registrar')}>Add measurement</ActionLink>
           </>
         ) : null}
         <details className="investigation-disclosure">
-          <summary>Como interpretar os estados</summary>
+          <summary>How to interpret the results</summary>
           <ProtocolLegend />
         </details>
       </Card>

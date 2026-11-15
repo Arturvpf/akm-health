@@ -96,7 +96,7 @@ function HistoricalSeries({ history }: { history: NASAHistoricalObservation[] })
   const source = nasaReferenceUrl(first.source_url);
   return <div className="nasa-history">
     <h3>ISS historical telemetry · {first.mission_id}</h3>
-    <SourceBadge source="nasa_historical" language="en" />
+    <SourceBadge source="nasa_historical" />
     <p>{first.context} This archive is separate from ODYSSEY-26 mission readings and investigation evidence.</p>
     <Details items={[
       { label: 'Source', value: source ? <a href={source}>{first.source}</a> : first.source },
@@ -138,7 +138,7 @@ export function NasaReferences({ mission }: { mission?: DashboardResponse['missi
     <Card heading="NASA references">
       {mission && <div className="nasa-planet">
         <h3>Mission destination · Mars surface</h3>
-        <SourceBadge source="nasa_reference" language="en" />
+        <SourceBadge source="nasa_reference" />
         <p>Reference gravity: {mission.gravity_g_reference} g.
           {planetSource ? <> <a href={planetSource}>NASA planetary fact sheet</a>.</>
             : ' The planetary fact sheet link is unavailable.'}</p>
@@ -150,7 +150,7 @@ export function NasaReferences({ mission }: { mission?: DashboardResponse['missi
         <ActionButton onClick={() => { setState('loading'); setAttempt(value => value + 1); }}>Try again</ActionButton>
       </> : <>
         <h3>Human Research Program</h3>
-        <SourceBadge source="nasa_reference" language="en" />
+        <SourceBadge source="nasa_reference" />
         <ul>{state.scientific_references.map(reference => {
           const url = nasaReferenceUrl(reference.url);
           return <li key={reference.url}>{url ? <a href={url}>{reference.title}</a> : reference.title}</li>;

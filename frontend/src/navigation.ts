@@ -1,9 +1,9 @@
 /** AKM-12 — named P0 sections, deliberately without a router dependency. */
 export const NAVIGATION = [
-  { id: 'dashboard', label: 'Dashboard', description: 'Visão da missão' },
-  { id: 'registrar', label: 'Registrar', description: 'Nova medição' },
-  { id: 'historico', label: 'Histórico', description: 'Medições registradas' },
-  { id: 'investigacao', label: 'Investigação', description: 'Análise e acompanhamento' },
+  { id: 'dashboard', label: 'Dashboard', description: 'Mission overview' },
+  { id: 'registrar', label: 'Register', description: 'New measurement' },
+  { id: 'historico', label: 'History', description: 'Recorded measurements' },
+  { id: 'investigacao', label: 'Investigation', description: 'Analysis and follow-up' },
 ] as const;
 
 export type PageId = (typeof NAVIGATION)[number]['id'];
