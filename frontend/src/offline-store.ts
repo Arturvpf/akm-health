@@ -24,7 +24,7 @@ export function openOfflineDb(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains(STORE_OUTBOX)) db.createObjectStore(STORE_OUTBOX, { keyPath: 'id' });
       if (!db.objectStoreNames.contains(STORE_CACHE)) db.createObjectStore(STORE_CACHE, { keyPath: 'key' });
     };
-    request.onerror = () => reject(request.error ?? new Error('Falha de armazenamento local'));
+    request.onerror = () => reject(request.error ?? new Error('Local storage failed'));
     request.onsuccess = () => resolve(request.result);
     request.onblocked = () => reject(new Error('Close other tabs running an older version of the app'));
   });

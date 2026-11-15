@@ -108,7 +108,7 @@ export function App() {
       <a className="skip-link" href="#main-content" onClick={skipToContent}>Skip to content</a>
       <header className="site-header">
         <div className="site-header-inner">
-          <a className="brand" href={pageHref('home')} aria-label="AKM Health, home">
+          <a className="brand" href={pageHref('home')}>
             <span aria-hidden="true" className="brand-mark"><img src="/akm-mark.svg" alt="" width="30" height="24" /></span>
             <span><strong>AKM Health</strong><small>Space Health Monitoring</small></span>
           </a>
