@@ -34,6 +34,7 @@ python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
 - [Dashboard API](http://127.0.0.1:8000/api/dashboard) shows the latest usable readings and whether new data awaits investigation. See the [measurement API notes](docs/contracts-v2-review.md#registering-a-measurement) for a request example.
 - [AKM-19 read APIs](docs/akm-19-read-apis.md) document profile, history and agenda queries, inclusive UTC filters, pagination, habitat readings and reproducible examples.
 - [AKM-21 individual detector](docs/akm-21-individual-detector.md) documents the pure sleep-change rule, evidence selection, limitations and an in-memory demo (`python scripts/demo_individual_detection.py`).
+- [AKM-22 collective detector](docs/akm-22-collective-detector.md) documents comparable crew periods and uncertain environmental coincidences (`python scripts/demo_collective_detection.py`).
 - The API uses `backend/akm.db` by default. Set `AKM_DB_PATH` to use a different SQLite file. Startup creates or migrates the local database. The TypeScript project currently contains shared contracts. Browser navigation and integration are tracked in AKM-12 through AKM-16.
 
 After installing the dependencies, run the local checks with the virtual environment active.
