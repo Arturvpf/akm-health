@@ -13,12 +13,16 @@ Abra [o HTML do wireframe](../frontend/public/akm-10-wireframe.html) diretamente
 5. Alterne do coletivo para o individual e volte. Confira que a verificação coletiva continua registrada no seu escopo. Com uma leitura compatível salva, tente concluir durante a falha simulada e confira que só é possível concluir depois da reconexão.
 6. No cenário sem dados, registre duas leituras de sono do mesmo perfil no mesmo dia e verifique que o coletivo continua com dados insuficientes.
 7. Navegue por teclado e confira o foco após mudar um filtro e ao entrar no gráfico e na tabela roláveis. Verifique as quatro telas a partir de 320 px.
+8. Gere uma verificação coletiva, mude para Lyra no escopo individual e volte ao Dashboard. A pendência coletiva deve continuar visível e seu botão deve abrir o acompanhamento coletivo. Gere também verificações individuais de Aurora e Orion: o contador deve mostrar três pendências, sem duplicar a selecionada. Concluir uma delas deve preservar as demais.
+
+O Dashboard reúne as verificações pendentes guardadas por escopo com a seleção atual, que pode ter alterações ainda não guardadas pela troca de escopo. Cada item identifica o escopo ou tripulante e abre o acompanhamento correspondente. O reset do cenário limpa essa agenda simulada. A regressão automatizada executa o script original do HTML por seus eventos em um DOM mínimo; ela verifica a lógica e o HTML gerado, sem substituir a inspeção visual no navegador.
 
 ## AKM-12 · Shell React
 
 ```sh
 npm --prefix frontend ci
 npm --prefix frontend run test:navigation
+npm --prefix frontend run test:wireframe
 npm --prefix frontend run build
 npm --prefix frontend run dev
 ```
