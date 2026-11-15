@@ -105,7 +105,8 @@ test('render uses API names, values, origins, independent timestamps, pending re
   const html = render(parseDashboard(snapshot()));
   for (const text of ['Missão de teste', 'Aurora', '5,4', '72', '0', 'Dado simulado', 'Registro manual',
     'Conferir nova leitura.', 'Achado registrado', 'Explicação retornada pelo servidor.',
-    'Novas medições disponíveis', '2026-11-14T05:00:00Z', '2026-11-14T08:00:00Z', 'Referência pública NASA']) {
+    'Novas medições disponíveis', '2026-11-14T05:00:00Z', '2026-11-14T08:00:00Z',
+    'NASA references', 'Mission destination · Mars surface', 'NASA planetary fact sheet']) {
     assert.ok(html.includes(text), text);
   }
   assert.ok(html.includes('0 °C'));
@@ -157,7 +158,7 @@ test('NASA reference links require HTTPS and an actual NASA hostname', () => {
   const data = snapshot(); data.mission.context_source_url = 'javascript:alert(1)';
   const html = render(data);
   assert.ok(!html.includes('href="javascript:'));
-  assert.ok(html.includes('Referência pública indisponível'));
+  assert.ok(html.includes('The planetary fact sheet link is unavailable.'));
 });
 
 test('refresh keeps confirmed data through loading and failure, then allows recovery', async () => {

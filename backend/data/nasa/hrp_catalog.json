@@ -1,0 +1,20 @@
+[
+  {
+    "source": "NASA HRP",
+    "title": "Human Spaceflight Hazards",
+    "url": "https://www.nasa.gov/hrp/hazards/",
+    "type": "research_reference"
+  },
+  {
+    "source": "NASA HRP",
+    "title": "Risks of Human Spaceflight",
+    "url": "https://www.nasa.gov/hrp/risks/",
+    "type": "research_reference"
+  },
+  {
+    "source": "NASA HRP",
+    "title": "Ongoing HRP Research",
+    "url": "https://www.nasa.gov/hrp/ongoing-hrp-research/",
+    "type": "research_reference"
+  }
+]

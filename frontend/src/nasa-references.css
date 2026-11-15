@@ -1,0 +1,58 @@
+.nasa-references {
+  margin-block-start: var(--space-4);
+  min-width: 0;
+}
+
+.nasa-planet,
+.nasa-history {
+  padding-block: var(--space-4);
+  border-block-start: 1px solid var(--border);
+}
+
+.nasa-planet {
+  margin-block-end: var(--space-4);
+  border-block: 1px solid var(--border);
+}
+
+.nasa-history .ds-field {
+  margin-block: var(--space-4);
+  max-width: 24rem;
+}
+
+.nasa-chart {
+  display: block;
+  width: 100%;
+  max-width: 45rem;
+  height: auto;
+  margin-block: var(--space-4);
+}
+
+.nasa-chart text {
+  fill: var(--text-muted);
+  font: 15px system-ui, sans-serif;
+}
+
+.nasa-chart-rule {
+  stroke: var(--border);
+  stroke-dasharray: 4 4;
+}
+
+.nasa-chart-line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.nasa-chart-dot { fill: currentColor; }
+
+.nasa-observations summary {
+  cursor: pointer;
+  margin-block-end: var(--space-2);
+}
+
+.nasa-observations .ds-table-scroll { max-height: 18rem; }
+
+@media (max-width: 540px) {
+  .nasa-chart text { font-size: 22px; }
+}
