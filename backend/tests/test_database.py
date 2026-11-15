@@ -51,9 +51,9 @@ def test_startup_migrates_empty_database(tmp_path, monkeypatch):
         assert client.get("/api/health").json() == {"status": "ok", "storage": "sqlite_reachable"}
         with app.state.engine.connect() as connection:
             assert connection.exec_driver_sql("PRAGMA foreign_keys").scalar_one() == 1
-            assert connection.exec_driver_sql("PRAGMA user_version").scalar_one() == 1
+            assert connection.exec_driver_sql("PRAGMA user_version").scalar_one() == 2
         schema = inspect(app.state.engine)
-        assert set(schema.get_table_names()) == {"astronauts", "measurements", "investigations", "followups"}
+        assert set(schema.get_table_names()) == {"astronauts", "measurements", "investigations", "followups", "sync_operations"}
         assert schema.get_indexes("measurements")[0]["column_names"] == ["astronaut_id", "kind", "measured_at"]
         with Session(app.state.engine) as session:
             assert session.exec(select(Astronaut)).all() == []
@@ -69,7 +69,7 @@ def test_migration_preserves_existing_smoke_database(tmp_path):
     migrate(engine)
     with engine.connect() as connection:
         assert connection.exec_driver_sql("SELECT value FROM smoke").scalar_one() == "preserve"
-        assert connection.exec_driver_sql("PRAGMA user_version").scalar_one() == 1
+        assert connection.exec_driver_sql("PRAGMA user_version").scalar_one() == 2
 
 
 def test_migration_rejects_unknown_schema_without_writes(tmp_path):
@@ -90,7 +90,7 @@ def test_startup_rejects_unrelated_database_with_matching_version(tmp_path, monk
     before = path.read_bytes()
     monkeypatch.setenv("AKM_DB_PATH", str(path))
 
-    with pytest.raises(RuntimeError, match=r"schema v1.*astronauts.*AKM_DB_PATH"):
+    with pytest.raises(RuntimeError, match=r"schema v2.*astronauts.*AKM_DB_PATH"):
         with TestClient(app):
             pytest.fail("The API accepted an incompatible database")
 
@@ -101,7 +101,7 @@ def test_migration_rejects_versioned_database_with_missing_column(engine):
     with engine.begin() as connection:
         connection.exec_driver_sql("ALTER TABLE astronauts DROP COLUMN role")
 
-    with pytest.raises(RuntimeError, match=r"schema v1.*astronauts\.role.*AKM_DB_PATH"):
+    with pytest.raises(RuntimeError, match=r"schema v2.*astronauts\.role.*AKM_DB_PATH"):
         migrate(engine)
 
 

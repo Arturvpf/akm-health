@@ -131,3 +131,13 @@ class Followup(SQLModel, table=True):
     created_at: datetime = Field(sa_type=UTCText)
     completed_at: datetime | None = Field(default=None, sa_type=UTCText)
     measurement_id: int | None = Field(default=None, foreign_key="measurements.id")
+
+
+class SyncOperation(SQLModel, table=True):
+    """AKM-33: durable idempotency receipt for browser outbox deliveries."""
+    __tablename__ = "sync_operations"
+
+    id: str = Field(primary_key=True, sa_type=Text)
+    payload_hash: str = Field(sa_type=Text)
+    measurement_id: int = Field(foreign_key="measurements.id")
+    created_at: datetime = Field(sa_type=UTCText)

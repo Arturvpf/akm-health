@@ -9,11 +9,12 @@ from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.pool import NullPool
 from sqlmodel import create_engine
 
-from .models import Astronaut, Followup, Investigation, Measurement
+from .models import Astronaut, Followup, Investigation, Measurement, SyncOperation
 
 
-SCHEMA_VERSION = 1
-TABLES = (Astronaut.__table__, Measurement.__table__, Investigation.__table__, Followup.__table__)
+SCHEMA_VERSION = 2
+CORE_TABLES = (Astronaut.__table__, Measurement.__table__, Investigation.__table__, Followup.__table__)
+TABLES = (*CORE_TABLES, SyncOperation.__table__)
 
 
 def database_path() -> Path:
@@ -34,11 +35,11 @@ def make_engine(path: Path | None = None) -> Engine:
     return create_engine("sqlite://", creator=lambda: connect(database), poolclass=NullPool)
 
 
-def _validate_current_schema(connection: Connection) -> None:
+def _validate_current_schema(connection: Connection, tables=TABLES) -> None:
     schema = inspect(connection)
     table_names = set(schema.get_table_names())
     missing = []
-    for table in TABLES:
+    for table in tables:
         if table.name not in table_names:
             missing.append(table.name)
             continue
@@ -57,6 +58,12 @@ def migrate(engine: Engine) -> None:
         if version == SCHEMA_VERSION:
             _validate_current_schema(connection)
             return
+        if version == 1:
+            # Add only the outbox receipt table; preserve all four existing MVP tables and rows.
+            _validate_current_schema(connection, CORE_TABLES)
+            Astronaut.metadata.create_all(connection, tables=(SyncOperation.__table__,))
+            connection.exec_driver_sql("PRAGMA user_version = 2")
+            return
         if version != 0:
             raise RuntimeError(f"Unsupported AKM database schema version: {version}")
         existing_tables = {
@@ -65,7 +72,7 @@ def migrate(engine: Engine) -> None:
         if existing_tables.intersection(table.name for table in TABLES):
             raise RuntimeError("Unversioned database already contains AKM tables. Back it up before migration.")
         Astronaut.metadata.create_all(connection, tables=TABLES)
-        connection.exec_driver_sql("PRAGMA user_version = 1")
+        connection.exec_driver_sql("PRAGMA user_version = 2")
 
 
 if __name__ == "__main__":

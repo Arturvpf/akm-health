@@ -1,3 +1,4 @@
+import { cachedRead } from './offline-store';
 import type { DashboardResponse, Kind } from './types';
 
 export const METRIC_LABELS: Record<Kind, string> = {
@@ -58,20 +59,22 @@ export function parseDashboard(value: unknown): DashboardResponse {
 }
 
 export async function fetchDashboard(signal: AbortSignal): Promise<DashboardResponse> {
-  let response: Response;
-  try {
-    response = await fetch('/api/dashboard', {
-      method: 'GET', signal, cache: 'no-store', headers: { Accept: 'application/json' },
-    });
-  } catch (error) {
-    if (signal.aborted) throw error;
-    throw new Error('Could not connect to the mission server.');
-  }
-  if (!response.ok) throw new Error('Could not retrieve mission data.');
-  let body: unknown;
-  try { body = await response.json(); }
-  catch { throw new Error('The server returned an invalid response.'); }
-  return parseDashboard(body);
+  return parseDashboard(await cachedRead<DashboardResponse>('dashboard', async () => {
+    let response: Response;
+    try {
+      response = await fetch('/api/dashboard', {
+        method: 'GET', signal, cache: 'no-store', headers: { Accept: 'application/json' },
+      });
+    } catch (error) {
+      if (signal.aborted) throw error;
+      throw new Error('Could not connect to the mission server.');
+    }
+    if (!response.ok) throw new Error('Could not retrieve mission data.');
+    let body: unknown;
+    try { body = await response.json(); }
+    catch { throw new Error('The server returned an invalid response.'); }
+    return parseDashboard(body);
+  }));
 }
 
 export function nasaReferenceUrl(value: string): string | null {
