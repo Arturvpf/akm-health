@@ -32,6 +32,9 @@
     @media(prefers-reduced-motion:no-preference){button,.panel{transition:background .13s ease}}
     @media print{.sidebar,.topbar,.button,.nav{display:none!important}.content{padding:0}.panel{break-inside:avoid}}
   .timeline-profile{margin:16px 0}.timeline-profile figcaption{font-weight:700}.timeline{display:flex;gap:8px;overflow-x:auto;list-style:none;padding:4px 0;margin:10px 0}.timeline li{min-width:6rem;text-align:center}.timeline strong,.timeline time{display:block;font-size:.8rem;margin-top:4px}.timeline-plot{position:relative;height:84px;background:#edf0f3}.timeline-baseline{position:absolute;left:0;right:0;border-top:1px dashed #505b68;z-index:1}.timeline-bar{position:absolute;bottom:0;left:30%;width:40%;background:#596779}
+  .eyebrow,.section-note,.metric-card .s,.astronaut small,.meta,.field .hint,.step{color:#535e6b}
+  .timeline:focus-visible,.table-wrap:focus-visible{outline:2px solid #505b68;outline-offset:2px}
+  @media(max-width:480px){.panel-header{flex-wrap:wrap}.pill{max-width:100%;white-space:normal;overflow-wrap:anywhere}}
 </style>
 </head>
 <body>
@@ -68,6 +71,8 @@
     function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
     function fmt(n){if(n===null||n===undefined)return '—';return Number(n).toLocaleString('pt-BR',{maximumFractionDigits:1});}
     function dt(t){if(!t)return '—';const d=new Date(t);return Number.isNaN(d.getTime())?'—':new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'UTC'}).format(d)+' UTC';}
+    const investigationsByScope=new Map();
+    const investigationKey=()=>state.scope==='crew'?'crew':state.subject;
     let lastDataMode=state.mode;
     const allRows=()=>[...(lastDataMode==='empty'?[]:base),...state.added];
     const okRows=()=>allRows().filter(x=>x.quality==='ok');
@@ -102,21 +107,77 @@
         const sleep=okRows().filter(x=>x.astronaut_id===c.id&&x.kind==='sleep_hours')
           .sort((a,b)=>a.measured_at.localeCompare(b.measured_at)||a.id-b.id);
         const byDay=new Map(sleep.map(row=>[row.measured_at.slice(0,10),row]));
-        return `<figure class="timeline-profile"><figcaption>${c.name} · baseline ${fmt(c.baseline)} h</figcaption><ol class="timeline">${dates.map(date=>{
+        return `<figure class="timeline-profile"><figcaption>${c.name} · baseline ${fmt(c.baseline)} h</figcaption><ol class="timeline" tabindex="0" aria-label="Evolução diária do sono">${dates.map(date=>{
           const row=byDay.get(date);
           return `<li><div class="timeline-plot" aria-hidden="true"><div class="timeline-baseline" style="bottom:${100*c.baseline/24}%"></div>${row?`<div class="timeline-bar" style="height:${100*row.value/24}%"></div>`:''}</div><strong>${row?fmt(row.value)+' h':'Sem dados'}</strong><time datetime="${date}">${date.slice(8)}/${date.slice(5,7)}</time></li>`;
         }).join('')}</ol></figure>`;
       }).join('');
       const tr=filtered.slice(0,40).map(x=>`<tr><td>${dt(x.measured_at)}</td><td>${x.astronaut_id??'Habitat'}</td><td>${escapeHtml(METRICS[x.kind].label)}</td><td><strong>${fmt(x.value)}</strong> ${escapeHtml(x.unit)}</td><td>${escapeHtml(x.source)}</td><td>${badge(x.quality,x.quality==='suspect'?'suspect':'normal')}</td></tr>`).join('');
-      return top+`<div class="stack"><section class="panel"><div class="panel-header"><div><h2>Evolução do sono · horas por dia</h2><p class="sub">Dias UTC em ordem cronológica. A escala vai de 0 a 24 h e a linha tracejada indica a baseline.</p></div>${badge('Somente valores válidos')}</div><div>${dates.length&&profiles.length?chart:notice("Sem períodos de sono para exibir neste escopo.")}</div><p class="section-note">O gráfico mostra duração estimada do sono. Não apresenta limiares clínicos ou diagnóstico.</p></section><section class="panel"><div class="panel-header"><div><h2>Registros disponíveis</h2><p class="sub">Até 40 registros nesta visualização de wireframe.</p></div><span class="tag">${filtered.length} resultado(s)</span></div>${filters}${filtered.length?`<div class="table-wrap" style="margin-top:17px"><table><thead><tr><th>Coleta (UTC)</th><th>Sujeito</th><th>Indicador</th><th>Valor/unidade</th><th>Origem</th><th>Qualidade</th></tr></thead><tbody>${tr}</tbody></table></div>`:`<div class="empty" style="margin-top:17px"><div class="symbol">□</div><h3>Nenhuma medição encontrada</h3><p>Não substituir registros ausentes por zero. Modifique os filtros ou realize uma nova medição.</p>${btn('Registrar medição','to-register')}</div>`}</section></div>`;
+      return top+`<div class="stack"><section class="panel"><div class="panel-header"><div><h2>Evolução do sono · horas por dia</h2><p class="sub">Dias UTC em ordem cronológica. A escala vai de 0 a 24 h e a linha tracejada indica a baseline.</p></div>${badge('Somente valores válidos')}</div><div>${dates.length&&profiles.length?chart:notice("Sem períodos de sono para exibir neste escopo.")}</div><p class="section-note">O gráfico mostra duração estimada do sono. Não apresenta limiares clínicos ou diagnóstico.</p></section><section class="panel"><div class="panel-header"><div><h2>Registros disponíveis</h2><p class="sub">Até 40 registros nesta visualização de wireframe.</p></div><span class="tag">${filtered.length} resultado(s)</span></div>${filters}${filtered.length?`<div class="table-wrap" role="region" aria-label="Tabela de medições" tabindex="0" style="margin-top:17px"><table><thead><tr><th>Coleta (UTC)</th><th>Sujeito</th><th>Indicador</th><th>Valor/unidade</th><th>Origem</th><th>Qualidade</th></tr></thead><tbody>${tr}</tbody></table></div>`:`<div class="empty" style="margin-top:17px"><div class="symbol">□</div><h3>Nenhuma medição encontrada</h3><p>Não substituir registros ausentes por zero. Modifique os filtros ou realize uma nova medição.</p>${btn('Registrar medição','to-register')}</div>`}</section></div>`;
     }
-    function analysisFor(){if(okRows().filter(x=>x.kind==='sleep_hours').length<2)return {status:'insufficient_data',title:'Dados insuficientes',summary:'Não há observações adequadas para sustentar um padrão. Registre novos períodos de sono.',findings:[],evidence:[],hypotheses:[],nextCheck:null};
-       if(state.scope==='individual'){const c=CREW.find(x=>x.id===state.subject);const rows=okRows().filter(x=>x.kind==='sleep_hours'&&x.astronaut_id===c.id).sort((a,b)=>a.measured_at.localeCompare(b.measured_at)||a.id-b.id);const periods=new Map(rows.map(x=>[x.measured_at.slice(0,10),x]));const sleeps=Array.from(periods.values()).slice(-2);const flag=sleeps.length===2&&sleeps.every(x=>x.value<=.8*c.baseline);return {status:sleeps.length<2?'insufficient_data':flag?'attention':'normal',title:flag?'Mudança persistente de sono':'Nenhum padrão correspondente',summary:flag?`${c.name} apresentou duas leituras de sono abaixo da referência fictícia definida para a demo.`:'A regra sintética não identificou o padrão exigido para esse perfil.',findings:flag?[`${c.name}: ${sleeps.map(x=>fmt(x.value)+' h').join(' e ')}; referência ${fmt(c.baseline)} h.`]:[],evidence:flag?[`Duas leituras válidas, em períodos distintos, do perfil ${c.id}.`]:[],hypotheses:flag?['Mudança de turno, rotina e condições de coleta são explicações alternativas.']:[],nextCheck:flag?{kind:'sleep_hours',reason:'Repetir a observação do sono e revisar condições de coleta.',astronaut_id:c.id}:null};}
-       return {status:'attention',title:'Alteração compartilhada de sono',summary:'Três perfis fictícios apresentam redução persistente de sono; há mudança ambiental temporalmente próxima.',findings:['Aurora, Orion e Vega: duas leituras de sono abaixo de 80% das referências sintéticas.','Lyra não apresenta o mesmo padrão.','Leituras válidas de CO₂ interno: 680 → 950 → 980 ppm.'],evidence:['Sono de A1, A2 e A3, duas noites e qualidade ok.','CO₂ da cabine, amostras válidas em janela próxima.','A leitura suspeita de 2.200 ppm foi excluída da evidência.'],hypotheses:['Possível fator ambiental compartilhado: hipótese não confirmada.','Rotina, carga de trabalho ou horários de coleta podem explicar coincidências.'],nextCheck:{kind:'co2_ppm',reason:'Repetir a leitura de CO₂ da cabine para verificar sua evolução e qualidade.',astronaut_id:null}};
+    function insufficient(summary){
+      return {status:'insufficient_data',title:'Dados insuficientes',summary,
+        findings:[],evidence:[],hypotheses:[],nextCheck:null};
+    }
+    function sleepPeriods(profile){
+      const rows=okRows().filter(row=>row.kind==='sleep_hours'&&row.astronaut_id===profile.id)
+        .sort((a,b)=>a.measured_at.localeCompare(b.measured_at)||a.id-b.id);
+      return Array.from(new Map(rows.map(row=>[row.measured_at.slice(0,10),row])).values()).slice(-2);
+    }
+    function sleepProfile(profile){
+      const readings=sleepPeriods(profile);
+      return {profile,readings,days:readings.map(row=>row.measured_at.slice(0,10)),
+        affected:readings.length===2&&readings.every(row=>row.value<=0.8*profile.baseline)};
+    }
+    function sleepEvidence({profile,readings}){
+      return profile.name+': '+readings.map(row=>fmt(row.value)+' h em '+dt(row.measured_at)).join(' e ')+
+        '; baseline '+fmt(profile.baseline)+' h.';
+    }
+    function analysisFor(){
+      if(state.scope==='individual'){
+        const result=sleepProfile(CREW.find(profile=>profile.id===state.subject));
+        if(result.readings.length<2)return insufficient('Registre duas observações válidas de sono em dias distintos para este perfil.');
+        return {status:result.affected?'attention':'normal',
+          title:result.affected?'Mudança persistente de sono':'Nenhum padrão correspondente',
+          summary:result.affected?result.profile.name+' apresentou duas leituras em até 80% da baseline fictícia.':'A regra sintética não identificou o padrão neste perfil.',
+          findings:result.affected?[sleepEvidence(result)]:[],
+          evidence:[sleepEvidence(result)],
+          hypotheses:result.affected?['Mudança de turno, rotina e condições de coleta são explicações alternativas.']:[],
+          nextCheck:result.affected?{kind:'sleep_hours',reason:'Repetir a observação do sono e revisar condições de coleta.',astronaut_id:result.profile.id}:null};
+      }
+
+      const groups=new Map();
+      for(const result of CREW.map(sleepProfile)){
+        if(result.days.length!==2)continue;
+        const key=result.days.join('/');
+        const group=groups.get(key)??[];
+        group.push(result);
+        groups.set(key,group);
+      }
+      const comparable=Array.from(groups.values()).filter(group=>group.length>=2)
+        .sort(([a],[b])=>b.days[1].localeCompare(a.days[1])||b.days[0].localeCompare(a.days[0]))[0];
+      if(!comparable)return insufficient('A análise coletiva exige ao menos dois perfis com observações válidas de sono nos mesmos dois dias.');
+      const affected=comparable.filter(result=>result.affected);
+      const evidence=comparable.map(sleepEvidence);
+      if(affected.length<2)return {status:'normal',title:'Sem padrão coletivo pela regra',summary:'Os períodos são comparáveis. A regra não encontrou alterações em pelo menos dois perfis.',findings:[],evidence,hypotheses:[],nextCheck:null};
+
+      const days=comparable[0].days;
+      const co2=okRows().filter(row=>row.kind==='co2_ppm'&&row.astronaut_id===null)
+        .sort((a,b)=>a.measured_at.localeCompare(b.measured_at)||a.id-b.id);
+      const aligned=days.map(day=>co2.findLast(row=>row.measured_at.slice(0,10)===day));
+      const baseline=co2.findLast(row=>row.measured_at.slice(0,10)<days[0]);
+      const shift=baseline&&aligned.every(Boolean)&&(aligned.every(row=>row.value>baseline.value)||aligned.every(row=>row.value<baseline.value));
+      if(baseline&&aligned.every(Boolean))evidence.push('CO₂ interno válido: '+[baseline,...aligned].map(row=>fmt(row.value)+' ppm').join(' → ')+'.');
+      return {status:'attention',title:'Alteração compartilhada de sono',
+        summary:'Padrão demonstrativo em '+affected.length+' perfis comparáveis.',
+        findings:affected.map(sleepEvidence),evidence,
+        hypotheses:[...(shift?['Possível coincidência com mudança no CO₂ interno. Hipótese não confirmada.']:[]),
+          'Rotina, carga de trabalho e condições da coleta são explicações alternativas.'],
+        nextCheck:{kind:'co2_ppm',reason:'Conferir novamente o CO₂ interno e a qualidade da coleta.',astronaut_id:null}};
     }
     function investigation(){let r=state.analysis;const ins=state.scope==='individual';const scopeForm=`<div class="form-grid"><div class="field"><label for="scope">Escopo da análise</label><select id="scope" class="control"><option value="crew" ${!ins?'selected':''}>Coletivo · tripulação</option><option value="individual" ${ins?'selected':''}>Individual · astronauta</option></select></div><div class="field"><label for="invest-subject">Tripulante</label><select id="invest-subject" class="control" ${!ins?'disabled':''}>${CREW.map(c=>`<option value="${c.id}" ${state.subject===c.id?'selected':''}>${c.id} · ${c.name}</option>`).join('')}</select></div></div><div class="buttons" style="margin-top:17px">${btn('Simular investigação','run-analysis',true)}</div>`;
       let result=!r?`<div class="empty"><div class="symbol">◇</div><h3>Investigação não executada</h3><p>Selecione o escopo e execute uma simulação para visualizar achados, evidências e a próxima verificação.</p></div>`:`<div class="stack"><div class="status-box"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><strong>${escapeHtml(r.title)}</strong>${badge(r.status==='attention'?'Atenção (demo)':r.status==='normal'?'Normal pela regra (demo)':'Dados insuficientes',r.status==='attention'?'attention':'unknown')}</div><p style="margin-top:10px">${escapeHtml(r.summary)}</p><p class="meta" style="margin-top:7px">Resultado fictício · Motor real não executado · Sem interpretação médica</p></div><div class="grid2"><div class="result-card"><h3>1 · Achados observáveis</h3>${r.findings.length?`<ul class="bullet">${r.findings.map(t=>`<li>${escapeHtml(t)}</li>`).join('')}</ul>`:'<p>Não há achados confiáveis nesta seleção.</p>'}</div><div class="result-card"><h3>2 · Evidências utilizadas</h3>${r.evidence.length?`<ul class="bullet">${r.evidence.map(t=>`<li>${escapeHtml(t)}</li>`).join('')}</ul>`:'<p>Registre informações suficientes para avaliar.</p>'}</div></div><div class="result-card"><h3>3 · Hipóteses não confirmadas</h3>${r.hypotheses.length?`<ul class="bullet">${r.hypotheses.map(t=>`<li>${escapeHtml(t)}</li>`).join('')}</ul>`:'<p>Sem evidência para elaborar hipótese fundamentada.</p>'}<div class="callout">Correlação temporal não demonstra causalidade. A equipe de pesquisa deve aprovar qualquer texto de orientação usado na aplicação.</div></div></div>`;
-      let follow='';if(state.followup){const fu=state.followup;const compat=state.added.filter(x=>x.kind===fu.kind&&x.astronaut_id===fu.astronaut_id&&x.quality==='ok'&&new Date(x.recorded_at)>new Date(fu.created_at));follow=`<div class="status-box"><div style="display:flex;justify-content:space-between;gap:9px;align-items:center"><strong>Solicitação: ${escapeHtml(METRICS[fu.kind].label)}</strong>${badge(fu.status==='pending'?'Pendente':'Concluída',fu.status==='pending'?'attention':'normal')}</div><p style="margin:11px 0">${escapeHtml(fu.reason)}</p><p class="meta">${fu.status==='pending'?'A conclusão depende de uma medição nova, válida e compatível.':'Conclusão demonstrativa vinculada a uma medição simulada.'}</p>${fu.status==='pending'?`<div class="buttons" style="margin-top:13px">${btn('Registrar rechecagem','create-recheck',true)}${btn('Confirmar conclusão','complete-followup',false,compat.length?'':'disabled title="Registre antes uma medição válida"')}</div>${compat.length?`<p class="meta">Há ${compat.length} nova(s) medição(ões) compatível(is) disponível(is).</p>`:''}`:`<div class="buttons" style="margin-top:13px">${btn('Reanalisar evidências','run-analysis',true)}</div>`}</div>`;}else follow=`<div class="empty"><div class="symbol">□</div><h3>Sem solicitação formal</h3><p>Execute uma investigação que justifique uma nova coleta antes de iniciar um acompanhamento.</p></div>`;
+      let follow='';if(state.followup){const fu=state.followup;const compat=state.added.filter(x=>x.kind===fu.kind&&x.astronaut_id===fu.astronaut_id&&x.quality==='ok'&&new Date(x.recorded_at)>new Date(fu.created_at));follow=`<div class="status-box"><div style="display:flex;justify-content:space-between;gap:9px;align-items:center"><strong>Solicitação: ${escapeHtml(METRICS[fu.kind].label)}</strong>${badge(fu.status==='pending'?'Pendente':'Concluída',fu.status==='pending'?'attention':'normal')}</div><p style="margin:11px 0">${escapeHtml(fu.reason)}</p><p class="meta">${fu.status==='pending'?'A conclusão depende de uma medição nova, válida e compatível.':'Conclusão demonstrativa vinculada a uma medição simulada.'}</p>${fu.status==='pending'?`<div class="buttons" style="margin-top:13px">${btn('Registrar rechecagem','create-recheck',true)}${btn('Confirmar conclusão','complete-followup',false,state.mode==='offline'?'disabled title="Reconecte para tentar novamente"':compat.length?'':'disabled title="Registre antes uma medição válida"')}</div>${compat.length?`<p class="meta">Há ${compat.length} nova(s) medição(ões) compatível(is) disponível(is).</p>`:''}`:`<div class="buttons" style="margin-top:13px">${btn('Reanalisar evidências','run-analysis',true)}</div>`}</div>`;}else follow=`<div class="empty"><div class="symbol">□</div><h3>Sem solicitação formal</h3><p>Execute uma investigação que justifique uma nova coleta antes de iniciar um acompanhamento.</p></div>`;
       return heading('Investigação e verificação','Fluxo explicável: observar → identificar padrões → formular hipótese → solicitar nova coleta → reanalisar.',btn('Abrir histórico','to-history'))+displayBanner()+(state.lastNotice?notice(`<strong>${escapeHtml(state.lastNotice)}</strong>`,state.lastNoticeType):'')+`<div class="flow-steps"><div class="step on"><strong>01 · Medir</strong>Coleta</div><div class="step on"><strong>02 · Investigar</strong>Achados</div><div class="step ${state.followup?'on':''}"><strong>03 · Verificar</strong>Nova leitura</div><div class="step ${state.followup?.status==='completed'?'on':''}"><strong>04 · Reanalisar</strong>Acompanhamento</div></div><div class="stack"><section class="panel"><div class="panel-header"><div><h2>Executar análise</h2><p class="sub">Escopo coletivo ou individual. A análise só ocorre por uma ação explícita.</p></div>${badge('POST /api/investigations/run')}</div>${scopeForm}</section><section class="panel"><div class="panel-header"><div><h2>Resultado explicável</h2><p class="sub">Separação obrigatória entre observações, evidências, hipóteses e ação.</p></div>${badge('Somente simulação')}</div>${result}</section><section class="panel"><div class="panel-header"><div><h2>Próxima verificação e acompanhamento</h2><p class="sub">A medição precisa ser salva antes de concluir o follow-up.</p></div>${badge('GET/PATCH /api/followups')}</div>${follow}</section><section class="panel"><h2>Limites e proveniência</h2><p class="inline-help">A <a href="https://humanresearchroadmap.nasa.gov/Risks/risk.aspx?i=100">referência NASA HRR-100 sobre sono</a> oferece contexto científico. Os valores de 20% na regra de sono e as leituras da ODYSSEY-26 são exemplos sintéticos não validados clinicamente. O estado vermelho/critical não é acionado neste protótipo. O histórico quantitativo NASA ainda depende da AKM-38/39.</p></section></div>`;
     }
     function render(){
@@ -134,7 +195,7 @@
       state.mode=e.target.value;
       if(state.mode==='empty'||state.mode==='base'){
         if(state.mode!==lastDataMode){
-          state.analysis=null;state.followup=null;state.added=[];state.success='';state.lastNotice='';
+          investigationsByScope.clear();state.analysis=null;state.followup=null;state.added=[];state.success='';state.lastNotice='';
           state.formRecheck=false;state.returnToFollowup=false;
         }
         lastDataMode=state.mode;
@@ -149,9 +210,11 @@
       else if(e.target.id==='hist-kind'){state.historyKind=e.target.value;render();}
       else if(e.target.id==='hist-quality'){state.historyQuality=e.target.value;render();}
       else if(e.target.id==='scope'||e.target.id==='invest-subject'){
+        investigationsByScope.set(investigationKey(),{analysis:state.analysis,followup:state.followup});
         if(e.target.id==='scope')state.scope=e.target.value;
         else state.subject=e.target.value;
-        state.analysis=null;state.followup=null;state.lastNotice='';
+        const saved=investigationsByScope.get(investigationKey());
+        state.analysis=saved?.analysis??null;state.followup=saved?.followup??null;state.lastNotice='';
         state.formRecheck=false;state.returnToFollowup=false;
         render();
       }
@@ -165,7 +228,11 @@
       else if(a==='clear-filters'){state.historyAstronaut='all';state.historyKind='all';state.historyQuality='all';render();}
       else if(a==='run-analysis'){if(state.mode==='offline'){state.lastNoticeType='error';state.lastNotice='Falha de conexão simulada: não foi possível executar a investigação. O último resultado permanece visível.';render();return;}state.analysis=analysisFor();const linked=state.added.find(x=>x.id===state.followup?.measurement_id);if(linked){state.analysis.evidence.push('Nova leitura vinculada: #'+linked.id+' · '+fmt(linked.value)+' '+linked.unit+' · '+dt(linked.measured_at)+'.');}state.lastNoticeType='success';state.lastNotice=state.followup?.status==='completed'?'Reanálise ilustrativa solicitada após a verificação.':'Análise simulada executada. Nenhuma regra do back-end foi chamada.';if(state.analysis.nextCheck&&!state.followup){state.followup={kind:state.analysis.nextCheck.kind,astronaut_id:state.analysis.nextCheck.astronaut_id,reason:state.analysis.nextCheck.reason,created_at:new Date().toISOString(),status:'pending'};}render();}
       else if(a==='create-recheck'){if(!state.followup)return;state.form={kind:state.followup.kind,astronaut_id:state.followup.astronaut_id??'A1',value:state.followup.kind==='sleep_hours'?'6':'850',source:'synthetic',quality:'ok',measured_at:new Date().toISOString().slice(0,16)};state.formRecheck=true;state.returnToFollowup=true;state.success='';nav('register');}
-      else if(a==='complete-followup'){const f=state.followup;if(!f||f.status!=='pending')return;const x=state.added.find(y=>y.kind===f.kind&&y.astronaut_id===f.astronaut_id&&y.quality==='ok'&&new Date(y.recorded_at)>new Date(f.created_at));if(x){f.status='completed';f.measurement_id=x.id;state.lastNotice=`Follow-up concluído no protótipo com vínculo à medição #${x.id}. Execute nova investigação para reanalisar.`;}render();}
+      else if(a==='complete-followup'){
+        if(state.mode==='offline'){
+          state.lastNoticeType='error';state.lastNotice='Falha de conexão simulada. A verificação continua pendente.';render();return;
+        }
+        const f=state.followup;if(!f||f.status!=='pending')return;const x=state.added.find(y=>y.kind===f.kind&&y.astronaut_id===f.astronaut_id&&y.quality==='ok'&&new Date(y.recorded_at)>new Date(f.created_at));if(x){f.status='completed';f.measurement_id=x.id;state.lastNoticeType='success';state.lastNotice=`Follow-up concluído no protótipo com vínculo à medição #${x.id}. Execute nova investigação para reanalisar.`;}render();}
     });
     render();
   })();

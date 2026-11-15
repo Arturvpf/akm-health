@@ -10,7 +10,9 @@ Abra [o HTML do wireframe](../frontend/public/akm-10-wireframe.html) diretamente
 2. Em Investigação, execute o cenário coletivo. Confira o achado, as fontes, a hipótese não confirmada e a próxima verificação. A conclusão fica desabilitada até registrar uma nova leitura compatível.
 3. Registre a rechecagem de CO₂, conclua a verificação e reanalise. Confira que a medição vinculada aparece entre as evidências. Repita no escopo individual de Aurora usando uma leitura de sono.
 4. Teste o cenário sem dados e o carregamento no seletor superior. Simule uma falha de conexão após uma investigação e confira que o último resultado continua visível.
-5. Navegue por teclado e confira o foco após mudar um filtro. Verifique as quatro telas em desktop e mobile.
+5. Alterne do coletivo para o individual e volte. Confira que a verificação coletiva continua registrada no seu escopo. Com uma leitura compatível salva, tente concluir durante a falha simulada e confira que só é possível concluir depois da reconexão.
+6. No cenário sem dados, registre duas leituras de sono do mesmo perfil no mesmo dia e verifique que o coletivo continua com dados insuficientes.
+7. Navegue por teclado e confira o foco após mudar um filtro e ao entrar no gráfico e na tabela roláveis. Verifique as quatro telas a partir de 320 px.
 
 ## AKM-12 · Shell React
 

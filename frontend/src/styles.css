@@ -31,3 +31,5 @@
 .table-scroll th, .table-scroll td { text-align: left; padding: 10px; border-bottom: 1px solid #e1e8ef; }
 @media (max-width: 1000px) { .panels { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 400px) { .preview-details { grid-template-columns: minmax(0, 1fr); gap: 4px; } .preview-details dd { margin-bottom: 8px; } }
+
+.topbar small,.eyebrow,.lead,.panel p,.disclaimer,.footer{color:#465d74}
