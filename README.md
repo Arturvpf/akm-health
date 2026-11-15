@@ -41,7 +41,7 @@ Keep the API running. In a **second terminal**, at the repository root:
 npm --prefix frontend run dev -- --port 5173 --strictPort
 ```
 
-Open [AKM Health](http://127.0.0.1:5173/#/dashboard). All four mission screens use the API. Route identifiers remain dashboard, registrar, historico, investigacao. Current main has Portuguese labels; a separate English-interface PR may change labels without changing route identifiers.
+Open [AKM Health](http://127.0.0.1:5173/#/dashboard). All four mission screens use the API. Route identifiers remain dashboard, registrar, historico, investigacao. The interface is in English; route identifiers retain their original names.
 
 Check [health](http://127.0.0.1:8000/api/health), [OpenAPI JSON](http://127.0.0.1:8000/openapi.json) and [NASA references](http://127.0.0.1:8000/api/nasa/references). Health returns status=ok and storage=sqlite_reachable. [Swagger UI](http://127.0.0.1:8000/docs) loads CDN assets and may not render offline.
 
@@ -87,6 +87,8 @@ npm --prefix frontend run build
 ```
 
 scripts/check.py covers Ruff, backend tests and TypeScript, **not** the complete frontend/browser suite. Registration integration expects the repository .venv; PYTHON may select another interpreter. The [verification record](docs/akm-31-verification.md) separates executed commands from remaining browser, accessibility and scientific review. Automated success does not mean visual approval, merge or clinical validation.
+
+For the canonical integration and accessibility matrix, see [AKM-30 acceptance](docs/akm-30-acceptance.md). Its browser suite uses a disposable fixture and requires the documented browser installation step.
 
 ## Architecture and contributing
 

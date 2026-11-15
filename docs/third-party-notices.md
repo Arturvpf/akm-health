@@ -12,7 +12,7 @@ NASA historical data and linked web content have their own terms; see [data sour
 
 ## Libraries
 
-[Machine-readable inventory](dependency-inventory.json) records Python distribution metadata from the clean AKM-31 environment and npm package-lock metadata. It includes transitive dependencies, not just the table below. Metadata is evidence of declared licensing, not a complete legal review. Preserve upstream LICENSE/NOTICE files when redistributing package code or binary artifacts.
+[Machine-readable inventory](dependency-inventory.json) records Python distribution metadata from the clean AKM-31 environment and npm package-lock metadata. It includes transitive dependencies, not just the table below. The snapshot predates the AKM-30 testing tools listed below; the current npm lockfile additionally records those tools. Metadata is evidence of declared licensing, not a complete legal review. Preserve upstream LICENSE/NOTICE files when redistributing package code or binary artifacts.
 
 | Direct dependency / tool | Declared license | Local source of evidence |
 | --- | --- | --- |
@@ -25,6 +25,8 @@ NASA historical data and linked web content have their own terms; see [data sour
 | TypeScript | Apache-2.0 | frontend/package-lock.json and installed license |
 | Vite, @vitejs/plugin-react | MIT | frontend/package-lock.json and installed licenses |
 | @types/react, @types/react-dom | MIT | frontend/package-lock.json |
+| Playwright Core (AKM-30 browser testing) | Apache-2.0 | Installed package metadata and frontend/package-lock.json |
+| axe-core (AKM-30 accessibility testing) | MPL-2.0 | Installed package metadata and frontend/package-lock.json |
 
 Important transitive licenses in the Python environment include Pydantic/SQLAlchemy (MIT), Starlette (BSD-3-Clause), certifi (MPL-2.0), OpenTelemetry API (Apache-2.0), packaging (Apache-2.0 OR BSD-2-Clause) and typing_extensions (PSF-2.0). The npm graph includes additional license expressions; consult the inventory and actual distributed package files.
 

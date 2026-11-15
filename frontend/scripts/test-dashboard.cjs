@@ -261,3 +261,14 @@ test('a transport that ignores abort still times out without making up a respons
   assert.equal(controller.getState().data, null);
   controller.dispose();
 });
+
+test('a persisted dashboard summary translates an embedded observation window without changing timestamps', () => {
+  const data = snapshot();
+  const start = '2026-11-12T08:00:00.123456+00:00';
+  const end = '2026-11-14T08:00:00.123456+00:00';
+  data.alerts[0].explanation = 'Padrão experimental de sono compartilhado por 3 astronautas: A1, A2, A3. Janela observada: ' + start + ' a ' + end + '. Limitação: Regra experimental com tripulação fictícia; não é avaliação clínica nem diagnóstico.';
+  const html = render(data);
+  assert.ok(html.includes('Observation window: ' + start + ' to ' + end + '.'));
+  assert.ok(!html.includes('Janela observada:'));
+  assert.ok(html.includes('Clinical assessment and diagnosis are outside its scope.'));
+});

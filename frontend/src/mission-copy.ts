@@ -73,7 +73,7 @@ const phrases = new RegExp(
 );
 
 export function englishMissionCopy(text: string): string {
-  return text.replace(/Janela observada: (\S+) a (\S+)\.$/gm, 'Observation window: $1 to $2.')
+  return text.replace(/Janela observada: (\S+) a (\S+)\.(?=\s|$)/g, 'Observation window: $1 to $2.')
     .replace(/Há (\d+) período\(s\) de sono utilizável\(is\) na janela; são necessários dois períodos distintos\./g,
       '$1 usable sleep periods in the window. The rule requires two distinct periods.')
     .replace(/As duas observações de sono são menores ou iguais a ([0-9.]+)% da baseline sintética: padrão experimental a verificar\./g,

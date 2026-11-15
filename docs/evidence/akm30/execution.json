@@ -1,0 +1,32 @@
+{
+  "executed_at": "2026-11-15T16:45:00.990Z",
+  "base": "5645a03dc8f6301df67984c6d49c4c72038debf8",
+  "branch": "test/akm-30-mvp-acceptance",
+  "backend": {
+    "passed": 340,
+    "ruff": "passed"
+  },
+  "frontend": {
+    "passed": 41,
+    "navigation": "passed",
+    "typecheck": "passed",
+    "build": "passed"
+  },
+  "browser": {
+    "cases": 8,
+    "axe_audits": 12,
+    "violations": 0,
+    "javascript_errors": 0,
+    "external_browser_network": "blocked",
+    "success": true
+  },
+  "remaining": [
+    "Human keyboard walkthrough including native date segments",
+    "English screen-reader listening; desktop list_apps timed out",
+    "OS-level disconnected execution is not certified; T15 evidence is browser external-request blocking"
+  ],
+  "fixes": [
+    "Use a named nav landmark for Other pages",
+    "Translate embedded observation windows while preserving timestamps"
+  ]
+}
