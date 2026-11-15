@@ -125,7 +125,7 @@ class MeasurementHistoryQuery(StrictModel):
     """Inclusive observation-time filters; keep the canonical JSON list response."""
 
     # FastAPI 0.115 passes aliased query values using the model field names.
-    # Accept both representations internally while keeping from/to in OpenAPI.
+    # Accept both representations internally. The route validates public query names separately.
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
     astronaut_id: str | None = Field(default=None, min_length=1)

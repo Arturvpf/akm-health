@@ -56,7 +56,7 @@ python scripts/check.py
 
 ### FastAPI minimum-version regression check
 
-The period-query model accepts population by field name as well as alias because FastAPI 0.115.0 passes parsed `from`/`to` values using the internal model field names. The public OpenAPI parameters remain `from` and `to`; unknown model fields remain forbidden.
+The period-query model accepts population by field name as well as alias because FastAPI 0.115.0 passes parsed `from` and `to` values using internal model field names. The HTTP route checks query keys before binding them to the model. Only `from` and `to` are public time filters. Internal names and unknown query keys return HTTP 422.
 
 In a separate virtual environment, install the declared backend dependencies with the minimum supported FastAPI and run the history API tests:
 

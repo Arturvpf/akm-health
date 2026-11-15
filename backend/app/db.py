@@ -4,7 +4,8 @@ import os
 import sqlite3
 from pathlib import Path
 
-from sqlalchemy.engine import Engine
+from sqlalchemy import inspect
+from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.pool import NullPool
 from sqlmodel import create_engine
 
@@ -33,11 +34,28 @@ def make_engine(path: Path | None = None) -> Engine:
     return create_engine("sqlite://", creator=lambda: connect(database), poolclass=NullPool)
 
 
+def _validate_current_schema(connection: Connection) -> None:
+    schema = inspect(connection)
+    table_names = set(schema.get_table_names())
+    missing = []
+    for table in TABLES:
+        if table.name not in table_names:
+            missing.append(table.name)
+            continue
+        columns = {column["name"] for column in schema.get_columns(table.name)}
+        missing.extend(f"{table.name}.{column.name}" for column in table.columns if column.name not in columns)
+    if missing:
+        raise RuntimeError(
+            f"Invalid AKM database schema v{SCHEMA_VERSION}: missing {', '.join(missing)}. Check AKM_DB_PATH."
+        )
+
+
 def migrate(engine: Engine) -> None:
     with engine.begin() as connection:
         connection.exec_driver_sql("BEGIN IMMEDIATE")
         version = connection.exec_driver_sql("PRAGMA user_version").scalar_one()
         if version == SCHEMA_VERSION:
+            _validate_current_schema(connection)
             return
         if version != 0:
             raise RuntimeError(f"Unsupported AKM database schema version: {version}")
