@@ -67,10 +67,10 @@ export function ResultDetails({ result, profiles, check, openCheck }: {
   const scope = result.scope === 'crew' ? 'Crew · ODYSSEY-26' : targetName(result.astronaut_id, profiles);
   const nasa = explanation?.references.filter(isNasaReference) ?? [];
   const otherReferences = explanation?.references.filter(reference => !isNasaReference(reference)) ?? [];
-  const displayedLimitations = new Set(explanation?.limitations.map(limitation => `Limitação: ${limitation}`));
+  const displayedLimitations = new Set(explanation?.limitations.flatMap(limitation => [`Limitation: ${limitation}`, `Limitação: ${limitation}`]));
   const findings = result.findings.filter(finding =>
     finding !== decision?.reason && !displayedLimitations.has(finding)
-    && !(coverage && finding.startsWith('Janela observada: ')));
+    && !(coverage && (finding.startsWith('Observation window: ') || finding.startsWith('Janela observada: '))));
 
   return (
     <div className="investigation-details">

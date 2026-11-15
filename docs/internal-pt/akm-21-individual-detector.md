@@ -1,6 +1,6 @@
 # AKM-21 — Detector individual de alterações
 
-[Tarefa](https://app.notion.com/p/4189432b22228117a953d9551cd76989) · [Arquitetura canônica](https://app.notion.com/p/4189432b2222816494fdd66f32e11ec4) · [Matriz de segurança AKM-08](akm-08-alert-safety.md)
+Tarefa (internal Notion page; Portuguese, not part of the submission) · Arquitetura canônica (internal Notion page; Portuguese, not part of the submission) · [Matriz de segurança AKM-08](../akm-08-alert-safety.md)
 
 `backend/app/rules.py` implementa DR-01 e a suficiência individual de DR-04. A função `detect_individual_changes(snapshot, rules_version, config)` recebe dados tipados, devolve um `IndividualDetection` explicável e não acessa banco, relógio, rede ou arquivos. Não grava alertas nem cria verificações.
 

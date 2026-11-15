@@ -1,16 +1,16 @@
-# AKM-36 — Corpo humano interativo e acessível
+# AKM-36 — Interactive and accessible human body
 
-Página `#/corpo`. Um SVG esquemático **original**, sem pretensão anatômica clínica, é apresentado com controles HTML nativos sobrepostos e lista textual equivalente. As áreas possuem `button`, `aria-label`, `aria-pressed`, foco visível e suporte nativo a Tab, Shift+Tab, Enter e Espaço. O contexto muda via AKM-35 sem fabricar novas leituras.
+Page `#/body`. An **original** schematic SVG, with no clinical anatomical claim, is presented with overlaid native HTML controls and an equivalent text list. The areas have `button`, `aria-label`, `aria-pressed`, visible focus and native support for Tab, Shift+Tab, Enter and Space. The context changes through AKM-35 without fabricating new readings.
 
-| Área selecionada | Associação fiel aos indicadores P0 | Não inferir |
+| Selected area | Faithful association with P0 indicators | Do not infer |
 |---|---|---|
-| Cabeça/comportamento | `sleep_hours`, `mood_score` autorrelatado | Atividade cerebral ou diagnóstico psicológico |
-| Referência cardiovascular | `heart_rate_bpm` leitura pontual | Doença cardíaca ou efeito causal da gravidade |
-| Músculos e ossos | **Nenhum indicador P0** | Massa óssea ou perda muscular medidas |
-| Habitat | `co2_ppm`, `cabin_temp_c` **fora do corpo** | Diagnóstico respiratório ou exposição individual |
+| Head/behavior | `sleep_hours`, self-reported `mood_score` | Brain activity or psychological diagnosis |
+| Cardiovascular reference | `heart_rate_bpm` single reading | Heart disease or a causal effect of gravity |
+| Muscles and bones | **No P0 indicator** | Measured bone mass or muscle loss |
+| Habitat | `co2_ppm`, `cabin_temp_c` **outside the body** | Respiratory diagnosis or individual exposure |
 
-Os links oficiais da NASA para pesquisas de isolamento, gravidade e ambiente fechado são exibidos em cada área. A interface usa texto além de cor e oferece alternativa à seleção visual no SVG.
+Official NASA links to research on isolation, gravity and closed environments are shown in each area. The interface uses text in addition to color and offers an alternative to visual selection on the SVG.
 
-**Fontes:** https://www.nasa.gov/hrp/hazards/ ; https://www.nasa.gov/hrp/risks/ ; https://www.nasa.gov/hrp/hazard-isolation-and-confinement/ ; https://www.nasa.gov/hrp/hazard-hostile-closed-environments/ .
+**Sources:** https://www.nasa.gov/hrp/hazards/ ; https://www.nasa.gov/hrp/risks/ ; https://www.nasa.gov/hrp/hazard-isolation-and-confinement/ ; https://www.nasa.gov/hrp/hazard-hostile-closed-environments/ .
 
-**Critério de aceite:** percorrer todos os controles de área por teclado, selecionar por Enter/Espaço e verificar que cabeçalho/indicadores/caveats mudam sem alterar o banco nem construir interpretações médicas.
+**Acceptance criterion:** step through all area controls by keyboard, select with Enter/Space, and verify that the heading, indicators and caveats change without altering the database or building medical interpretations.

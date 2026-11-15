@@ -1,6 +1,6 @@
 # Data sources and provenance
 
-This inventory describes the artifacts used by the current application, not every source proposed in earlier plans. See [AKM-39](akm-39-nasa-references.md) and the [AKM-38 audit](https://app.notion.com/p/4189432b2222817c8ebdc3a1be168b8a).
+This inventory describes the artifacts used by the current application, not every source proposed in earlier plans. See [AKM-39](akm-39-nasa-references.md) and the AKM-38 audit (internal Notion page; Portuguese, not part of the submission).
 
 | Category | Local artifact / origin | Purpose |
 | --- | --- | --- |

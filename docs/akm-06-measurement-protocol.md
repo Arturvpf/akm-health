@@ -1,6 +1,6 @@
 # AKM-06 — NASA-backed demo measurement protocol
 
-Source of truth: https://app.notion.com/p/4189432b2222815fb561ed1894b96750
+Source of truth: the team's internal Notion workspace (Portuguese, not part of the submission)
 
 | Metric | Meaning | Unit | Zone | Input method | Demo collection cadence |
 | --- | --- | --- | --- | --- | --- |
@@ -16,7 +16,7 @@ Source of truth: https://app.notion.com/p/4189432b2222815fb561ed1894b96750
 
 - Sleep: select astronaut; enter hours slept (0..24) and end-of-sleep time with timezone. Unknown value means **no record**, never 0.
 - Heart rate: select astronaut; enter BPM and timestamp. Suggest rest/comparable conditions, but the schema **does not verify** physical activity or instrument reliability; no automated cardiac diagnosis.
-- Mood: ask “Como você avalia seu bem-estar emocional neste momento?” 1 muito ruim, 2 ruim, 3 neutro, 4 bom, 5 muito bom. This is a demo-only ordinal rating, not validated psychometrics.
+- Mood: ask “How would you rate your emotional well-being right now?” 1 muito ruim, 2 ruim, 3 neutro, 4 bom, 5 muito bom. This is a demo-only ordinal rating, not validated psychometrics.
 - CO2 and temperature: select habitat, with NULL astronaut_id; keep readings from the fictitious cabin separate from actual NASA/ISS data and Mars exterior.
 - Mark sources synthetic vs manual, quality ok vs suspect. Suspicious entries remain visible but cannot prove clinical risk. No real-time telemetry claim.
 
@@ -38,4 +38,4 @@ Source of truth: https://app.notion.com/p/4189432b2222815fb561ed1894b96750
 - NASA physiology risks: https://www.nasa.gov/hrp/risks/
 - NASA EDA/OSDR historical ISS environmental telemetry: https://visualization.osdr.nasa.gov/eda/
 
-These sources establish why the project tracks each indicator. The 20% sleep change is a synthetic parameter of the demonstration. AKM-38 verified the RR-1 exports, and the [EP-05 evidence](ep-05-scientific-foundation-and-safety.md#proveniência-rr-1) records the source, context, units, file checks and metadata limits.
+These sources establish why the project tracks each indicator. The 20% sleep change is a synthetic parameter of the demonstration. AKM-38 verified the RR-1 exports, and the EP-05 evidence records the source, context, units, file checks and metadata limits.

@@ -57,6 +57,6 @@ Validado o código do commit 6cc023f com Playwright 1.65.1 e Chromium Headless S
 - HTTP 422 simulado no transporte do navegador: valor preservado e foco no campo rejeitado. HTTP 404: envio bloqueado até atualizar e selecionar novamente. Falha de rede: rascunho bloqueado, conferência explícita antes de liberar novo envio e nenhum retry automático.
 - axe-core 4.14.0 na tela inicial a 390 px, regras WCAG 2 A/AA e 2.1 A/AA: zero violações, 26 verificações aprovadas e nenhuma incompleta. Auditoria automatizada não substitui teste humano.
 
-Capturas de evidência: [desktop](evidence/akm14/desktop.png), [320 px](evidence/akm14/mobile-320.png), [confirmação](evidence/akm14/confirmation.png). Recibo e leituras são exclusivamente da demonstração fictícia em banco de teste.
+Capturas de evidência: [desktop](../evidence/akm14/desktop.png), [320 px](../evidence/akm14/mobile-320.png), [confirmação](../evidence/akm14/confirmation.png). Recibo e leituras são exclusivamente da demonstração fictícia em banco de teste.
 
 **Pendência:** teste manual com leitor de tela e revisão humana completa da interação por teclado. Não foram realizadas avaliação médica ou validação clínica. A aprovação funcional/visual documentada não significa merge do PR.

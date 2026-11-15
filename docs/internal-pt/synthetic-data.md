@@ -1,6 +1,6 @@
 # ODYSSEY-26 · Dados simulados da AKM-27
 
-Os perfis e todas as observações abaixo são **simulados** e têm finalidade demonstrativa. O conjunto fica em [`backend/app/seed.py`](../backend/app/seed.py), com versões rastreáveis pelo Git. As métricas e unidades seguem o [protocolo AKM-06](akm-06-measurement-protocol.md) e o [dicionário canônico do Notion](https://app.notion.com/p/4189432b222281509e14c95de7f52a2e).
+Os perfis e todas as observações abaixo são **simulados** e têm finalidade demonstrativa. O conjunto fica em [`backend/app/seed.py`](../../backend/app/seed.py), com versões rastreáveis pelo Git. As métricas e unidades seguem o [protocolo AKM-06](../akm-06-measurement-protocol.md) e o dicionário canônico do Notion (internal Notion page; Portuguese, not part of the submission).
 
 ## Carregar e repetir
 
@@ -38,7 +38,7 @@ Execute `python -m pytest -q backend` a partir da raiz para verificar as unidade
 
 ## Cenários de investigação da AKM-28
 
-O [arquivo de fixtures](../backend/tests/fixtures/odyssey-26-scenarios.json) reaproveita os perfis e horários da AKM-27. Cada caso descreve o escopo, as alterações na amostra base e o resultado esperado para o motor.
+O [arquivo de fixtures](../../backend/tests/fixtures/odyssey-26-scenarios.json) reaproveita os perfis e horários da AKM-27. Cada caso descreve o escopo, as alterações na amostra base e o resultado esperado para o motor.
 
 | Caso | Entradas | Resultado esperado |
 | --- | --- | --- |

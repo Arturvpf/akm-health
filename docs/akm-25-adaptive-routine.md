@@ -2,7 +2,7 @@
 
 The agenda now combines periodic collection windows with the investigative checks delivered by AKM-20/23. It uses the four existing tables and ten canonical endpoints. The response schemas and TypeScript types stay unchanged. No background scheduler runs and GET requests never create or complete checks.
 
-Sources: [AKM-25](https://app.notion.com/p/4189432b22228109bbaedd3ad3dce37a), [canonical architecture](https://app.notion.com/p/4189432b2222816494fdd66f32e11ec4), [AKM-06 collection protocol](akm-06-measurement-protocol.md), [AKM-09 copy](akm-09-guidance-library.md), [AKM-23 priorities](akm-23-next-check.md).
+Sources: AKM-25 (internal Notion page; Portuguese, not part of the submission), canonical architecture (internal Notion page; Portuguese, not part of the submission), [AKM-06 collection protocol](akm-06-measurement-protocol.md), [AKM-09 copy](akm-09-guidance-library.md), AKM-23 priorities.
 
 ## Enable a collection policy explicitly
 

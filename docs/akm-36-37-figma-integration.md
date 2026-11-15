@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | `AKM_Health_AKM33_34_35_36_Completo.zip` | Repository snapshot built on `19c7b4e` (PR #28) plus 35 changed files | AKM-33 offline sync, AKM-34 scenario comparator, AKM-35 mission environments, AKM-36 body map |
 | [Figma Make — AKM Health Mission Monitoring](https://www.figma.com/make/zu8Tq9w8gElqjLBJWlUEfP/) | Standalone React/Tailwind prototype in Portuguese. All data are hard-coded and nothing calls the API | AKM-36 body map (`HumanHealthMap`), AKM-37 gamification (`SelfCareJourney`), AKM-11 brand identity (logo, dark palette), AKM Predict mock, NASA EDA panel |
-| `docs/design/AKM_Health_Design_System_v1.0.docx` | Design-system and product document by The Bug Bang Theory | AKM-11 design system, input for AKM-32 submission material and review rules for AKM-36/37 |
+| `docs/internal-pt/AKM_Health_Design_System_v1.0.docx` | Design-system and product document by The Bug Bang Theory | AKM-11 design system, input for AKM-32 submission material and review rules for AKM-36/37 |
 
 ## Which version wins, and why
 
@@ -28,7 +28,7 @@ No points for normal readings; a low mood reading earns the same points as a hig
 
 The document reviewed the Figma Make snapshot, not the repository. Before using it in the submission, update the following:
 
-- "Dataset NASA pendente de seleção" / RF-13 not complete: `main` ships the credited NASA OSDR RR-1 excerpt (AKM-38/39).
+- "NASA dataset pending selection" / RF-13 not complete: `main` ships the credited NASA OSDR RR-1 excerpt (AKM-38/39).
 - "Nenhuma chamada a API": the repository screens use the FastAPI backend; only the Make prototype is offline-mock.
 - History and Registration "estado local": in the repository both persist through the API (and AKM-33 adds an offline queue).
 

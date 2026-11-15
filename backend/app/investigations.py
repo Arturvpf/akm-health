@@ -221,7 +221,7 @@ def _compose_result(row: Investigation, detection, selection, followup_id: int |
                 evidence.append(InvestigationEvidence(kind=comparison.kind, astronaut_ids=[], quality="ok"))
         hypotheses = [InvestigationHypothesis.model_validate(item.model_dump()) for item in detection.hypotheses]
     findings = list(detection.findings)
-    findings.append(f"Janela observada: {detection.window_start.isoformat()} a {detection.as_of.isoformat()}.")
+    findings.append(f"Observation window: {detection.window_start.isoformat()} to {detection.as_of.isoformat()}.")
     findings.extend(f"Limitation: {limitation}" for limitation in detection.limitations)
     if selection.next_check is None:
         findings.append(selection.reason)

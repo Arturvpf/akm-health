@@ -1,6 +1,6 @@
 # AKM-19 — History, habitat and dashboard read APIs
 
-[Task](https://app.notion.com/p/4189432b22228160ac37c92165c70e91) · [Canonical architecture](https://app.notion.com/p/4189432b2222816494fdd66f32e11ec4)
+Task (internal Notion page; Portuguese, not part of the submission) · Canonical architecture (internal Notion page; Portuguese, not part of the submission)
 
 These endpoints read the existing four SQLite tables. They do not run the investigation motor, create follow-ups, or import NASA data. All mission observations remain `manual` or `synthetic`; NASA historical references use the separate canonical endpoint.
 
@@ -15,7 +15,7 @@ These endpoints read the existing four SQLite tables. They do not run the invest
 
 History supports combined optional `astronaut_id`, `kind`, `from` and `to` filters. Period boundaries are inclusive and apply to **observation time**, not recording time. `from` and `to` must be ISO 8601 datetimes with a timezone; offsets are normalized to UTC and `from <= to` is required. Response timestamps use UTC `Z`.
 
-The React History route consumes these endpoints as described in [AKM-15](akm-15-history-trends.md).
+The React History route consumes these endpoints as described in AKM-15.
 
 Pagination preserves the canonical list response: `limit` defaults to 100 (1–1000), `offset` defaults to 0 (0–9223372036854775807, SQLite's signed 64-bit integer range). Larger offsets return 422 before querying SQLite. Increment offset by limit until a page is shorter than limit. Ordering by observation time and ID breaks ties consistently on a fixed dataset; offset pagination is not a snapshot across concurrent inserts.
 

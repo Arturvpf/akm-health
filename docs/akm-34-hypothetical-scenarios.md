@@ -1,20 +1,20 @@
-# AKM-34 — Comparador de cenários hipotéticos
+# AKM-34 — Hypothetical scenario comparator
 
-A página `#/comparador` contrasta o estado **congelado e sintético** da segunda noite da ODYSSEY-26 (arquivo `backend/app/seed.py`) com valores alternativos digitados pelo operador. São suportados os cinco indicadores oficiais do MVP: sono (h), frequência cardíaca pontual (bpm), humor ordinal (1–5), CO₂ da cabine (ppm) e temperatura da cabine (°C).
+The `#/scenarios` page contrasts the **frozen, synthetic** state of ODYSSEY-26's second night (file `backend/app/seed.py`) with alternative values typed by the operator. It supports the five official MVP indicators: sleep (h), single heart-rate reading (bpm), ordinal mood (1–5), cabin CO₂ (ppm) and cabin temperature (°C).
 
-### Premissas e proveniência
+### Assumptions and provenance
 
-- Aurora/A1: sono 5,4 h, FC 74 bpm, humor 3; Orion/A2: sono 5,7 h, FC 71 bpm, humor 3; Vega/A3: sono 5,6 h, FC 76 bpm, humor **ausente**; Lyra/A4: sono 7,9 h, FC **ausente**, humor 4.
-- Última cabine sintética: CO₂ 980 ppm, temperatura 22,2 °C. Não é telemetria NASA nem medição de Marte exterior.
-- Alternativas são entradas locais, não são gravadas no banco nem dispararam regras. O cálculo é simplesmente `hipótese – referência` com a unidade correspondente.
-- Valor não medido/fora do domínio → ausência explícita de comparação. Nenhuma classificação de risco/benefício nem previsão médica.
+- Aurora/A1: sleep 5.4 h, HR 74 bpm, mood 3; Orion/A2: sleep 5.7 h, HR 71 bpm, mood 3; Vega/A3: sleep 5.6 h, HR 76 bpm, mood **absent**; Lyra/A4: sleep 7.9 h, HR **absent**, mood 4.
+- Latest synthetic cabin: CO₂ 980 ppm, temperature 22.2 °C. This is neither NASA telemetry nor an outside-Mars measurement.
+- Alternatives are local inputs; they are not saved to the database and do not trigger rules. The calculation is simply `hypothesis – reference` with the matching unit.
+- A value that is unmeasured or out of domain yields an explicit absence of comparison. There is no risk/benefit classification and no medical prediction.
 
-### Critérios de aceite verificáveis
+### Verifiable acceptance criteria
 
-1. A página identifica ambos os cenários e a origem sintética.
-2. Alterar um valor apresenta apenas a diferença aritmética; não gera alertas ou recomendações.
-3. A3/mood e A4/FC não são preenchidos com zero ou valores inventados.
-4. Entradas inválidas e não finitas não produzem diferenças fictícias.
-5. O ambiente hipotético pode ser selecionado (AKM-35), mas o comparador não modifica a missão armazenada.
+1. The page identifies both scenarios and the synthetic origin.
+2. Changing a value shows only the arithmetic difference; it produces no alerts or recommendations.
+3. A3/mood and A4/HR are not filled with zero or invented values.
+4. Invalid and non-finite inputs produce no fictitious differences.
+5. The hypothetical environment can be selected (AKM-35), but the comparator does not modify the stored mission.
 
-Referências contextuais NASA: https://www.nasa.gov/hrp/hazards/ e https://www.nasa.gov/hrp/risks/ . Relevância científica não significa validação clínica desses números de demonstração.
+NASA contextual references: https://www.nasa.gov/hrp/hazards/ and https://www.nasa.gov/hrp/risks/ . Scientific relevance does not mean clinical validation of these demonstration numbers.

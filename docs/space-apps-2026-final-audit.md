@@ -6,7 +6,7 @@
 
 This audit was written against `5645a03`. Since then `main` gained PR #33 (AKM-33 to AKM-37 exploratory tools) and PR #34 (AKM-30 acceptance). Where this update and the original text below disagree, this update wins:
 
-- **AKM-30 (T01–T15):** executed on `main` + PR #32 + PR #34 and recorded in [AKM-30 acceptance](akm-30-acceptance.md). T01–T13 pass; T14 automated checks pass (axe at 320/1280 px, keyboard, text + icon). An English screen-reader walkthrough and a visual focus check of the date/time inputs still need a person. T15 passed as browser-level isolation (no external requests), not with the operating system's network turned off. AKM-30 is marked Concluído in Notion with those items recorded as pending.
+- **AKM-30 (T01–T15):** executed on `main` + PR #32 + PR #34 and recorded in [AKM-30 acceptance](akm-30-acceptance.md). T01–T13 pass; T14 automated checks pass (axe at 320/1280 px, keyboard, text + icon). An English screen-reader walkthrough and a visual focus check of the date/time inputs still need a person. T15 passed as browser-level isolation (no external requests), not with the operating system's network turned off. AKM-30 is marked Done in the internal Notion workspace with those items recorded as pending.
 - **Counts on the integrated tree:** 348 backend tests, 48/48 frontend node tests, 11/11 browser scenario groups, 23 axe audits with 0 violations.
 - **Idempotency:** new registrations go through `POST /api/sync/measurements` with a client `operation_id`; a replay returns the original receipt and a different body returns 409. The original `POST /api/measurements` still has no idempotency key.
 - **Offline and P1/P2 tools now on `main`:** IndexedDB outbox for new measurements (investigations and follow-up completion still need the API), service worker for the production build, scenario comparator, mission environments, body map and self-care journey — eight routes in total. They are exploratory and secondary to the investigation loop.
@@ -66,7 +66,7 @@ Reference: [NASA OSDR EDA](https://visualization.osdr.nasa.gov/eda/), [specific 
 
 ## 4. Canonical AKM-30 T01–T15 — acceptance evidence required
 
-This matrix follows the [Notion canonical architecture](https://app.notion.com/p/4189432b2222816494fdd66f32e11ec4); individual unit and feature tests are not a substitute for executing all scenarios on the **final merged commit**.
+This matrix follows the Notion canonical architecture (internal Notion page; Portuguese, not part of the submission); individual unit and feature tests are not a substitute for executing all scenarios on the **final merged commit**.
 
 | ID | Acceptance action | Evidence previously documented / remaining |
 | --- | --- | --- |
@@ -150,8 +150,8 @@ Evidence already committed in prior revisions: [AKM-31 Windows clean install](ak
 - [NASA HRP hazards](https://www.nasa.gov/hrp/hazards/) and [NASA risks](https://www.nasa.gov/hrp/risks/)
 - [NASA OSDR EDA](https://visualization.osdr.nasa.gov/eda/)
 - [NASA science-data licensing](https://science.data.nasa.gov/about/license)
-- [Notion architecture](https://app.notion.com/p/4189432b2222816494fdd66f32e11ec4) and [backlog](https://app.notion.com/p/4189432b2222817d8ef0f80befa8e182)
-- [Notion AKM-30](https://app.notion.com/p/4189432b222281b799e9ca40f6f3ec9c), [AKM-32](https://app.notion.com/p/4189432b2222816dbad1d27d8ba2071d)
+- Notion architecture (internal Notion page; Portuguese, not part of the submission) and backlog (internal Notion page; Portuguese, not part of the submission)
+- Notion AKM-30 (internal Notion page; Portuguese, not part of the submission), AKM-32 (internal Notion page; Portuguese, not part of the submission)
 - [Clean-install results](akm-31-verification.md), [English UI PR #29](https://github.com/Arturvpf/akm-health/pull/29), [NASA integration PR #28](https://github.com/Arturvpf/akm-health/pull/28)
 
 **Scope of this audit:** static inspection of the complete tracked tree, selective source inspection, Notion comparison, official web research and review of existing test evidence. The auditor could not clone/install/run the entire codebase in the current environment due to blocked GitHub DNS; therefore no new end-to-end test pass is asserted. Changes are isolated on the audit branch until reviewed and merged.

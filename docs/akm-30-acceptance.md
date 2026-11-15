@@ -1,6 +1,6 @@
 # AKM-30 · MVP integration and accessibility acceptance
 
-[Task](https://app.notion.com/p/4189432b222281b799e9ca40f6f3ec9c) · [Canonical T01–T15](https://app.notion.com/p/4189432b2222816494fdd66f32e11ec4)
+Task (internal Notion page; Portuguese, not part of the submission) · Canonical T01–T15 (internal Notion page; Portuguese, not part of the submission)
 
 The acceptance suite exercises the fictional mission and existing contracts. It is not medical, scientific or production certification. Tests never reset a developer's mission database or modify the NASA artifacts.
 

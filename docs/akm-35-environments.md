@@ -1,23 +1,23 @@
-# AKM-35 — Ambientes de missão e contexto científico
+# AKM-35 — Mission environments and scientific context
 
-Página: `#/ambientes`. Quatro ambientes **hipotéticos** são selecionados via controle nativo acessível. A seleção, persistida localmente no navegador, atualiza textos e explicações também no Atlas corporal e no Comparador.
+Page: `#/environments`. Four **hypothetical** environments are selected through an accessible native control. The selection, persisted locally in the browser, also updates the texts and explanations in the Body map and the Comparator.
 
-| Ambiente | Gravidade de referência | Contexto |
+| Environment | Reference gravity | Context |
 |---|---|---|
-| Superfície marciana | 3,7 m/s² ≈ 0,38g | Gravidade parcial, distância, habitat fechado |
-| Superfície lunar | 1,6 m/s² ≈ 0,16g | Gravidade parcial, ambiente controlado |
-| Análogo terrestre | 9,8 m/s² = 1g | Isolamento simulado, não reproduz exposição espacial |
-| ISS / órbita | Microgravidade, sem número calculado no MVP | Ambiente fechado, adaptação orbital, isolamento |
+| Mars surface | 3.73 m/s² ≈ 0.38 g | Partial gravity, distance, closed habitat |
+| Lunar surface | 1.62 m/s² ≈ 0.16 g | Partial gravity, controlled environment |
+| Earth analog | 9.82 m/s² = 1 g | Simulated isolation; does not reproduce space exposure |
+| ISS / orbit | Microgravity, no number computed in the MVP | Closed environment, orbital adaptation, isolation |
 
-Fonte numérica de Marte/Lua/Terra: https://nssdc.gsfc.nasa.gov/planetary/factsheet/ . Taxonomia dos cinco perigos NASA: https://www.nasa.gov/hrp/hazards/ . A classificação de microgravidade da ISS **não implica gravidade física local literalmente nula**.
+Numeric source for Mars and Earth: [NASA NSSDCA Mars Fact Sheet](https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html) (mean surface gravity 3.73 m/s² against 9.82 m/s² for Earth, ratio 0.380; last updated 19 May 2025). Numeric source for the Moon: [NASA NSSDCA Moon Fact Sheet](https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html) (1.62 m/s²; last updated 11 January 2024). Taxonomy of the five NASA hazards: https://www.nasa.gov/hrp/hazards/ . The ISS microgravity classification **does not imply that local physical gravity is literally zero**.
 
-## Limite arquitetural
+## Architectural limit
 
-Esta é uma **visão contrafactual local**; a missão persistida no backend continua `ODYSSEY-26`, `destination=mars_surface`, com seus indicadores e observações sintéticas. A seleção não reclassifica leituras, não ajusta limiares médicos, não muda `GET /api/dashboard` e não mistura telemetria de ambientes distintos. Dados externos NASA permanecem em `GET /api/nasa/references` com proveniência separada.
+This is a **local counterfactual view**; the mission persisted in the backend remains `ODYSSEY-26`, `destination=mars_surface`, with its synthetic indicators and observations. The selection does not reclassify readings, does not adjust medical thresholds, does not change `GET /api/dashboard` and does not mix telemetry from different environments. External NASA data stay in `GET /api/nasa/references` with separate provenance.
 
-## Verificação
+## Verification
 
-- Selecione Lua → gravidade e explicação lunar aparecem.
-- Selecione ISS → explicação de microgravidade sem valor fictício em g.
-- Volte a Marte → contexto marciano reaparece e o backend e banco permanecem inalterados.
-- A seleção é preservada após recarregar, se o navegador permitir armazenamento.
+- Select Moon → lunar gravity and explanation appear.
+- Select ISS → microgravity explanation with no fictitious g value.
+- Go back to Mars → the Martian context reappears and the backend and database remain unchanged.
+- The selection is preserved after a reload, if the browser allows storage.
