@@ -43,9 +43,9 @@ function MissionPulse({ crew, evaluated, hasNewReadings }: { crew: AstronautDash
   const headline = !evaluated ? 'No investigation has been run yet.'
     : flagged > 0 ? `${flagged} of ${crew.length} crew members show an experimental pattern to check.`
     : 'No pattern under the demo rule.';
-  const detail = hasNewReadings ? 'New readings arrived since the last run. Run an investigation to include them.'
-    : evaluated ? 'Based on the most recent investigation. The cause is never assumed.'
-    : 'Investigations only run when you ask. Readings below are the latest recorded.';
+  const detail = !evaluated ? 'Investigations only run when you ask. Readings below are the latest recorded.'
+    : hasNewReadings ? 'New readings arrived since the last run. Run an investigation to include them.'
+    : 'Based on the most recent investigation. The cause is never assumed.';
   return <section className="mission-pulse" aria-label="Mission status at a glance">
     <div>
       <p className="pulse-label"><span aria-hidden="true">{flagged > 0 ? '▲ ' : '● '}</span>Right now</p>

@@ -80,7 +80,7 @@
 }
 
 .history-legend li { display: flex; align-items: center; gap: var(--space-2); }
-.history-legend-valid { color: var(--action); }
+.history-legend-valid { color: var(--chart-line); }
 .history-legend-suspect { color: var(--caution-text); font-size: 1.25em; font-weight: 700; line-height: 1; }
 .history-legend-gap { width: 1rem; height: 0.75rem; border: 1px dashed var(--neutral-border); background: var(--neutral-surface); }
 .history-legend-baseline { width: 1rem; border-bottom: 2px dashed var(--positive-text); }
