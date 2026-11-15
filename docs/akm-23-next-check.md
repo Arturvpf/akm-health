@@ -28,12 +28,12 @@ Esses números são prioridades de software explicáveis, não utilidade clínic
 | Sono sem observação útil, com baseline conhecida | 80 | 100 | Iniciar nova coleta; uma única leitura ainda não completa dois períodos. |
 | Perfil alterado | 80 | 20, ou 40 com leituras suspeitas excluídas | Repetir registro e conferir horário/rotina da coleta. |
 | Perfil incompleto quando já existe padrão coletivo suficiente | 50 | 70 | Alternativa de cobertura; não ultrapassa a confirmação ambiental do grupo. |
-| Grupo sem períodos comparáveis, com pelo menos dois perfis individualmente suficientes e nenhuma lacuna individual com baseline conhecida | 90 se o último período é antigo; 70 caso contrário | 80 | Coletar período distinto para alinhar a cobertura. |
+| Grupo sem períodos comparáveis, com pelo menos dois perfis individualmente suficientes | 90 se o último período é antigo; 70 caso contrário | 80 | Coletar período distinto para alinhar a cobertura quando as opções para preencher lacunas individuais estiverem indisponíveis. |
 | Temperatura interna com padrão coletivo | 25 | 20 | Contexto adicional, sem substituir confirmação de CO₂. |
 
 Baselines ausentes/não positivas não são corrigidas por uma medição inventada: o perfil sem baseline não gera proposta automática de sono. Roster vazio ou ausência de alvo adequado gera `needs_context`. Sem padrão nem lacuna relevante, `no_check_needed`; a rotina programada é responsabilidade das tarefas seguintes. Um resultado coletivo normal pode ainda originar checagem de um perfil individual alterado ou incompleto, sem promover o grupo a alerta.
 
-Ordenar por prioridade do protocolo (quando houver), score decrescente, menor penalidade de esforço e chave estável `(kind, astronaut_id)`. Escolher o primeiro disponível. Se opções anteriores estiverem indisponíveis, marcar `used_alternative=true`, preservar os candidatos rejeitados e explicar a alternativa no próprio `reason`. Frequência cardíaca e humor não ganham justificativa automática a partir do padrão de sono; só podem ser selecionados aqui por instrução de protocolo explícita.
+Aplicar primeiro a prioridade do protocolo, quando houver. Na insuficiência coletiva, as coletas para preencher lacunas individuais vêm antes das coletas de alinhamento. Dentro de cada grupo, ordenar por score decrescente, menor penalidade de esforço e chave estável `(kind, astronaut_id)`. Escolher o primeiro disponível. Se opções anteriores estiverem indisponíveis, marcar `used_alternative=true`, preservar os candidatos rejeitados e explicar a alternativa no próprio `reason`. Frequência cardíaca e humor só podem ser selecionados aqui por instrução de protocolo explícita.
 
 ## Protocolos e limites
 
