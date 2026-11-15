@@ -12,3 +12,11 @@
 .journey-tasks li.done{border-color:var(--positive-border);background:var(--positive-surface)}.journey-tasks small{display:block;color:var(--text-muted)}.journey-check{font-weight:700;width:1.5rem;text-align:center}
 .achievement-row{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:.5rem}.achievement-row li{border:1px dashed var(--border-control);border-radius:var(--radius-pill);padding:.4rem .8rem;color:var(--text-muted)}.achievement-row li.unlocked{border-style:solid;color:var(--text);font-weight:600}
 @media(max-width:650px){.journey-tasks li{grid-template-columns:auto 1fr}.journey-tasks li>:last-child{grid-column:2}}
+
+/* Text blocks inside a card sit in their own panel, matching the landing cards. */
+.experiment-panel {
+  margin-block-start: var(--space-4); padding: var(--space-4); min-width: 0;
+  border: 1px solid rgb(148 163 255 / 28%); border-radius: var(--radius-card); background: rgb(15 22 48 / 70%);
+}
+.experiment-panel > :first-child { margin-block-start: 0; }
+.experiment-panel > :last-child { margin-block-end: 0; }

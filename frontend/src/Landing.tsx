@@ -176,8 +176,11 @@ export function Landing() {
       <section className="lp-section" aria-labelledby="lp-method" ref={method} id="method">
         <h2 id="lp-method" className="lp-h2">How an investigation works</h2>
         <div className="lp-split">
-          <ol className="lp-steps">{STEPS.map(step => <li key={step}>{step}</li>)}</ol>
-          <div>
+          <div className="lp-card">
+            <h3 className="lp-h3">The four steps</h3>
+            <ol className="lp-steps">{STEPS.map(step => <li key={step}>{step}</li>)}</ol>
+          </div>
+          <div className="lp-card lp-card-limits">
             <h3 className="lp-h3">What it will not do</h3>
             <ul className="lp-list">{LIMITS.map(item => <li key={item}>{item}</li>)}</ul>
           </div>
