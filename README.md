@@ -47,6 +47,8 @@ python scripts/check.py
 
 The command runs Ruff, Pytest and the TypeScript type check. Run it before opening a PR and include its result in the PR description.
 
+[AKM-29 investigation engine validation](docs/akm-29-investigation-engine-validation.md) links the rules and acceptance cases to automated tests and shows how to reproduce the synthetic HTTP flow.
+
 The API, tests, and type checking run locally after dependency installation. The interactive Swagger UI currently loads assets from a CDN. The health endpoint and JSON OpenAPI schema are served locally.
 
 To apply the SQLite schema separately, run `python -m app.db` with `backend/` as the working directory. See the [database notes](docs/database.md) for schema versioning and cases that require review.
