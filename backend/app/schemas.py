@@ -217,7 +217,7 @@ class InvestigationResult(StrictModel):
 
 class FollowupCompleteRequest(StrictModel):
     status: Literal["completed"]
-    measurement_id: int = Field(gt=0)
+    measurement_id: int = Field(gt=0, le=2**63 - 1, strict=True)
 
 
 class FollowupRead(StrictModel):
