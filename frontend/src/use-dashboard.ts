@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { fetchDashboard } from './api';
+import { onDataChange } from './data-changes';
 import type { DashboardResponse } from './types';
 
 /** Read-only dashboard snapshot shared by the exploratory P2 views (AKM-36, AKM-37). */
@@ -24,6 +25,7 @@ export function useDashboardSnapshot() {
     return () => controller.abort();
   }, [attempt]);
   const retry = useCallback(() => setAttempt(value => value + 1), []);
+  useEffect(() => onDataChange(retry), [retry]);
   return { ...state, retry };
 }
 

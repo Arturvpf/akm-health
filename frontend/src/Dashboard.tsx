@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { METRIC_LABELS } from './api';
 import { NasaReferences } from './NasaReferences';
+import { onDataChange } from './data-changes';
 import { createDashboardController, INITIAL_DASHBOARD_STATE, type DashboardState } from './dashboard-state';
 import { ActionButton, ActionLink, Card, DataState, Details, InformationNotice, ProtocolLegend, SourceBadge, StatusBadge } from './design-system';
 import { pageHref } from './navigation';
@@ -152,7 +153,8 @@ export function Dashboard() {
     controllerRef.current = controller;
     const unsubscribe = controller.subscribe(setState);
     void controller.refresh();
-    return () => { unsubscribe(); controller.dispose(); controllerRef.current = null; };
+    const stopListening = onDataChange(() => { void controller.refresh(); });
+    return () => { stopListening(); unsubscribe(); controller.dispose(); controllerRef.current = null; };
   }, []);
   return <DashboardView state={state} onRefresh={() => { void controllerRef.current?.refresh(); }} />;
 }

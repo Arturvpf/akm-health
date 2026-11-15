@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ActionButton, ActionLink, Card, DataState, InformationNotice } from './design-system';
+import { onDataChange } from './data-changes';
 import { readAgenda } from './investigation-api';
 import type { FollowupRead, Kind } from './types';
 import { formatUtc, useDashboardSnapshot } from './use-dashboard';
@@ -44,12 +45,14 @@ export function SelfCareJourney() {
   const [showHistory, setShowHistory] = useState(false);
   const now = Date.now();
 
+  const [agendaRevision, setAgendaRevision] = useState(0);
+  useEffect(() => onDataChange(() => setAgendaRevision(value => value + 1)), []);
   useEffect(() => {
     const controller = new AbortController();
-    readAgenda(controller.signal).then(setAgenda)
+    readAgenda(controller.signal).then(value => { setAgenda(value); setAgendaError(null); })
       .catch(() => { if (!controller.signal.aborted) setAgendaError('Follow-up checks are unavailable right now.'); });
     return () => controller.abort();
-  }, []);
+  }, [agendaRevision]);
 
   const crew = dashboard.data?.astronauts ?? [];
   const astronaut = crew.find(item => item.id === astronautId) ?? crew[0] ?? null;
