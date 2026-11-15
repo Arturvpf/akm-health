@@ -3,6 +3,7 @@ import { ActionButton, ActionLink, Card, DataState, Details, SelectField, Source
 import { readCompatibleMeasurements } from './investigation-api';
 import { formatTime, metricNames, metricValue, targetName, UtcTime } from './investigation-result';
 import { pageHref } from './navigation';
+import { englishMissionCopy } from './mission-copy';
 import type { AstronautRead, FollowupRead, MeasurementRead } from './types';
 
 export interface Agenda {
@@ -57,40 +58,40 @@ function MeasurementLinkForm({ check, locked, saving, complete }: {
 
   return (
     <form className="investigation-link-form" onSubmit={submit}>
-      <h5 ref={formHeading} tabIndex={-1}>Vínculo de medição para a checagem #{check.id}</h5>
+      <h5 ref={formHeading} tabIndex={-1}>Link a measurement to check #{check.id}</h5>
       <div role="status">
-        {!ready && state !== 'error' ? <DataState kind="loading">Buscando medições registradas para esta checagem.</DataState> : null}
-        {state === 'error' ? <DataState kind="error">Não foi possível consultar as medições.</DataState> : null}
+        {!ready && state !== 'error' ? <DataState kind="loading">Loading eligible measurements for this check.</DataState> : null}
+        {state === 'error' ? <DataState kind="error">Could not load measurements.</DataState> : null}
         {ready && !measurements.length ? (
-          <DataState kind="empty">Registre uma medição válida do indicador e alvo acima. O registro precisa ser posterior à solicitação.</DataState>
+          <DataState kind="empty">Record a valid reading for the metric and target above. It must be recorded after the check was requested.</DataState>
         ) : null}
       </div>
       <div className="investigation-actions">
-        <ActionLink href={pageHref('registrar')}>Registrar medição</ActionLink>
+        <ActionLink href={pageHref('registrar')}>Register measurement</ActionLink>
         <ActionButton onClick={reload} disabled={locked || state === 'loading'}>
-          {state === 'error' ? 'Tentar carregar medições novamente' : 'Atualizar medições'}
+          {state === 'error' ? 'Retry loading measurements' : 'Refresh measurements'}
         </ActionButton>
       </div>
       {measurements.length ? (
         <>
-          <SelectField label="Medição para vincular" value={selected ? selectedId : ''}
+          <SelectField label="Measurement to link" value={selected ? selectedId : ''}
             onChange={event => setSelectedId(event.currentTarget.value)}
             disabled={locked || !ready}>
-            <option value="">Selecione uma medição</option>
+            <option value="">Select a measurement</option>
             {measurements.map(row => (
               <option key={row.id} value={row.id}>
                 #{row.id} · {metricValue(row.value, row.unit)} · {formatTime(row.measured_at)}
               </option>
             ))}
           </SelectField>
-          <p>Os horários da leitura e do cadastro são validados pelo servidor ao confirmar.</p>
+          <p>The server checks the observation and recording times during confirmation.</p>
           {selected ? <Details items={[
-            { label: 'Cadastro da medição', value: <UtcTime value={selected.recorded_at} /> },
-            { label: 'Origem', value: <SourceBadge source={selected.source} /> },
+            { label: 'Measurement recorded', value: <UtcTime value={selected.recorded_at} /> },
+            { label: 'Source', value: <SourceBadge source={selected.source} /> },
           ]} /> : null}
           <div>
             <ActionButton type="submit" aria-disabled={!selected || locked || !ready}>
-              {saving ? 'Vinculando medição…' : 'Vincular medição e concluir'}
+              {saving ? 'Linking measurement…' : 'Link measurement and complete'}
             </ActionButton>
           </div>
         </>
@@ -111,36 +112,36 @@ export function InvestigationAgenda({ agenda, loading, error, refresh, profiles,
   const selectedCompleted = active?.status === 'completed' ? active : undefined;
 
   return (
-    <Card heading="Agenda de checagens">
-      <p>Solicitações da tripulação e do habitat em ordem de prioridade da rotina.</p>
+    <Card heading="Follow-up schedule">
+      <p>Crew and habitat checks in priority order.</p>
       <ActionButton onClick={refresh} disabled={completing || loading}>
-        {error ? 'Tentar recarregar agenda' : 'Atualizar agenda'}
+        {error ? 'Retry loading schedule' : 'Refresh schedule'}
       </ActionButton>
       <div className="state-feedback" role="status">
-        {loading ? <DataState kind="loading">Consultando as checagens salvas.</DataState> : null}
+        {loading ? <DataState kind="loading">Loading saved checks.</DataState> : null}
         {error ? <DataState kind="error">
-          {agenda ? 'A última agenda confirmada permanece visível. Atualize para confirmar a situação antes de vincular.' :
-            'Não foi possível consultar a agenda.'}
+          {agenda ? 'Showing the last confirmed schedule. Refresh before linking a reading.' :
+            'Could not load the schedule.'}
         </DataState> : null}
-        {!loading && !error && agenda && !pending.length ? <DataState kind="empty">Nenhuma checagem pendente.</DataState> : null}
+        {!loading && !error && agenda && !pending.length ? <DataState kind="empty">No pending checks.</DataState> : null}
       </div>
       <div className="state-feedback" role="status">
         {linkMessage ? <p className={`investigation-message ${linkMessage.error ? 'tone-caution' : 'tone-positive'}`}>{linkMessage.text}</p> : null}
       </div>
       <h3 tabIndex={-1} ref={heading} className="investigation-agenda-heading">
-        {active ? `Acompanhamento da checagem #${active.id}` : 'Acompanhamento das checagens'}
+        {active ? `Follow-up for check #${active.id}` : 'Follow-up checks'}
       </h3>
       {selectedCompleted ? (
-        <section className="investigation-check-box" aria-label="Conclusão selecionada">
+        <section className="investigation-check-box" aria-label="Selected completion">
           <strong>{metricNames[selectedCompleted.kind]} · {targetName(selectedCompleted.astronaut_id, profiles)}</strong>
           <Details items={[
-            { label: 'Situação', value: 'Concluída' },
-            { label: 'Medição vinculada', value: `#${selectedCompleted.measurement_id}` },
-            { label: 'Conclusão', value: selectedCompleted.completed_at ? <UtcTime value={selectedCompleted.completed_at} /> : 'Horário indisponível' },
+            { label: 'Status', value: 'Completed' },
+            { label: 'Linked measurement', value: `#${selectedCompleted.measurement_id}` },
+            { label: 'Completed at', value: selectedCompleted.completed_at ? <UtcTime value={selectedCompleted.completed_at} /> : 'Time unavailable' },
           ]} />
-          <p>Para avaliar a nova leitura, execute uma reanálise do escopo correspondente.</p>
+          <p>Reanalyze the same scope to evaluate the new reading.</p>
           <ActionButton disabled={recovering} onClick={() => recover(selectedCompleted.investigation_id)}>
-            Abrir investigação #{selectedCompleted.investigation_id}
+            Open investigation #{selectedCompleted.investigation_id}
           </ActionButton>
         </section>
       ) : null}
@@ -149,18 +150,18 @@ export function InvestigationAgenda({ agenda, loading, error, refresh, profiles,
           {pending.map(check => (
             <li key={check.id} className="investigation-check-box">
               <h4>{metricNames[check.kind]} · {targetName(check.astronaut_id, profiles)}</h4>
-              <div className="badge-row"><span className="ds-badge tone-caution">Pendente · #{check.id}</span></div>
-              <p>{check.reason}</p>
+              <div className="badge-row"><span className="ds-badge tone-caution">Pending · #{check.id}</span></div>
+              <p>{englishMissionCopy(check.reason)}</p>
               <Details items={[
-                { label: 'Solicitada em', value: <UtcTime value={check.created_at} /> },
-                { label: 'Prazo', value: check.due_at ? <UtcTime value={check.due_at} /> : 'Sem prazo informado' },
+                { label: 'Requested at', value: <UtcTime value={check.created_at} /> },
+                { label: 'Due', value: check.due_at ? <UtcTime value={check.due_at} /> : 'No due date' },
               ]} />
               <div className="investigation-actions">
                 <ActionButton disabled={recovering} onClick={() => recover(check.investigation_id)}>
-                  Abrir investigação #{check.investigation_id}
+                  Open investigation #{check.investigation_id}
                 </ActionButton>
                 {active?.id !== check.id ? <ActionButton disabled={completing} onClick={() => select(check)}>
-                  Selecionar checagem #{check.id}
+                  Select check #{check.id}
                 </ActionButton> : null}
               </div>
               {active?.id === check.id ? (
@@ -172,13 +173,13 @@ export function InvestigationAgenda({ agenda, loading, error, refresh, profiles,
       ) : null}
       {completed.length ? (
         <details className="investigation-disclosure">
-          <summary>Checagens concluídas ({completed.length})</summary>
+          <summary>Completed checks ({completed.length})</summary>
           <ul className="investigation-checks">
             {[...completed].reverse().map(check => (
               <li key={check.id} className="investigation-check-box">
                 <h4>{metricNames[check.kind]} · {targetName(check.astronaut_id, profiles)}</h4>
-                <p>Medição #{check.measurement_id} vinculada {check.completed_at ? <>em <UtcTime value={check.completed_at} /></> : null}.</p>
-                <ActionButton disabled={completing} onClick={() => select(check)}>Ver conclusão #{check.id}</ActionButton>
+                <p>Measurement #{check.measurement_id} linked {check.completed_at ? <>at <UtcTime value={check.completed_at} /></> : null}.</p>
+                <ActionButton disabled={completing} onClick={() => select(check)}>View completion #{check.id}</ActionButton>
               </li>
             ))}
           </ul>

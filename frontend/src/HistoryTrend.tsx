@@ -2,12 +2,12 @@ import { DataTable, Details, QualityBadge, SourceBadge } from './design-system';
 import { dayStart, type HistoryFilters, METRICS, summarizeSeries } from './history-data';
 import type { MeasurementRead } from './types';
 
-const dateFormat = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeZone: 'UTC' });
-const timestampFormat = new Intl.DateTimeFormat('pt-BR', {
+const dateFormat = new Intl.DateTimeFormat('en-US', { dateStyle: 'short', timeZone: 'UTC' });
+const timestampFormat = new Intl.DateTimeFormat('en-US', {
   dateStyle: 'short', timeStyle: 'medium', timeZone: 'UTC',
 });
-const valueFormat = new Intl.NumberFormat('pt-BR', { maximumSignificantDigits: 15 });
-const axisFormat = new Intl.NumberFormat('pt-BR', { notation: 'compact', maximumSignificantDigits: 4 });
+const valueFormat = new Intl.NumberFormat('en-US', { maximumSignificantDigits: 15 });
+const axisFormat = new Intl.NumberFormat('en-US', { notation: 'compact', maximumSignificantDigits: 4 });
 
 function Time({ value }: { value: string }) {
   const fraction = value.match(/\.(\d+)(?:Z|[+-]\d\d:\d\d)$/)?.[1];
@@ -17,7 +17,7 @@ function Time({ value }: { value: string }) {
 
 function formatGap(firstDay: number, lastDay: number) {
   const start = dateFormat.format(dayStart(firstDay));
-  return firstDay === lastDay ? start : `${start} a ${dateFormat.format(dayStart(lastDay))}`;
+  return firstDay === lastDay ? start : `${start} to ${dateFormat.format(dayStart(lastDay))}`;
 }
 
 function TrendPlot({ series, label, unit, baseline }: {
@@ -45,10 +45,10 @@ function TrendPlot({ series, label, unit, baseline }: {
 
   return (
     <figure className="history-figure">
-      <figcaption>{label} em {unit} por data de coleta (UTC)</figcaption>
-      <p className="history-chart-hint">Consulte os valores e horários exatos na tabela de medições.</p>
-      <div className="history-chart-scroll" role="region" aria-label="Área rolável do gráfico" tabIndex={0}>
-        <svg viewBox="0 0 600 225" role="img" aria-label={`Gráfico de ${label} em ${unit}`}
+      <figcaption>{label} in {unit} by observation date (UTC)</figcaption>
+      <p className="history-chart-hint">See the measurements table for exact values and timestamps.</p>
+      <div className="history-chart-scroll" role="region" aria-label="Scrollable chart" tabIndex={0}>
+        <svg viewBox="0 0 600 225" role="img" aria-label={`Chart of ${label} in ${unit}`}
           aria-describedby="history-chart-description">
           <line className="history-axis" x1={left} y1={top} x2={left} y2={bottom} />
           <line className="history-axis" x1={left} y1={bottom} x2={right} y2={bottom} />
@@ -92,15 +92,15 @@ function TrendPlot({ series, label, unit, baseline }: {
           )}
         </svg>
       </div>
-      <ul className="history-legend" aria-label="Legenda do gráfico">
-        <li><span className="history-legend-valid" aria-hidden="true">●</span> Medição válida</li>
-        <li><span className="history-legend-suspect" aria-hidden="true">×</span> Medição suspeita</li>
-        <li><span className="history-legend-gap" aria-hidden="true" /> Dia sem amostra</li>
-        {baseline !== null && <li><span className="history-legend-baseline" aria-hidden="true" /> Base individual</li>}
+      <ul className="history-legend" aria-label="Chart legend">
+        <li><span className="history-legend-valid" aria-hidden="true">●</span> Valid reading</li>
+        <li><span className="history-legend-suspect" aria-hidden="true">×</span> Suspect reading</li>
+        <li><span className="history-legend-gap" aria-hidden="true" /> Day without a reading</li>
+        {baseline !== null && <li><span className="history-legend-baseline" aria-hidden="true" /> Individual baseline</li>}
       </ul>
       <p id="history-chart-description">
-        A linha é interrompida em dias UTC sem amostras e em medições suspeitas.
-        A qualidade indica a condição técnica da leitura.
+        The line breaks on UTC days without readings and at suspect readings.
+        Quality reflects the technical condition of the reading.
       </p>
     </figure>
   );
@@ -117,27 +117,27 @@ export function HistoryTrend({ rows, filters, target, baseline }: {
   const validCount = rows.length - series.suspect.length;
 
   return (
-    <section className="history-results" aria-label="Tendência e dados de medição">
+    <section className="history-results" aria-label="Measurement trend and data">
       <h3>{label} · {target}</h3>
       <Details items={[
-        { label: 'Período exibido', value: `${dateFormat.format(series.start)} a ${dateFormat.format(series.end)} (UTC)` },
-        { label: 'Intervalo das coletas', value: <><Time value={series.first.measured_at} /> a <Time value={series.last.measured_at} /> (UTC)</> },
-        { label: 'Cobertura', value: `${validCount} válidas · ${series.suspect.length} suspeitas · ${series.missingDays} dias sem amostra` },
-        ...(baseline === null ? [] : [{ label: 'Base individual de sono', value: `${valueFormat.format(baseline)} h (perfil simulado)` }]),
+        { label: 'Displayed period', value: `${dateFormat.format(series.start)} to ${dateFormat.format(series.end)} (UTC)` },
+        { label: 'Observation range', value: <><Time value={series.first.measured_at} /> to <Time value={series.last.measured_at} /> (UTC)</> },
+        { label: 'Coverage', value: `${validCount} valid · ${series.suspect.length} suspect · ${series.missingDays} days without readings` },
+        ...(baseline === null ? [] : [{ label: 'Individual sleep baseline', value: `${valueFormat.format(baseline)} h (simulated profile)` }]),
       ]} />
-      {validCount === 0 && <p>As medições encontradas são suspeitas. Faltam amostras válidas para traçar uma tendência.</p>}
+      {validCount === 0 && <p>The available readings are suspect. A trend requires valid readings.</p>}
       <TrendPlot series={series} label={label} unit={unit} baseline={baseline} />
       {series.gaps.length > 0 && (
-        <p><strong>Datas sem amostras (UTC)</strong> {series.gaps.map(gap => formatGap(gap.firstDay, gap.lastDay)).join(' · ')}</p>
+        <p><strong>Dates without readings (UTC)</strong> {series.gaps.map(gap => formatGap(gap.firstDay, gap.lastDay)).join(' · ')}</p>
       )}
-      <DataTable label="Tabela de medições" caption={`Medições de ${label} para ${target}, em ordem de coleta`}>
+      <DataTable label="Measurements table" caption={`${label} readings for ${target}, in observation order`}>
         <thead>
           <tr>
-            <th scope="col">Coleta (UTC)</th>
-            <th scope="col">Registro (UTC)</th>
-            <th scope="col">Valor</th>
-            <th scope="col">Origem</th>
-            <th scope="col">Qualidade</th>
+            <th scope="col">Observed (UTC)</th>
+            <th scope="col">Recorded (UTC)</th>
+            <th scope="col">Value</th>
+            <th scope="col">Source</th>
+            <th scope="col">Quality</th>
           </tr>
         </thead>
         <tbody>

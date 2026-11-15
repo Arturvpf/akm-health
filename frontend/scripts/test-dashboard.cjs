@@ -24,6 +24,17 @@ execFileSync(process.execPath, [require.resolve('typescript/bin/tsc'), '--target
 const { parseDashboard, fetchDashboard, nasaReferenceUrl } = require(path.join(output, 'api.js'));
 const { createDashboardController, INITIAL_DASHBOARD_STATE } = require(path.join(output, 'dashboard-state.js'));
 const { DashboardView } = require(path.join(output, 'Dashboard.js'));
+const { englishMissionCopy } = require(path.join(output, 'mission-copy.js'));
+
+test('localizes saved investigation copy and preserves measurements, scope and custom protocol text', () => {
+  const source = 'Padrão experimental de sono compartilhado por 3 astronautas: A1, A2, A3. '
+    + 'Janela observada: 2026-11-13T08:00:00+00:00 a 2026-11-15T08:00:00+00:00.';
+  assert.equal(englishMissionCopy(source),
+    'Experimental sleep pattern shared by 3 crew members: A1, A2, A3. '
+    + 'Observation window: 2026-11-13T08:00:00+00:00 to 2026-11-15T08:00:00+00:00.');
+  assert.match(englishMissionCopy('As duas observações de sono são menores ou iguais a 80% da baseline sintética: padrão experimental a verificar.'), /80% of the simulated baseline/);
+  assert.equal(englishMissionCopy('Custom protocol reference: Orion/2026.'), 'Custom protocol reference: Orion/2026.');
+});
 
 const stamp = '2026-11-14T08:00:00Z';
 function snapshot() {
@@ -73,14 +84,14 @@ test('API client uses only GET dashboard and validates the received body', async
 
 test('HTTP failure and malformed JSON never create fallback data', async t => {
   t.mock.method(globalThis, 'fetch', async () => ({ ok: false, status: 503 }));
-  await assert.rejects(fetchDashboard(new AbortController().signal), /Não foi possível/);
+  await assert.rejects(fetchDashboard(new AbortController().signal), /Could not/);
   globalThis.fetch = async () => ({ ok: true, json: async () => { throw new Error('HTML proxy response'); } });
-  await assert.rejects(fetchDashboard(new AbortController().signal), /resposta inválida/);
+  await assert.rejects(fetchDashboard(new AbortController().signal), /invalid response/);
 });
 
 test('network errors are explained without exposing browser implementation text', async t => {
   t.mock.method(globalThis, 'fetch', async () => { throw new TypeError('Failed to fetch'); });
-  await assert.rejects(fetchDashboard(new AbortController().signal), /conectar ao servidor da missão/);
+  await assert.rejects(fetchDashboard(new AbortController().signal), /connect to the mission server/);
 });
 
 test('invalid response fields are rejected instead of inventing a status or observation', () => {
@@ -96,23 +107,23 @@ test('invalid response fields are rejected instead of inventing a status or obse
     data => { data.environment = null; },
   ]) {
     const data = snapshot(); mutate(data);
-    assert.throws(() => parseDashboard(data), /inválidos/);
+    assert.throws(() => parseDashboard(data), /invalid dashboard data/);
   }
-  assert.throws(() => parseDashboard(null), /inválidos/);
+  assert.throws(() => parseDashboard(null), /invalid dashboard data/);
 });
 
 test('render uses API names, values, origins, independent timestamps, pending reason and freshness', () => {
   const html = render(parseDashboard(snapshot()));
-  for (const text of ['Missão de teste', 'Aurora', '5,4', '72', '0', 'Dado simulado', 'Registro manual',
+  for (const text of ['Missão de teste', 'Aurora', '5.4', '72', '0', 'Simulated data', 'Manual entry',
     'Conferir nova leitura.', 'Achado registrado', 'Explicação retornada pelo servidor.',
-    'Novas medições disponíveis', '2026-11-14T05:00:00Z', '2026-11-14T08:00:00Z',
+    'New measurements available', '2026-11-14T05:00:00Z', '2026-11-14T08:00:00Z',
     'NASA references', 'Mission destination · Mars surface', 'NASA planetary fact sheet']) {
     assert.ok(html.includes(text), text);
   }
   assert.ok(html.includes('0 °C'));
-  assert.ok(html.includes('Bem-estar emocional'));
-  assert.ok(html.includes('Sem registro'));
-  assert.ok(html.includes('Padrão experimental a verificar'));
+  assert.ok(html.includes('Emotional well-being'));
+  assert.ok(html.includes('No reading'));
+  assert.ok(html.includes('Experimental pattern to check'));
   assert.ok(!html.includes('Orion'));
 });
 
@@ -120,8 +131,8 @@ test('before a persisted investigation no motor assessment or alert is presented
   const data = snapshot();
   data.last_investigation_at = null;
   const html = render(data);
-  assert.ok(html.includes('Nenhuma investigação executada'));
-  assert.ok(html.includes('Não avaliado pelo motor'));
+  assert.ok(html.includes('No investigation has been run'));
+  assert.ok(html.includes('Awaiting investigation'));
   assert.ok(!html.includes('Achado registrado'));
   assert.ok(!html.includes('Explicação retornada pelo servidor.'));
 });
@@ -132,21 +143,21 @@ test('empty storage and absent observations remain explicit; old API metadata is
   data.environment = { co2_ppm: null, cabin_temp_c: null, measured_at: null, measurement_zone: 'habitat' };
   data.last_investigation_at = null; data.has_unanalyzed_measurements = false;
   const html = render(parseDashboard(data));
-  assert.ok(html.includes('Não há tripulantes cadastrados'));
-  assert.ok(html.includes('Nenhuma verificação pendente'));
-  assert.ok(html.includes('Sem registro'));
-  assert.ok(!html.includes('Novas medições disponíveis'));
+  assert.ok(html.includes('No crew profiles are available.'));
+  assert.ok(html.includes('No pending checks'));
+  assert.ok(html.includes('No reading'));
+  assert.ok(!html.includes('New measurements available'));
   data.environment.co2_ppm = 0;
   const legacy = render(parseDashboard(data));
   assert.ok(legacy.includes('0 ppm'));
-  assert.ok(legacy.includes('Origem não informada'));
-  assert.ok(legacy.includes('Horário individual não informado'));
+  assert.ok(legacy.includes('Source unavailable'));
+  assert.ok(legacy.includes('Reading time unavailable'));
 });
 
 test('reserved critical status is never converted into a synthetic live red alarm', () => {
   const data = snapshot(); data.astronauts[0].status = 'critical'; data.alerts = [];
   const html = render(parseDashboard(data));
-  assert.ok(html.includes('Estado reservado de protocolo informado pela API'));
+  assert.ok(html.includes('Reserved protocol status'));
   assert.equal((html.match(/ds-badge-protocol/g) ?? []).length, 1); // Legend only.
 });
 
@@ -182,8 +193,8 @@ test('refresh keeps confirmed data through loading and failure, then allows reco
   assert.equal(controller.getState().receivedAt, confirmed.receivedAt);
   const html = render(confirmed.data, controller.getState());
   assert.ok(html.includes('role="alert"'));
-  assert.ok(html.includes('última consulta confirmada'));
-  assert.ok(html.includes('Tentar novamente'));
+  assert.ok(html.includes('last confirmed snapshot'));
+  assert.ok(html.includes('Try again'));
   await controller.refresh();
   assert.equal(controller.getState().phase, 'ready');
   assert.equal(controller.getState().error, null);
@@ -192,7 +203,7 @@ test('refresh keeps confirmed data through loading and failure, then allows reco
 });
 
 test('initial loading/error has no mock astronauts or invented measurements', async () => {
-  assert.ok(render(null, INITIAL_DASHBOARD_STATE).includes('Consultando os dados'));
+  assert.ok(render(null, INITIAL_DASHBOARD_STATE).includes('Loading mission data'));
   const controller = createDashboardController(async () => { throw new Error('Sem servidor'); });
   await controller.refresh();
   const html = render(null, controller.getState());
@@ -246,7 +257,7 @@ test('a transport that ignores abort still times out without making up a respons
   await controller.refresh();
   assert.equal(signal.aborted, true);
   assert.equal(controller.getState().phase, 'error');
-  assert.match(controller.getState().error, /tempo de espera/);
+  assert.match(controller.getState().error, /timed out/);
   assert.equal(controller.getState().data, null);
   controller.dispose();
 });

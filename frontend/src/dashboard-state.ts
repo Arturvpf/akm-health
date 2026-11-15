@@ -50,7 +50,7 @@ export function createDashboardController(
           timeout = setTimeout(() => {
             timedOut = true;
             controller.abort();
-            reject(new Error('A consulta excedeu o tempo de espera.'));
+            reject(new Error('The request timed out.'));
           }, timeoutMs);
           timer = timeout;
         });
@@ -59,8 +59,8 @@ export function createDashboardController(
         publish({ data, phase: 'ready', error: null, receivedAt: new Date().toISOString() });
       } catch (error) {
         if (disposed || current !== sequence) return;
-        publish({ ...state, phase: 'error', error: timedOut ? 'A consulta excedeu o tempo de espera.'
-          : error instanceof Error ? error.message : 'Falha ao consultar os dados da missão.' });
+        publish({ ...state, phase: 'error', error: timedOut ? 'The request timed out.'
+          : error instanceof Error ? error.message : 'Could not retrieve mission data.' });
       } finally {
         clearTimeout(timeout);
         if (current === sequence) active = null;

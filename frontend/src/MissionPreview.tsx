@@ -9,22 +9,22 @@ const example = {
   measured_at: '2026-11-14T07:00:00Z', source: 'synthetic', quality: 'ok',
 } satisfies MeasurementCreate;
 
-const valueInPt = new Intl.NumberFormat('pt-BR');
-const labels = { sleep_hours: 'Sono', heart_rate_bpm: 'Frequência cardíaca', mood_score: 'Humor', co2_ppm: 'CO₂ interno', cabin_temp_c: 'Temperatura interna' };
+const valueFormat = new Intl.NumberFormat('en-US');
+const labels = { sleep_hours: 'Sleep', heart_rate_bpm: 'Heart rate', mood_score: 'Mood', co2_ppm: 'Cabin CO₂', cabin_temp_c: 'Cabin temperature' };
 
 export function MissionPreview({ page }: { page: Exclude<PageId, 'dashboard'> }) {
   switch (page) {
     case 'registrar':
-      return <Card heading="Exemplo de registro">
+      return <Card heading="Registration example">
         <Details items={[
-          { label: 'Indicador', value: labels[example.kind] },
-          { label: 'Zona de medição', value: 'Astronauta' },
-          { label: 'Tripulante', value: `Aurora · ${example.astronaut_id}` },
-          { label: 'Duração', value: `${valueInPt.format(example.value)} ${example.unit}` },
-          { label: 'Coleta', value: <time dateTime={example.measured_at}>14/11/2026, 07:00 UTC</time> },
-          { label: 'Origem', value: <SourceBadge source={example.source} /> },
+          { label: 'Metric', value: labels[example.kind] },
+          { label: 'Measurement zone', value: 'Astronaut' },
+          { label: 'Crew member', value: `Aurora · ${example.astronaut_id}` },
+          { label: 'Duration', value: `${valueFormat.format(example.value)} ${example.unit}` },
+          { label: 'Observed', value: <time dateTime={example.measured_at}>Nov 14, 2026, 07:00 UTC</time> },
+          { label: 'Source', value: <SourceBadge source={example.source} /> },
         ]} />
-        <p>Use o wireframe para experimentar o preenchimento e o registro em memória.</p>
+        <p>Use the wireframe to try the registration form with in-memory data.</p>
       </Card>;
     case 'historico':
       return <MeasurementHistory />;

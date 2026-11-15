@@ -44,20 +44,20 @@ const HistoryResults = memo(function HistoryResults({ filters, profile, onRetry 
   return (
     <>
       <div className="state-feedback" role="status">
-        {result.status === 'loading' && <DataState kind="loading">Buscando medições de {metric} · {target}.</DataState>}
-        {result.status === 'error' && <DataState kind="error">Não foi possível consultar medições de {metric} · {target}.</DataState>}
+        {result.status === 'loading' && <DataState kind="loading">Loading measurements for {metric} · {target}.</DataState>}
+        {result.status === 'error' && <DataState kind="error">Could not load measurements for {metric} · {target}.</DataState>}
         {result.status === 'ready' && rows.length === 0 && (
-          <DataState kind="empty">Nenhuma medição de {metric} · {target} foi encontrada no período consultado.</DataState>
+          <DataState kind="empty">No {metric} readings for {target} in this period.</DataState>
         )}
-        {rows.length > 0 && <p className="sr-only">{rows.length} medições carregadas de {metric} · {target}.</p>}
+        {rows.length > 0 && <p className="sr-only">{rows.length} measurements loaded for {metric} · {target}.</p>}
       </div>
       {result.status === 'error' && (
         <div className="status-actions">
-          <ActionButton onClick={() => { onRetry(); retry(); }}>Tentar novamente</ActionButton>
+          <ActionButton onClick={() => { onRetry(); retry(); }}>Try again</ActionButton>
         </div>
       )}
       {result.status === 'ready' && rows.length === 0 && (
-        <div className="status-actions"><ActionLink href={pageHref('registrar')}>Ir para Registrar</ActionLink></div>
+        <div className="status-actions"><ActionLink href={pageHref('registrar')}>Go to Register</ActionLink></div>
       )}
       {rows[0] && (
         <HistoryTrend rows={rows as [MeasurementRead, ...MeasurementRead[]]} filters={filters} target={target} baseline={baseline} />
@@ -96,8 +96,8 @@ function HistoryQuery({ profiles }: { profiles: AstronautRead[] }) {
 
   return (
     <>
-      <form onSubmit={submit} className="history-filters" aria-label="Filtros de histórico">
-        <SelectField label="Alvo da medição" value={draft.astronautId === null ? 'habitat' : `crew:${draft.astronautId}`}
+      <form onSubmit={submit} className="history-filters" aria-label="History filters">
+        <SelectField label="Measurement target" value={draft.astronautId === null ? 'habitat' : `crew:${draft.astronautId}`}
           onChange={event => {
             const value = event.currentTarget.value;
             const astronautId = value === 'habitat' ? null : value.slice('crew:'.length);
@@ -109,7 +109,7 @@ function HistoryQuery({ profiles }: { profiles: AstronautRead[] }) {
           ))}
           <option value="habitat">Habitat</option>
         </SelectField>
-        <SelectField label="Indicador" value={draft.kind}
+        <SelectField label="Metric" value={draft.kind}
           onChange={event => {
             const kind = kinds.find(value => value === event.currentTarget.value);
             if (kind) setDraft({ ...draft, kind });
@@ -117,21 +117,21 @@ function HistoryQuery({ profiles }: { profiles: AstronautRead[] }) {
           {kinds.map(kind => <option key={kind} value={kind}>{METRICS[kind].label} ({METRICS[kind].unit})</option>)}
         </SelectField>
         <label className="ds-field">
-          Início (UTC)
+          Start (UTC)
           <input className="ds-control" type="date" min="0001-01-01" max="9999-12-31" value={draft.start}
             aria-describedby="history-period-help"
             onChange={event => { setDraft({ ...draft, start: event.currentTarget.value }); setPeriodError(false); }} />
         </label>
         <label className="ds-field">
-          Fim (UTC)
+          End (UTC)
           <input className="ds-control" ref={endDate} type="date" min="0001-01-01" max="9999-12-31" value={draft.end}
             aria-invalid={periodError || undefined} aria-describedby={periodError ? 'history-period-error' : 'history-period-help'}
             onChange={event => { setDraft({ ...draft, end: event.currentTarget.value }); setPeriodError(false); }} />
         </label>
-        <p id="history-period-help">Datas opcionais. A consulta inclui todo o dia de início e de fim, em UTC.</p>
-        {periodError && <p role="alert" id="history-period-error">A data de fim deve ser igual ou posterior à data de início.</p>}
-        <button ref={submitButton} type="submit" className="ds-action ds-action-primary">Aplicar filtros</button>
-        {hasPendingChanges && <p>Os resultados ainda correspondem aos últimos filtros aplicados.</p>}
+        <p id="history-period-help">Dates are optional. The full start and end dates are included in UTC.</p>
+        {periodError && <p role="alert" id="history-period-error">The end date must be on or after the start date.</p>}
+        <button ref={submitButton} type="submit" className="ds-action ds-action-primary">Apply filters</button>
+        {hasPendingChanges && <p>Results reflect the last applied filters.</p>}
       </form>
       <HistoryResults key={revision} filters={filters} profile={profiles.find(profile => profile.id === filters.astronautId)}
         onRetry={focusSubmit} />
@@ -144,17 +144,17 @@ export function MeasurementHistory() {
   const retryFocus = useRef<HTMLDivElement>(null);
 
   return (
-    <Card heading="Consulta de medições">
+    <Card heading="Find measurements">
       <div className="history-route">
         <div className="state-feedback" tabIndex={-1} ref={retryFocus}>
           <div role="status">
-            {result.status === 'loading' && <DataState kind="loading">Buscando perfis da tripulação.</DataState>}
-            {result.status === 'error' && <DataState kind="error">Não foi possível consultar os perfis da tripulação.</DataState>}
+            {result.status === 'loading' && <DataState kind="loading">Loading crew profiles.</DataState>}
+            {result.status === 'error' && <DataState kind="error">Could not load crew profiles.</DataState>}
           </div>
         </div>
         {result.status === 'error' && (
           <div className="status-actions">
-            <ActionButton onClick={() => { retryFocus.current?.focus(); retry(); }}>Tentar novamente</ActionButton>
+            <ActionButton onClick={() => { retryFocus.current?.focus(); retry(); }}>Try again</ActionButton>
           </div>
         )}
         {result.status === 'ready' && <HistoryQuery profiles={result.data} />}

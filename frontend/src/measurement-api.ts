@@ -4,10 +4,10 @@ import type { MeasurementCreate, MeasurementRead } from './types';
 export class RegistrationError extends Error {
   constructor(message: string, public uncertain: boolean, public fields: FieldErrors = {}, public missingAstronaut = false) { super(message); }
 }
-const UNCERTAIN = 'Não foi possível confirmar o registro. Confira se a medição aparece no histórico antes de reenviar.';
+const UNCERTAIN = 'The measurement could not be confirmed. Check History before resubmitting.';
 
 export function parseMeasurement(value: unknown): MeasurementRead {
-  if (!value || typeof value !== 'object') throw new Error('Resposta inválida.');
+  if (!value || typeof value !== 'object') throw new Error('Invalid response.');
   const item = value as MeasurementRead;
   const metric = Object.hasOwn(FORM_METRICS, item.kind) ? FORM_METRICS[item.kind] : null;
   const validDate = (date: unknown) => typeof date === 'string' && /T.*(?:Z|[+-]\d{2}:\d{2})$/i.test(date) && Number.isFinite(Date.parse(date));
@@ -19,7 +19,7 @@ export function parseMeasurement(value: unknown): MeasurementRead {
     || (item.kind === 'sleep_hours' && (item.value < 0 || item.value > 24))
     || (item.kind === 'heart_rate_bpm' && item.value <= 0)
     || (item.kind === 'co2_ppm' && item.value < 0)
-    || (item.kind === 'mood_score' && (!Number.isInteger(item.value) || item.value < 1 || item.value > 5))) throw new Error('Resposta inválida.');
+    || (item.kind === 'mood_score' && (!Number.isInteger(item.value) || item.value < 1 || item.value > 5))) throw new Error('Invalid response.');
   return item;
 }
 
@@ -29,11 +29,11 @@ export async function saveMeasurement(payload: MeasurementCreate, signal: AbortS
     response = await fetch('/api/measurements', { method: 'POST', signal,
       headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
   } catch { throw new RegistrationError(UNCERTAIN, true); }
-  if (response.status === 404) throw new RegistrationError('O tripulante selecionado não está disponível. Atualize a lista e selecione novamente.', false, { astronaut: 'Selecione novamente após atualizar a lista.' }, true);
+  if (response.status === 404) throw new RegistrationError('The selected crew member is unavailable. Refresh the list and select again.', false, { astronaut: 'Select again after refreshing the list.' }, true);
   if (response.status === 422) {
     const fields: FieldErrors = {};
     const names: Record<string, keyof FieldErrors> = { value: 'value', measured_at: 'localTime', astronaut_id: 'astronaut', source: 'source', quality: 'quality', kind: 'kind', unit: 'kind' };
-    const messages: Partial<Record<keyof FieldErrors, string>> = { value: 'O servidor rejeitou o valor. Confira a unidade e os limites indicados.', localTime: 'O servidor rejeitou a data/hora. Confira o momento e o fuso.', astronaut: 'Confira o tripulante selecionado.', source: 'Confira a origem.', quality: 'Confira a qualidade.', kind: 'Confira o indicador e sua unidade.' };
+    const messages: Partial<Record<keyof FieldErrors, string>> = { value: 'The server rejected the value. Check the unit and supported range.', localTime: 'The server rejected the timestamp. Check the time and UTC offset.', astronaut: 'Check the selected crew member.', source: 'Check the source.', quality: 'Check the quality.', kind: 'Check the metric and unit.' };
     try {
       const body = await response.json();
       if (Array.isArray(body.detail)) for (const error of body.detail) {
@@ -41,7 +41,7 @@ export async function saveMeasurement(payload: MeasurementCreate, signal: AbortS
         if (field) fields[field] = messages[field];
       }
     } catch { /* A confirmed validation rejection is safe to correct even without its body. */ }
-    throw new RegistrationError('Revise o campo indicado e tente salvar novamente. Confira também indicador, tripulante, valor, horário, origem e qualidade.', false, fields);
+    throw new RegistrationError('Review the highlighted field and try again. Check the metric, crew member, value, time, source, and quality.', false, fields);
   }
   // Any unexpected response can follow a committed write; never retry automatically.
   if (response.status !== 201) throw new RegistrationError(UNCERTAIN, true);
@@ -49,7 +49,7 @@ export async function saveMeasurement(payload: MeasurementCreate, signal: AbortS
     const saved = parseMeasurement(await response.json());
     if (saved.kind !== payload.kind || saved.unit !== payload.unit || saved.value !== payload.value
       || saved.astronaut_id !== (payload.astronaut_id ?? null) || saved.source !== payload.source
-      || saved.quality !== (payload.quality ?? 'ok') || Date.parse(saved.measured_at) !== Date.parse(payload.measured_at)) throw new Error('Registro incompatível.');
+      || saved.quality !== (payload.quality ?? 'ok') || Date.parse(saved.measured_at) !== Date.parse(payload.measured_at)) throw new Error('The saved record does not match the submission.');
     return saved;
   } catch { throw new RegistrationError(UNCERTAIN, true); }
 }
