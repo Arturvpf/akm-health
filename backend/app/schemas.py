@@ -289,6 +289,7 @@ class MetricSnapshot(StrictModel):
     value: float = Field(allow_inf_nan=False)
     unit: MetricUnit
     measured_at: datetime
+    source: DataSource | None = None
 
     @field_validator("measured_at")
     @classmethod
@@ -307,6 +308,7 @@ class HabitatSnapshot(StrictModel):
     cabin_temp_c: float | None = Field(allow_inf_nan=False)
     measured_at: datetime | None
     measurement_zone: Literal["habitat"]
+    latest_metrics: dict[Kind, MetricSnapshot] = Field(default_factory=dict)
 
     @field_validator("measured_at")
     @classmethod

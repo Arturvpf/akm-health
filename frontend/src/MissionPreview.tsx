@@ -6,13 +6,6 @@ import {
 import { pageHref, type PageId } from './navigation';
 import type { MeasurementCreate, NextCheck, Quality } from './types';
 
-const crew = [
-  { id: 'A1', name: 'Aurora', role: 'Comando', sleep: '5,4 h' },
-  { id: 'A2', name: 'Orion', role: 'Engenharia', sleep: '5,7 h' },
-  { id: 'A3', name: 'Vega', role: 'Pesquisa', sleep: '5,6 h' },
-  { id: 'A4', name: 'Lyra', role: 'Operações', sleep: '7,9 h' },
-];
-
 const example = {
   astronaut_id: 'A1', kind: 'sleep_hours', value: 5.4, unit: 'h',
   measured_at: '2026-11-14T07:00:00Z', source: 'synthetic', quality: 'ok',
@@ -143,26 +136,8 @@ function InvestigationPreview() {
   );
 }
 
-export function MissionPreview({ page }: { page: PageId }) {
+export function MissionPreview({ page }: { page: Exclude<PageId, 'dashboard'> }) {
   switch (page) {
-    case 'dashboard':
-      return <Card heading="Tripulação">
-        <SourceBadge source="synthetic" />
-        <ul className="crew-list">
-          {crew.map(person => <li key={person.id}><div><strong>{person.name}</strong><span>{person.role}</span></div><span>{person.sleep} de sono</span></li>)}
-        </ul>
-        <section className="data-group">
-          <h3>Habitat interno</h3>
-          <SourceBadge source="synthetic" />
-          <p>980 ppm de CO₂ · 22,2 °C</p>
-        </section>
-        <section className="scientific-context">
-          <h3>Referência pública NASA</h3>
-          <SourceBadge source="nasa_reference" />
-          <p><a href="https://www.nasa.gov/hrp/hazards/">Contexto científico · NASA HRP</a></p>
-          <p>Dataset NASA pendente de seleção.</p>
-        </section>
-      </Card>;
     case 'registrar':
       return <Card heading="Exemplo de registro">
         <Details items={[

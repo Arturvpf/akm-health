@@ -108,6 +108,7 @@ def build_dashboard(session: Session) -> DashboardResponse:
     for measurement in session.exec(select(latest).where(ranked.c.rank == 1)):
         snapshots[measurement.astronaut_id][Kind(measurement.kind)] = MetricSnapshot(
             value=measurement.value, unit=measurement.unit, measured_at=measurement.measured_at,
+            source=measurement.source,
         )
 
     habitat = snapshots[None]
@@ -127,6 +128,7 @@ def build_dashboard(session: Session) -> DashboardResponse:
             cabin_temp_c=temperature.value if temperature else None,
             measured_at=max((sample.measured_at for sample in habitat.values()), default=None),
             measurement_zone="habitat",
+            latest_metrics=habitat,
         ),
         alerts=alerts,
         pending_followups=[

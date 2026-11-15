@@ -51,6 +51,8 @@ The dashboard compares `recorded_at` of usable measurements to the latest crew i
 
 Dashboard includes mission, astronauts, environment, alerts, pending_followups, last_investigation_at and has_unanalyzed_measurements. Empty dataset with no investigation => false and insufficient_data; new measurement after last collective investigation => true. GET dashboard must never run rules implicitly.
 
+AKM-13 adds optional `MetricSnapshot.source` (`manual` or `synthetic`, default `null`) and `environment.latest_metrics` (default `{}`), keyed by `co2_ppm` and `cabin_temp_c`. Each environmental snapshot carries its own value, unit, UTC `measured_at` and source from the same latest usable measurement. The original flat environmental values and aggregate `measured_at` remain available. Older responses without this metadata display an unknown origin and unknown individual observation time; the client never substitutes the aggregate time for both sensors. No database migration is required. See the [dashboard implementation](akm-13-crew-dashboard.md).
+
 NASA HRP risks and planetary fact sheet are contextual research, not astronaut measurements. NASA EDA/OSDR cabin history and MEDA/PDS Mars exterior history require verified actual file, units, instrument, period, URL and rights before historical_series is populated. If not imported, historical_data_status=not_imported.
 
 No clinical diagnosis, use synthetic heuristics and mark all demonstration data. The critical/red state may be displayed as legend but must not be triggered using unvalidated rules.

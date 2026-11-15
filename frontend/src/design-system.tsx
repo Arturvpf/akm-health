@@ -140,6 +140,10 @@ export function DataState({ kind, children }: { kind: DataStateKind; children: R
   return <Notice {...DATA_STATES[kind]}>{children}</Notice>;
 }
 
+export function InformationNotice({ label, children }: { label: string; children: ReactNode }) {
+  return <Notice label={label} icon="info" tone="info">{children}</Notice>;
+}
+
 export function Details({ items }: { items: ReadonlyArray<{ label: string; value: ReactNode }> }) {
   return (
     <dl className="ds-details">

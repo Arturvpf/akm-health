@@ -58,7 +58,7 @@ export interface FollowupRead {
   reason: string; status: 'pending' | 'completed'; due_at: string | null;
   created_at: string; completed_at: string | null; measurement_id: number | null;
 }
-export interface MetricSnapshot { value: number; unit: MetricUnit; measured_at: string }
+export interface MetricSnapshot { value: number; unit: MetricUnit; measured_at: string; source?: DataSource | null }
 export interface AstronautDashboardRead {
   id: string; name: string; latest_metrics: Partial<Record<Kind, MetricSnapshot>>; status: InvestigationStatus;
 }
@@ -68,7 +68,7 @@ export interface DashboardResponse {
     context_source_url: string; demo_only: true };
   astronauts: AstronautDashboardRead[];
   environment: { co2_ppm: number | null; cabin_temp_c: number | null;
-    measured_at: string | null; measurement_zone: 'habitat' };
+    measured_at: string | null; measurement_zone: 'habitat'; latest_metrics?: Partial<Record<Kind, MetricSnapshot>> };
   alerts: DashboardAlert[]; pending_followups: FollowupRead[];
   last_investigation_at: string | null; has_unanalyzed_measurements: boolean;
 }
