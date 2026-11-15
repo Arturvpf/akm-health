@@ -47,6 +47,16 @@ Comandos de validação:
 
 A integração usa a .venv do repositório por padrão; PYTHON pode indicar outro executável com as dependências backend instaladas. Os bancos de teste são temporários; o banco de desenvolvimento não é alterado.
 
-## Limites de validação
+## Validação no navegador — 15/11/2026
 
-Labels, descrições, aria-invalid, foco de feedback e controles nativos foram implementados e o markup foi conferido nos testes. Isso não comprova acessibilidade completa. A validação visual, responsividade real, navegação por teclado e leitor de tela precisa ser concluída no navegador: o controle do computador/navegador falhou por timeout nesta sessão. Não há avaliação médica ou validação clínica.
+Validado o código do commit 6cc023f com Playwright 1.65.1 e Chromium Headless Shell 159, usando o build Vite servido localmente e FastAPI com SQLite exclusivo de teste. O Edge e o controle interativo apresentaram timeout; a execução no Chromium foi concluída.
+
+- Cinco registros pela interface confirmados pela API: sono, FC, humor, CO₂ zero e temperatura negativa. Foram observadas exatamente cinco requisições de escrita, todas POST /api/measurements; nenhuma investigação ou conclusão de follow-up automática. Nenhum erro JavaScript.
+- Inspeção visual das capturas de desktop, celular estreito e recibo: conteúdo legível, campos e ações apresentados sem sobreposição. Layout sem overflow horizontal nas larguras 1440, 768, 390 e 320 px.
+- Foco no primeiro campo inválido ao enviar vazio, Tab do valor para data/hora e foco do recibo confirmado. Isso cobre navegação pontual, sem certificar todas as combinações de teclado.
+- HTTP 422 simulado no transporte do navegador: valor preservado e foco no campo rejeitado. HTTP 404: envio bloqueado até atualizar e selecionar novamente. Falha de rede: rascunho bloqueado, conferência explícita antes de liberar novo envio e nenhum retry automático.
+- axe-core 4.14.0 na tela inicial a 390 px, regras WCAG 2 A/AA e 2.1 A/AA: zero violações, 26 verificações aprovadas e nenhuma incompleta. Auditoria automatizada não substitui teste humano.
+
+Capturas de evidência: [desktop](evidence/akm14/desktop.png), [320 px](evidence/akm14/mobile-320.png), [confirmação](evidence/akm14/confirmation.png). Recibo e leituras são exclusivamente da demonstração fictícia em banco de teste.
+
+**Pendência:** teste manual com leitor de tela e revisão humana completa da interação por teclado. Não foram realizadas avaliação médica ou validação clínica. A aprovação funcional/visual documentada não significa merge do PR.
