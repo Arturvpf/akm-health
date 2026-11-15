@@ -1,7 +1,7 @@
 import { nasaReferenceUrl } from './api';
-import { englishMissionCopy } from './mission-copy';
 import { ActionButton, ActionLink, Details, QualityBadge, SourceBadge, StatusBadge } from './design-system';
 import { pageHref } from './navigation';
+import { WhyThisFinding } from './why-finding';
 import type { AstronautRead, FollowupRead, InvestigationExplanation, InvestigationResult, Kind, MetricUnit } from './types';
 
 export const metricNames: Record<Kind, string> = {
@@ -50,8 +50,8 @@ function isNasaReference(reference: References[number]) {
 function ReferenceList({ references }: { references: References }) {
   return <ul>{references.map(reference => (
     <li key={reference.source_id}>
-      <a href={reference.url}>{englishMissionCopy(reference.title)}</a>
-      <p>{englishMissionCopy(reference.relevance)}</p>
+      <a href={reference.url}>{reference.title}</a>
+      <p>{reference.relevance}</p>
     </li>
   ))}</ul>;
 }
@@ -67,10 +67,10 @@ export function ResultDetails({ result, profiles, check, openCheck }: {
   const scope = result.scope === 'crew' ? 'Crew · ODYSSEY-26' : targetName(result.astronaut_id, profiles);
   const nasa = explanation?.references.filter(isNasaReference) ?? [];
   const otherReferences = explanation?.references.filter(reference => !isNasaReference(reference)) ?? [];
-  const displayedLimitations = new Set(explanation?.limitations.flatMap(limitation => [`Limitation: ${limitation}`, `Limitação: ${limitation}`]));
+  const displayedLimitations = new Set(explanation?.limitations.flatMap(limitation => [`Limitation: ${limitation}`]));
   const findings = result.findings.filter(finding =>
     finding !== decision?.reason && !displayedLimitations.has(finding)
-    && !(coverage && (finding.startsWith('Observation window: ') || finding.startsWith('Janela observada: '))));
+    && !(coverage && (finding.startsWith('Observation window: '))));
 
   return (
     <div className="investigation-details">
@@ -89,10 +89,11 @@ export function ResultDetails({ result, profiles, check, openCheck }: {
       <section>
         <h3>Findings for the simulated crew</h3>
         {findings.length ? (
-          <ul>{findings.map((finding, i) => <li key={i}>{englishMissionCopy(finding)}</li>)}</ul>
+          <ul>{findings.map((finding, i) => <li key={i}>{finding}</li>)}</ul>
         ) : <p>This saved result has no findings.</p>}
         {result.status === 'insufficient_data' ? <ActionLink href={pageHref('register')}>Add measurement</ActionLink> : null}
       </section>
+      <WhyThisFinding id={result.id} profiles={profiles} />
       <section>
         <h3>Coverage</h3>
         {coverage ? (
@@ -124,15 +125,15 @@ export function ResultDetails({ result, profiles, check, openCheck }: {
         <h3>Unconfirmed hypotheses</h3>
         {result.hypotheses.length ? (
           <ul>{result.hypotheses.map((hypothesis, i) => (
-            <li key={i}><strong>{englishMissionCopy(hypothesis.label)}</strong><p>{englishMissionCopy(hypothesis.explanation)}</p></li>
+            <li key={i}><strong>{hypothesis.label}</strong><p>{hypothesis.explanation}</p></li>
           ))}</ul>
         ) : <p>This result has no hypotheses.</p>}
       </section>
       <section>
         <h3>Uncertainty and limitations</h3>
-        <p>{explanation ? englishMissionCopy(explanation.uncertainty) : 'This saved result has no detailed uncertainty statement.'}</p>
+        <p>{explanation ? explanation.uncertainty : 'This saved result has no detailed uncertainty statement.'}</p>
         {explanation?.limitations.length ? (
-          <ul>{explanation.limitations.map((limitation, i) => <li key={i}>{englishMissionCopy(limitation)}</li>)}</ul>
+          <ul>{explanation.limitations.map((limitation, i) => <li key={i}>{limitation}</li>)}</ul>
         ) : null}
       </section>
       <section>
@@ -145,21 +146,21 @@ export function ResultDetails({ result, profiles, check, openCheck }: {
               { label: 'Target', value: targetName(nextCheck.astronaut_id, profiles) },
               { label: 'Effort', value: effortLabels[nextCheck.effort] },
             ]} />
-            <p>{englishMissionCopy(decision?.reason ?? nextCheck.reason)}</p>
+            <p>{decision?.reason ?? nextCheck.reason}</p>
             {check ? <ActionButton onClick={() => openCheck(check)}>
               {check.status === 'pending' ? `Open check #${check.id} in the schedule` : `View completion for check #${check.id}`}
             </ActionButton> : result.followup_id !== null ? (
               <p>Check the schedule for the status of check #{result.followup_id}.</p>
             ) : null}
           </>
-        ) : <p>{decision ? englishMissionCopy(decision.reason) : 'This saved result has no decision about a next check.'}</p>}
+        ) : <p>{decision ? decision.reason : 'This saved result has no decision about a next check.'}</p>}
       </section>
       <section>
         <h3>Human review</h3>
         {review ? (
           <>
             <p><strong>{review.mode === 'per_protocol' ? 'Under the mission protocol' : 'When to contact mission staff'}</strong></p>
-            <p>{englishMissionCopy(review.instruction)}</p>
+            <p>{review.instruction}</p>
             {review.protocol_reference ? <p>Protocol reference · {review.protocol_reference}</p> : null}
             <p>Contact mission staff and share the summary directly.</p>
           </>

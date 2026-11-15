@@ -103,3 +103,22 @@ export interface NASAReferenceResponse {
   co2_context?: NASACo2Context | null;
   co2_context_status?: 'not_imported' | 'imported';
 }
+
+export interface BasisReading {
+  measurement_id: number; kind: Kind; value: number; unit: MetricUnit; measured_at: string; role: string;
+}
+export interface BasisMember {
+  astronaut_id: string; status: string; baseline_sleep_hours: number | null;
+  threshold_sleep_hours: number | null; readings: BasisReading[]; excluded_suspect_ids: number[]; summary: string;
+}
+export interface BasisEnvironment {
+  kind: Kind; consistent_shift: boolean; explanation: string; readings: BasisReading[];
+}
+export interface InvestigationBasis {
+  investigation_id: number; scope: 'crew' | 'individual'; rules_version: string;
+  window_start: string; window_end: string;
+  rules: { rule_id: string; title: string; description: string }[];
+  parameters: { label: string; value: string }[];
+  members: BasisMember[]; environment: BasisEnvironment[];
+  data_sources: string[]; limitations: string[]; demo_only: true;
+}

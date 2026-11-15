@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { fetchDashboard } from './api';
+import { announceDataChange, onDataChange } from './data-changes';
 import { InvestigationAgenda, type Agenda } from './investigation-agenda';
 import {
   completeFollowup, InvestigationApiError, readAgenda, readAstronauts, readInvestigation, runInvestigation,
@@ -36,7 +37,7 @@ function remember(id: number) {
   }
 }
 
-function useRead<T>(read: (signal: AbortSignal) => Promise<T>) {
+function useRead<T>(read: (signal: AbortSignal) => Promise<T>, live = false) {
   const [data, setData] = useState<T>();
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -66,6 +67,11 @@ function useRead<T>(read: (signal: AbortSignal) => Promise<T>) {
     setError(false);
     setRevision(current => current + 1);
   }
+
+  // Reload as soon as a reading is confirmed or an investigation changes elsewhere (another view or tab).
+  const latestRefresh = useRef(refresh);
+  latestRefresh.current = refresh;
+  useEffect(() => live ? onDataChange(() => latestRefresh.current()) : undefined, [live]);
 
   return { data, setData, error, loading, refresh };
 }
@@ -108,8 +114,8 @@ function linkError(error: unknown) {
 
 export function InvestigationPage() {
   const profiles = useRead(readAstronauts);
-  const agenda = useRead(readAgenda);
-  const dashboard = useRead(fetchDashboard);
+  const agenda = useRead(readAgenda, true);
+  const dashboard = useRead(fetchDashboard, true);
   const [initialId] = useState(storedId);
   const [scope, setScope] = useState<InvestigationRequest['scope']>('crew');
   const [astronautId, setAstronautId] = useState('');
@@ -178,6 +184,7 @@ export function InvestigationPage() {
       });
       agenda.refresh();
       dashboard.refresh();
+      announceDataChange('other-tabs');
     } catch (error) {
       setResultMessage({ text: investigationError(error, 'run'), error: true });
       if (error instanceof InvestigationApiError && error.status === 404) profiles.refresh();
@@ -245,6 +252,7 @@ export function InvestigationPage() {
     } finally {
       agenda.refresh();
       dashboard.refresh();
+      announceDataChange('other-tabs');
       setCompleting(false);
     }
   }

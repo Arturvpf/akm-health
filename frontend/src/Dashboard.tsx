@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { METRIC_LABELS } from './api';
+import { DownlinkReport } from './DownlinkReport';
 import { NasaReferences } from './NasaReferences';
-import { englishMissionCopy } from './mission-copy';
+import { onDataChange } from './data-changes';
 import { createDashboardController, INITIAL_DASHBOARD_STATE, type DashboardState } from './dashboard-state';
 import { ActionButton, ActionLink, Card, DataState, Details, InformationNotice, ProtocolLegend, SourceBadge, StatusBadge } from './design-system';
 import { pageHref } from './navigation';
-import type { DataSource, InvestigationStatus, Kind, MetricSnapshot } from './types';
+import type { AstronautDashboardRead, DataSource, InvestigationStatus, Kind, MetricSnapshot } from './types';
 
 const number = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
 const date = new Intl.DateTimeFormat('en-US', { dateStyle: 'short', timeStyle: 'short', timeZone: 'UTC' });
@@ -37,6 +38,28 @@ function Reading({ kind, sample, legacyValue }: { kind: Kind; sample?: MetricSna
   </div>;
 }
 
+/** One-glance answer to "is anything worth checking right now?", derived only from the API snapshot. */
+function MissionPulse({ crew, evaluated, hasNewReadings }: { crew: AstronautDashboardRead[]; evaluated: boolean; hasNewReadings: boolean }) {
+  const flagged = crew.filter(person => person.status === 'attention').length;
+  const headline = !evaluated ? 'No investigation has been run yet.'
+    : flagged > 0 ? `${flagged} of ${crew.length} crew members show an experimental pattern to check.`
+    : 'No pattern under the demo rule.';
+  const detail = !evaluated ? 'Investigations only run when you ask. Readings below are the latest recorded.'
+    : hasNewReadings ? 'New readings arrived since the last run. Run an investigation to include them.'
+    : 'Based on the most recent investigation. The cause is never assumed.';
+  return <section className="mission-pulse" aria-label="Mission status at a glance">
+    <div>
+      <p className="pulse-label"><span aria-hidden="true">{flagged > 0 ? '▲ ' : '● '}</span>Right now</p>
+      <p className="pulse-headline">{headline}</p>
+      <p className="pulse-detail">{detail}</p>
+    </div>
+    <div className="pulse-actions">
+      <ActionLink variant="primary" href={pageHref('investigation')}>Investigate<span aria-hidden="true">→</span></ActionLink>
+      <ActionLink href={pageHref('register')}>Log a reading</ActionLink>
+    </div>
+  </section>;
+}
+
 export function DashboardView({ state, onRefresh }: { state: DashboardState; onRefresh: () => void }) {
   const { data, phase, error, receivedAt } = state;
   const cachedAt = state.cachedAt ?? null;
@@ -59,6 +82,7 @@ export function DashboardView({ state, onRefresh }: { state: DashboardState; onR
       {phase === 'ready' && cachedAt !== null && <DataState kind="error">Could not get current data from the mission server. Showing a copy saved on this device at <Timestamp value={cachedAt} />. It may be out of date.</DataState>}
     </div>
     {data && <>
+      <MissionPulse crew={data.astronauts} evaluated={evaluated} hasNewReadings={data.has_unanalyzed_measurements} />
       <section className="dashboard-summary" aria-label="Mission summary">
         <Card heading={data.mission.name}>
           <Details items={[
@@ -100,7 +124,7 @@ export function DashboardView({ state, onRefresh }: { state: DashboardState; onR
               : <ol className="dashboard-followups">{data.pending_followups.map(check => <li key={check.id}>
                 <h3>{METRIC_LABELS[check.kind]}</h3>
                 <p><strong>{check.astronaut_id === null ? 'Habitat' : data.astronauts.find(person => person.id === check.astronaut_id)?.name ?? check.astronaut_id}</strong> · Check #{check.id}</p>
-                <p>{englishMissionCopy(check.reason)}</p>
+                <p>{check.reason}</p>
                 <small>Due: <Timestamp value={check.due_at} missing="No due date" /></small>
               </li>)}</ol>}
           </Card>
@@ -112,11 +136,12 @@ export function DashboardView({ state, onRefresh }: { state: DashboardState; onR
             : data.alerts.length === 0 ? <p>No alerts in the current snapshot.</p>
             : <ul className="dashboard-alerts">{data.alerts.map(alert => <li key={alert.id}>
               <AssessmentStatus status={alert.level} evaluated />
-              <h3>{englishMissionCopy(alert.label)}</h3><p>{englishMissionCopy(alert.explanation)}</p>
+              <h3>{alert.label}</h3><p>{alert.explanation}</p>
             </li>)}</ul>}
           <ProtocolLegend />
         </Card>
       </section>
+      <DownlinkReport data={data} />
     </>}
     <NasaReferences mission={data?.mission} environment={data?.environment} />
   </div>;
@@ -130,7 +155,8 @@ export function Dashboard() {
     controllerRef.current = controller;
     const unsubscribe = controller.subscribe(setState);
     void controller.refresh();
-    return () => { unsubscribe(); controller.dispose(); controllerRef.current = null; };
+    const stopListening = onDataChange(() => { void controller.refresh(); });
+    return () => { stopListening(); unsubscribe(); controller.dispose(); controllerRef.current = null; };
   }, []);
   return <DashboardView state={state} onRefresh={() => { void controllerRef.current?.refresh(); }} />;
 }

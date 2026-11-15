@@ -6,7 +6,7 @@ This is an attribution/inventory document, not a replacement for upstream licens
 
 The original AKM Health source code and documentation are licensed under [Apache-2.0](../LICENSE), as authorized by the project requester after AKM-31. See [NOTICE](../NOTICE) for project attribution. Individual contributors retain copyright in their contributions. This project license does not replace licenses or terms for third-party dependencies, NASA data, external content or marks.
 
-The interface uses CSS/system-font fallbacks and text symbols. The font stack begins with Inter but no Inter font file is included or downloaded by this checkout. No NASA logo, external photograph, video or separately packaged icon/font asset was found in the tracked application assets. Versioned evidence PNGs are captures of the fictional application. Do not infer rights for future assets from this inventory.
+The interface uses the self-hosted Space Grotesk variable font (SIL Open Font License 1.1, installed from `@fontsource-variable/space-grotesk`, listed below) with system-font fallbacks. No Inter font file is included. No third-party font is requested from an external server at run time. No NASA logo, external photograph, video or separately packaged icon/font asset was found in the tracked application assets. Versioned evidence PNGs are captures of the fictional application. Do not infer rights for future assets from this inventory.
 
 NASA historical data and linked web content have their own terms; see [data sources](data-sources.md). Referencing NASA does not imply NASA endorsement. NASA image/brand guidance is separate from the mission-data policy.
 
@@ -24,6 +24,7 @@ NASA historical data and linked web content have their own terms; see [data sour
 | React, React DOM | MIT | frontend/package-lock.json and installed LICENSE |
 | TypeScript | Apache-2.0 | frontend/package-lock.json and installed license |
 | Vite, @vitejs/plugin-react | MIT | frontend/package-lock.json and installed licenses |
+| @fontsource-variable/space-grotesk (Space Grotesk font files, self-hosted) | OFL-1.1 (SIL Open Font License) | frontend/package-lock.json and installed LICENSE |
 | @types/react, @types/react-dom | MIT | frontend/package-lock.json |
 | Playwright Core (AKM-30 browser testing) | Apache-2.0 | Installed package metadata and frontend/package-lock.json |
 | axe-core (AKM-30 accessibility testing) | MPL-2.0 | Installed package metadata and frontend/package-lock.json |

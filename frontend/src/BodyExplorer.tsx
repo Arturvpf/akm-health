@@ -61,7 +61,7 @@ export function BodyExplorer() {
   }
 
   return <div className="experiment-stack">
-    <InformationNotice label="AKM-36 · Illustrative map, not an anatomical exam">
+    <InformationNotice label="Illustrative map, not an anatomical exam">
       Original vector diagram with no clinical images. Each region opens the latest stored reading for the selected crew member.
       It does not diagnose. Use Tab and Enter or Space to move between regions.
     </InformationNotice>
@@ -77,14 +77,14 @@ export function BodyExplorer() {
         <div className="body-stage">
           <svg className="body-silhouette" viewBox="0 0 260 430" role="img" focusable="false"
             aria-label="Schematic front-facing human silhouette. Use the buttons to select a region.">
-            <g fill="#d5e3eb" stroke="#587a91" strokeWidth="2.5" strokeLinejoin="round">
+            <g fill="#1b2347" stroke="#8da2d6" strokeWidth="2.5" strokeLinejoin="round">
               <ellipse cx="130" cy="53" rx="34" ry="41" />
               <path d="M119 91 L141 91 L147 107 L178 116 Q189 120 190 146 L181 234 L158 248 L152 403 Q143 417 132 405 L122 270 L112 405 Q101 417 92 400 L99 248 L79 234 L70 146 Q71 121 84 116 L114 107 Z" />
               <path d="M76 123 Q58 123 51 147 L23 264 Q18 282 32 285 Q44 284 49 271 L91 161" />
               <path d="M184 123 Q202 123 209 147 L237 264 Q242 282 228 285 Q216 284 211 271 L169 161" />
             </g>
-            {selected === 'head' && <ellipse cx="130" cy="53" rx="38" ry="45" fill="none" stroke="#244e6e" strokeWidth="4" />}
-            {selected === 'chest' && <path d="M84 120 L176 120 L172 200 L88 200 Z" fill="none" stroke="#244e6e" strokeWidth="4" strokeLinejoin="round" />}
+            {selected === 'head' && <ellipse cx="130" cy="53" rx="38" ry="45" fill="none" stroke="#67e8f9" strokeWidth="4" />}
+            {selected === 'chest' && <path d="M84 120 L176 120 L172 200 L88 200 Z" fill="none" stroke="#67e8f9" strokeWidth="4" strokeLinejoin="round" />}
           </svg>
           {(['head', 'chest'] as const).map((id, index) =>
             <button key={id} type="button" className={`body-point body-point-${id}`} aria-pressed={selected === id}
@@ -102,7 +102,7 @@ export function BodyExplorer() {
         <section aria-live="polite" aria-atomic="true">
           <h3>{region.label}{region.kinds[0] !== 'co2_ppm' && astronaut ? ` · ${astronaut.name}` : ''}</h3>
           <div role="status">
-            {dashboard.phase === 'loading' && !dashboard.data && <DataState kind="loading">Loading the latest readings from the local API.</DataState>}
+            {dashboard.phase === 'loading' && !dashboard.data && <DataState kind="loading">Loading the latest readings.</DataState>}
             {dashboard.phase === 'error' && <DataState kind="error">{dashboard.error} <ActionButton onClick={dashboard.retry}>Retry</ActionButton></DataState>}
           </div>
           {dashboard.data && region.kinds.map(kind => {

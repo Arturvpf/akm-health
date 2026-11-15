@@ -1,15 +1,15 @@
 import type { Kind, MeasurementCreate, Quality, DataSource } from './types';
 
 export const FORM_METRICS = {
-  sleep_hours: { unit: 'h', displayUnit: 'h', zone: 'astronaut', id: 'MED-SONO',
+  sleep_hours: { unit: 'h', displayUnit: 'h', zone: 'astronaut', id: 'MED-SLEEP',
     instruction: 'Estimate how long you slept during your last completed sleep period. Enter when you woke up and the UTC offset. Leave the reading blank if you do not know the duration.',
     limit: 'Enter 0 to 24 h. Enter zero only if you did not sleep.',
     url: 'https://humanresearchroadmap.nasa.gov/Risks/risk.aspx?i=100' },
-  heart_rate_bpm: { unit: 'bpm', displayUnit: 'bpm', zone: 'astronaut', id: 'MED-FC',
+  heart_rate_bpm: { unit: 'bpm', displayUnit: 'bpm', zone: 'astronaut', id: 'MED-HR',
     instruction: 'Select the crew member. Record one reading from the monitor in bpm and enter the time it was taken. For comparison, take readings under similar conditions, preferably at rest.',
     limit: 'Enter a finite value greater than zero. Resting conditions, measurement technique, and device accuracy are outside the demo.',
     url: 'https://www.nasa.gov/humans-in-space/wearable-tech-for-space-station-research/' },
-  mood_score: { unit: 'score_1_to_5', displayUnit: '1–5 scale', zone: 'astronaut', id: 'MED-HUMOR',
+  mood_score: { unit: 'score_1_to_5', displayUnit: '1–5 scale', zone: 'astronaut', id: 'MED-MOOD',
     instruction: 'How would you rate your emotional well-being now? Choose from 1 (very poor) to 5 (very good).',
     limit: 'This is a subjective check-in on a demonstration scale with no clinical validation.',
     url: 'https://humanresearchroadmap.nasa.gov/risks/risk.aspx?i=99' },

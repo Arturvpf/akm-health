@@ -1,4 +1,5 @@
 /** AKM-33: durable local outbox and last-confirmed read snapshots (no medical data allowed). */
+import { announceDataChange } from './data-changes';
 import type { MeasurementCreate, MeasurementRead } from './types';
 
 const DATABASE = 'akm-health-demo-offline';
@@ -24,7 +25,7 @@ export function openOfflineDb(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains(STORE_OUTBOX)) db.createObjectStore(STORE_OUTBOX, { keyPath: 'id' });
       if (!db.objectStoreNames.contains(STORE_CACHE)) db.createObjectStore(STORE_CACHE, { keyPath: 'key' });
     };
-    request.onerror = () => reject(request.error ?? new Error('Falha de armazenamento local'));
+    request.onerror = () => reject(request.error ?? new Error('Local storage failed'));
     request.onsuccess = () => resolve(request.result);
     request.onblocked = () => reject(new Error('Close other tabs running an older version of the app'));
   });
@@ -143,6 +144,8 @@ async function deliver(signal?: AbortSignal): Promise<SyncReport> {
         error: `Server rejected the operation (HTTP ${response.status}); review it before discarding.` });
     } else { break; } // 5xx or network: retry later with stable operation ID.
   }
+  // A confirmed reading changes agendas, dashboards and history on every open view.
+  if (Object.keys(confirmed).length > 0) announceDataChange();
   const items = await listOutbox();
   return { confirmed, rejected, pending: items.filter(item => item.status === 'pending').length,
     conflicts: items.filter(item => item.status === 'conflict').length };

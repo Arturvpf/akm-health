@@ -67,3 +67,10 @@
   background: var(--tone-surface);
   color: var(--tone-text);
 }
+
+.why-finding h4 { margin: var(--space-4) 0 var(--space-1); font-size: 1rem; }
+.why-finding table td div + div { margin-top: var(--space-1); }
+.why-finding table td { min-width: 14rem; }
+.why-finding table th[scope="row"] { min-width: 9rem; white-space: nowrap; }
+.why-finding table td:nth-child(2), .why-finding table td:nth-child(3) { white-space: nowrap; }
+.investigation-details > .why-finding { min-width: 0; }

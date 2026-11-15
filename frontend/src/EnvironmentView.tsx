@@ -14,7 +14,7 @@ export function useSelectedEnvironment() {
 export function EnvironmentSelector() {
   const { current, id, select } = useSelectedEnvironment();
   return <div className="experiment-stack">
-    <InformationNotice label="AKM-35 · Context comparison, not a real mission change">
+    <InformationNotice label="Context comparison, not a real mission change">
       The stored mission remains ODYSSEY-26 (Mars). Changing the environment only changes the explanatory context, never measurements or rules.
     </InformationNotice>
     <Card heading="Selected mission context">

@@ -18,7 +18,7 @@ export function ScenarioComparator() {
     return { metric, result: compareMetric(metric.id, baseline, value) };
   }), [profile, overrides]);
   return <div className="experiment-stack">
-    <InformationNotice label="AKM-34 · Hypothetical simulation">
+    <InformationNotice label="Hypothetical simulation">
       Baseline: fictional ODYSSEY-26 seed (second night), not real health data. Alternative values are typed hypotheses. Numeric differences do not indicate risk, benefit, diagnosis or prediction.
     </InformationNotice>
     <Card heading="Comparator assumptions">

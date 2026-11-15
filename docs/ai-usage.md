@@ -1,6 +1,6 @@
 # AI assistance disclosure
 
-AKM Health was developed with AI assistance through OpenAI Codex, including implementation, code review, tests, documentation and synthetic demo work documented in task/PR records. This AKM-31 README/architecture/source guide and its verification orchestration were prepared with that assistance and checked against repository files and executed commands.
+AKM Health was developed with AI assistance through OpenAI Codex and, during the Space Apps weekend, Anthropic's Claude (through Claude Code). The assistance included implementation, code review, tests, documentation and synthetic demo work documented in task/PR records. This AKM-31 README/architecture/source guide and its verification orchestration were prepared with that assistance and checked against repository files and executed commands.
 
 This disclosure is not a complete inventory of every contributor's tools or model versions. Those versions and other contributors' use are not recorded here; the team must reconcile them before a submission requiring a complete declaration. Do not invent model versions, authors, training data or approval history.
 

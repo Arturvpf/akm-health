@@ -1,0 +1,28 @@
+/* Ambient background scene: decorative only, always behind the interface. */
+.scene-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  opacity: 0;
+  animation: scene-in 900ms ease-out forwards;
+}
+
+@keyframes scene-in {
+  to { opacity: 1; }
+}
+
+.app-shell {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-canvas { animation: none; opacity: 1; }
+}
+
+@media print {
+  .scene-canvas { display: none; }
+}

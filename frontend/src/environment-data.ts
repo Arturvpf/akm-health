@@ -29,7 +29,7 @@ export const ENVIRONMENTS: readonly MissionEnvironment[] = [
     gravity: '1.62 m/s² (~0.165 Earth g)', gravityRatio: 1.62 / 9.82,
     factors: ['Partial gravity', 'Closed environment', 'Space exposure (context)'],
     implications: 'Lunar gravity is lower than Earth gravity and the habitat needs environmental control. Displayed readings stay simulated; no thresholds are recalibrated.',
-    limitations: 'MVP crew data are not lunar mission data. Do not extrapolate quantitative clinical risk.',
+    limitations: 'The demo crew data are not lunar mission data. Do not extrapolate quantitative clinical risk.',
     sources: [{ title: 'NASA Moon Fact Sheet', url: MOON_FACT_SHEET }, { title: 'NASA HRP — Five Hazards', url: HAZARDS }],
   },
   {
@@ -44,7 +44,7 @@ export const ENVIRONMENTS: readonly MissionEnvironment[] = [
     id: 'earth_analog', name: 'Earth analog', setting: 'Simulation habitat on Earth',
     gravity: '9.82 m/s² (1 Earth g)', gravityRatio: 1,
     factors: ['Experimental isolation', 'Controlled environment', 'Earth conditions'],
-    implications: 'Earth analogs help study isolation and performance factors. This MVP data source remains synthetic.',
+    implications: 'Earth analogs help study isolation and performance factors. This demo data source remains synthetic.',
     limitations: 'An Earth analog does not reproduce space radiation or microgravity. Do not use it as a clinical rule.',
     sources: [{ title: 'NASA Mars Fact Sheet (Earth column)', url: MARS_FACT_SHEET }, { title: 'NASA HRP — Five Hazards', url: HAZARDS }],
   },

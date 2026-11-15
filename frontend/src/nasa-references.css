@@ -56,3 +56,11 @@
 @media (max-width: 540px) {
   .nasa-chart text { font-size: 22px; }
 }
+
+.nasa-credit {
+  margin-top: var(--space-5);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
