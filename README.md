@@ -41,7 +41,7 @@ Keep the API running. In a **second terminal**, at the repository root:
 npm --prefix frontend run dev -- --port 5173 --strictPort
 ```
 
-Open [AKM Health](http://127.0.0.1:5173/#/dashboard). All four mission screens use the API. Route identifiers remain dashboard, registrar, historico, investigacao. The interface is in English; route identifiers retain their original names.
+Open [AKM Health](http://127.0.0.1:5173/#/dashboard). All four mission screens use the API. Route identifiers remain dashboard, registrar, historico, investigacao. The main interface labels and built-in investigation narratives are in English following merged PR #29; route identifiers remain unchanged. The separate interactive wireframe is an older Portuguese-language reference.
 
 Check [health](http://127.0.0.1:8000/api/health), [OpenAPI JSON](http://127.0.0.1:8000/openapi.json) and [NASA references](http://127.0.0.1:8000/api/nasa/references). Health returns status=ok and storage=sqlite_reachable. [Swagger UI](http://127.0.0.1:8000/docs) loads CDN assets and may not render offline.
 
@@ -77,6 +77,8 @@ It uses FastAPI TestClient, temporary SQLite and a frozen demo clock. It checks 
 
 ## Check the checkout
 
+The canonical integration and accessibility matrix (T01–T15) and its browser suite are documented in [AKM-30 acceptance](docs/akm-30-acceptance.md); the suite uses a disposable fixture and a separately installed browser.
+
 Windows commands, repository root. On Bash/Zsh replace the Python prefix with python after activation:
 
 ```powershell
@@ -87,8 +89,6 @@ npm --prefix frontend run build
 ```
 
 scripts/check.py covers Ruff, backend tests and TypeScript, **not** the complete frontend/browser suite. Registration integration expects the repository .venv; PYTHON may select another interpreter. The [verification record](docs/akm-31-verification.md) separates executed commands from remaining browser, accessibility and scientific review. Automated success does not mean visual approval, merge or clinical validation.
-
-For the canonical integration and accessibility matrix, see [AKM-30 acceptance](docs/akm-30-acceptance.md). Its browser suite uses a disposable fixture and requires the documented browser installation step.
 
 ## Architecture and contributing
 
