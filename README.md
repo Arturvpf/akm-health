@@ -38,6 +38,7 @@ python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
 - [AKM-22 collective detector](docs/akm-22-collective-detector.md) documents comparable crew periods and uncertain environmental coincidences (`python scripts/demo_collective_detection.py`).
 - The API uses `backend/akm.db` by default. Set `AKM_DB_PATH` to use a different SQLite file. Startup creates or migrates the local database.
 - Run `npm --prefix frontend run dev` to open the four-route React shell with simulated data. See the [AKM-10/12 walkthrough](docs/akm-10-12-wireframes-and-shell.md) for the prototype, browser checks, and build commands.
+- The [AKM-11 design system](docs/akm-11-accessible-design-system.md) documents shared React components, accessible status and provenance labels, and how to exercise the simulated interface states.
 
 After installing the dependencies, run the local checks with the virtual environment active.
 
