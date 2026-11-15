@@ -175,6 +175,9 @@ def test_crew_coverage_prioritizes_an_empty_profile_over_repeating_a_complete_ol
     result = prioritize_next_check(data, "demo-v1", resources())
     assert result.detection_status == "insufficient_data"
     assert result.next_check.kind == "sleep_hours" and result.next_check.astronaut_id == "A2"
+    only_complete_profile = (CheckResource(kind="sleep_hours", astronaut_id="A1", available=True, effort="low"),)
+    unavailable = prioritize_next_check(data, "demo-v1", only_complete_profile)
+    assert unavailable.status == "unavailable" and unavailable.next_check is None
 
 
 def test_one_more_period_is_more_informative_than_starting_an_empty_profile():
@@ -201,6 +204,38 @@ def test_individually_sufficient_but_unaligned_periods_recommend_new_distinct_sl
     result = prioritize_next_check(data, "demo-v1", resources())
     assert result.detection_status == "insufficient_data"
     assert result.next_check.kind == "sleep_hours" and "período distinto" in result.reason
+
+
+@pytest.mark.parametrize("incomplete_available", [False, None, True])
+def test_crew_alignment_remains_an_alternative_to_collecting_a_missing_profile(incomplete_available):
+    rows = []
+    for subject, ages in (("A1", (36, 25)), ("A2", (25, 1))):
+        for age in ages:
+            measured_at = AS_OF - timedelta(hours=age)
+            rows.append(MeasurementRead(
+                id=len(rows) + 1, astronaut_id=subject, kind="sleep_hours", value=5, unit="h",
+                measured_at=measured_at, recorded_at=measured_at + timedelta(minutes=5),
+                source="synthetic", measurement_zone="astronaut",
+            ))
+    snapshot = CrewSnapshot(
+        as_of=AS_OF, measurements=tuple(rows),
+        astronauts=tuple(CrewMember(id=subject, baseline_sleep_hours=8) for subject in ("A1", "A2", "A3")),
+    )
+    catalog = tuple(CheckResource(kind="sleep_hours", astronaut_id=subject, available=True, effort="low")
+                    for subject in ("A1", "A2"))
+    if incomplete_available is not None:
+        catalog += (CheckResource(kind="sleep_hours", astronaut_id="A3", available=incomplete_available, effort="high"),)
+
+    result = prioritize_next_check(snapshot, "demo-v1", catalog)
+
+    assert result.detection_status == "insufficient_data" and result.status == "selected"
+    assert result.next_check.kind == "sleep_hours"
+    assert result.next_check.astronaut_id == ("A3" if incomplete_available else "A1")
+    assert result.used_alternative is (not incomplete_available)
+    assert [candidate.target.astronaut_id for candidate in result.candidates] == ["A3", "A1", "A2"]
+    assert result.candidates[1].score > result.candidates[0].score
+    if not incomplete_available:
+        assert "Alternativa" in result.next_check.reason and "alinhar" in result.next_check.reason
 
 
 def test_collective_normal_does_not_hide_a_persisting_individual_pattern():

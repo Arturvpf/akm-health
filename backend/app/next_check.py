@@ -181,6 +181,7 @@ def prioritize_next_check(
         individual_results = detection.individual_results
 
     proposals: list[tuple[CheckTarget, int, int, str, int | None]] = []
+    alignment_alternatives: set[str] = set()
     if protocol is not None:
         proposals = [
             (target, 100, 100, f"Checagem permitida pelo protocolo validado informado: {protocol.reference}.", rank)
@@ -196,27 +197,18 @@ def prioritize_next_check(
                 "a coincidência ambiental não demonstra causalidade.", None))
             proposals.append((CheckTarget(kind="cabin_temp_c"), 25, 20,
                 "Obter contexto adicional da temperatura interna; não substitui a confirmação de CO₂.", None))
-        profiles_with_baseline = tuple(
-            result for result in individual_results
-            if result.baseline_sleep_hours is not None and result.baseline_sleep_hours > 0
-        )
-        needs_profile_data = any(result.status == "insufficient_data" for result in profiles_with_baseline)
+        has_alignment_pair = sum(result.status != "insufficient_data" for result in individual_results) >= 2
         for result in individual_results:
-            # In an insufficient crew scope, first improve coverage instead of
-            # repeating a complete profile that cannot supply a second subject.
-            if isinstance(snapshot, CrewSnapshot) and detection.status == "insufficient_data":
-                if result.status == "insufficient_data":
-                    gap = _sleep_gap(result)
-                else:
-                    gap = None
-                    if result.evidence and len(profiles_with_baseline) >= 2 and not needs_profile_data:
-                        info = 90 if result.evidence[-1].period < snapshot.as_of.date() else 70
-                        gap = (info, 80, "Registrar um novo período distinto de sono para alinhar a cobertura temporal coletiva.")
-            else:
-                gap = _sleep_gap(result)
-                if (gap is not None and isinstance(snapshot, CrewSnapshot)
-                        and detection.status == "attention" and result.status == "insufficient_data"):
-                    gap = (50, 70, gap[2])
+            gap = _sleep_gap(result)
+            if scope == "crew" and detection.status == "insufficient_data" and result.status != "insufficient_data":
+                gap = None
+                if has_alignment_pair:
+                    info = 90 if result.evidence[-1].period < snapshot.as_of.date() else 70
+                    gap = (info, 80, "Registrar um novo período distinto de sono para alinhar a cobertura temporal coletiva.")
+                    alignment_alternatives.add(result.astronaut_id)
+            elif (gap is not None and scope == "crew"
+                    and detection.status == "attention" and result.status == "insufficient_data"):
+                gap = (50, 70, gap[2])
             if gap is not None:
                 info, quality, reason = gap
                 proposals.append((CheckTarget(kind="sleep_hours", astronaut_id=result.astronaut_id),
@@ -238,6 +230,8 @@ def prioritize_next_check(
         ))
     ranked = tuple(sorted(scored, key=lambda candidate: (
         candidate.protocol_rank if candidate.protocol_rank is not None else 0,
+        # Keep alignment eligible after checks that fill an individual coverage gap.
+        candidate.target.astronaut_id in alignment_alternatives,
         -candidate.score, candidate.effort_penalty, candidate.target.kind.value,
         candidate.target.astronaut_id or "",
     )))
