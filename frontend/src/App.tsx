@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { NAVIGATION, pageHref, parsePage, type PageId } from './navigation';
 import { MissionPreview } from './MissionPreview';
+import { Dashboard } from './Dashboard';
 import { ActionLink, Card, SimulationNotice } from './design-system';
 
 type Section = {
@@ -12,7 +13,7 @@ type Section = {
 
 const SECTIONS: Record<PageId, Section> = {
   dashboard: {
-    eyebrow: 'Missão fictícia · ODYSSEY-26',
+    eyebrow: 'Missão fictícia · resumo da API',
     heading: 'Dashboard da missão',
     intro: 'Visão consolidada da tripulação, leituras do habitat e verificações pendentes.',
     next: 'registrar',
@@ -86,7 +87,7 @@ export function App() {
       <div className="content-shell">
         <header className="topbar">
           <div><small>AKM HEALTH / MVP P0</small><strong>{view.heading}</strong></div>
-          <span className="version-chip">Estrutura navegável · AKM-12</span>
+          <span className="version-chip">{page === 'dashboard' ? 'Consulta à API local' : 'Demonstração local'}</span>
         </header>
         <main id="main-content" className="main-area" tabIndex={-1}>
           <div aria-live="polite" className="sr-only">Página atual: {view.heading}</div>
@@ -94,6 +95,7 @@ export function App() {
           <h1>{view.heading}</h1>
           <p className="lead">{view.intro}</p>
 
+          {page === 'dashboard' ? <Dashboard /> : <>
           <SimulationNotice />
 
           <section className="panels" aria-label={page === 'historico' ? 'Histórico e navegação' : 'Dados de exemplo e navegação'}>
@@ -116,7 +118,8 @@ export function App() {
               </div>
             </Card>
           </section>
-          <p className="disclaimer">Prova de navegação com missão e tripulação fictícias. Este shell não executa análises médicas, não consulta sensores e não cria alertas clínicos.</p>
+          </>}
+          <p className="disclaimer">Missão e tripulação fictícias. Os estados são experimentais; esta demonstração não realiza avaliações médicas nem consulta sensores reais.</p>
         </main>
         <footer className="footer">AKM Health · NASA Space Apps Challenge 2026 · Interface P0</footer>
       </div>

@@ -37,7 +37,7 @@ def test_empty_storage_is_explicit_and_reads_do_not_create_rows(client):
     assert snapshot["has_unanalyzed_measurements"] is False
     assert snapshot["environment"] == {
         "co2_ppm": None, "cabin_temp_c": None, "measured_at": None,
-        "measurement_zone": "habitat",
+        "measurement_zone": "habitat", "latest_metrics": {},
     }
     assert snapshot["mission"]["destination"] == "mars_surface"
     with Session(app.state.engine) as session:
@@ -115,6 +115,10 @@ def test_habitat_history_keeps_suspect_samples_but_snapshot_uses_usable_values(s
     assert snapshot["environment"] == {
         "co2_ppm": 980, "cabin_temp_c": 0, "measured_at": "2026-11-14T08:00:00Z",
         "measurement_zone": "habitat",
+        "latest_metrics": {
+            "co2_ppm": {"value": 980, "unit": "ppm", "measured_at": "2026-11-14T05:00:00Z", "source": "synthetic"},
+            "cabin_temp_c": {"value": 0, "unit": "C", "measured_at": "2026-11-14T08:00:00Z", "source": "manual"},
+        },
     }
     assert snapshot["has_unanalyzed_measurements"] is True
     assert snapshot["last_investigation_at"] is None
