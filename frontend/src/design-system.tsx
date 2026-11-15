@@ -14,7 +14,7 @@ const ICONS = {
 
 type IconName = keyof typeof ICONS;
 type Tone = 'info' | 'neutral' | 'positive' | 'caution';
-type DemoStatus = Exclude<InvestigationStatus, 'critical'>;
+export type DemoStatus = Exclude<InvestigationStatus, 'critical'>;
 type Source = DataSource | 'nasa_reference' | 'nasa_historical';
 type StatusLabel = { label: string; icon: IconName; tone: Tone };
 

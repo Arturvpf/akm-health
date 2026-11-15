@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import {
   ActionButton, ActionLink, Card, DataState, DataTable, Details, ProtocolLegend,
-  QualityBadge, SelectField, SourceBadge, StatusBadge, type DataStateKind,
+  QualityBadge, SelectField, SourceBadge, StatusBadge, type DataStateKind, type DemoStatus,
 } from './design-system';
 import { pageHref, type PageId } from './navigation';
 import type { MeasurementCreate, NextCheck, Quality } from './types';
@@ -31,77 +31,105 @@ const nextCheck = {
 const valueInPt = new Intl.NumberFormat('pt-BR');
 const labels = { sleep_hours: 'Sono', heart_rate_bpm: 'Frequência cardíaca', mood_score: 'Humor', co2_ppm: 'CO₂ interno', cabin_temp_c: 'Temperatura interna' };
 
-type InvestigationScenario = 'available' | DataStateKind;
+const RESULT_EXAMPLES = {
+  attention: [
+    { label: 'Janela de evidência', value: '13 a 14/11/2026 (UTC) · 4 perfis avaliados' },
+    { label: 'Achado', value: 'Três perfis com redução de sono nos períodos comparados.' },
+    { label: 'Evidência', value: 'Duas noites de Aurora, Orion e Vega.' },
+    { label: 'Hipótese não confirmada', value: 'Coincidência com mudança no CO₂ interno. A coincidência não confirma uma causa.' },
+    { label: 'Próxima checagem', value: `${nextCheck.reason} no habitat.` },
+  ],
+  normal: [
+    { label: 'Janela de evidência', value: '13 a 14/11/2026 (UTC) · 4 perfis avaliados' },
+    { label: 'Achado', value: 'A regra experimental não identificou padrão coletivo de redução de sono.' },
+    { label: 'Evidência', value: 'Quatro perfis têm duas noites comparáveis. Apenas Aurora atingiu o critério individual.' },
+    { label: 'Próxima checagem', value: 'Nenhuma verificação coletiva sugerida neste resultado.' },
+  ],
+  insufficient_data: [
+    { label: 'Janela de evidência', value: '13 a 14/11/2026 (UTC) · 1 perfil com dados suficientes' },
+    { label: 'Achado', value: 'Pelo menos mais um perfil precisa ter duas noites comparáveis para aplicar a regra coletiva.' },
+    { label: 'Evidência', value: 'Somente Aurora tem duas noites utilizáveis. Orion, Vega e Lyra têm uma noite cada.' },
+    { label: 'Próxima checagem', value: 'Completar os dados de sono de Orion.' },
+  ],
+} as const satisfies Record<DemoStatus, ReadonlyArray<{ label: string; value: string }>>;
 
 const SCENARIOS = [
-  { value: 'available', label: 'Resultado de exemplo' },
-  { value: 'empty', label: 'Sem observações' },
-  { value: 'loading', label: 'Carregamento' },
-  { value: 'error', label: 'Falha de conexão' },
+  { type: 'result', value: 'attention', label: 'Resultado · Padrão a verificar' },
+  { type: 'result', value: 'normal', label: 'Resultado · Sem padrão coletivo' },
+  { type: 'result', value: 'insufficient_data', label: 'Resultado · Dados insuficientes' },
+  { type: 'interface', value: 'empty', label: 'Sem observações' },
+  { type: 'interface', value: 'loading', label: 'Carregamento' },
+  { type: 'interface', value: 'error', label: 'Falha de conexão' },
 ] as const;
 
 function InvestigationPreview() {
-  const [scenario, setScenario] = useState<InvestigationScenario>('available');
+  const [resultStatus, setResultStatus] = useState<DemoStatus>('attention');
+  const [dataState, setDataState] = useState<DataStateKind | null>(null);
   const scenarioControl = useRef<HTMLSelectElement>(null);
 
   function completeUpdate() {
     scenarioControl.current?.focus();
-    setScenario('success');
+    setDataState('success');
   }
 
   return (
     <Card heading="Resultado da investigação">
       <SelectField label="Cenário da demonstração" ref={scenarioControl}
-        value={scenario === 'success' ? 'available' : scenario}
+        value={dataState === null || dataState === 'success' ? resultStatus : dataState}
         onChange={(event) => {
           const selected = SCENARIOS.find(({ value }) => value === event.currentTarget.value);
-          if (selected) setScenario(selected.value);
+          if (!selected) return;
+          if (selected.type === 'result') {
+            setResultStatus(selected.value);
+            setDataState(null);
+          } else {
+            setDataState(selected.value);
+          }
         }}>
         {SCENARIOS.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
       </SelectField>
       <div className="state-feedback" role="status">
-        {scenario === 'empty' && (
+        {dataState === 'empty' && (
           <DataState kind="empty">Adicione observações de sono para avaliar a tripulação.</DataState>
         )}
-        {scenario === 'loading' && (
+        {dataState === 'loading' && (
           <DataState kind="loading">O último resultado disponível permanece abaixo durante a atualização simulada.</DataState>
         )}
-        {scenario === 'error' && (
+        {dataState === 'error' && (
           <DataState kind="error">A atualização simulada falhou. O último resultado disponível permanece abaixo.</DataState>
         )}
-        {scenario === 'success' && (
-          <DataState kind="success">A conexão simulada foi restabelecida. O resultado de exemplo está disponível.</DataState>
+        {dataState === 'success' && (
+          <DataState kind="success">O resultado de exemplo está disponível.</DataState>
         )}
       </div>
-      {scenario === 'empty' ? (
+      {dataState === 'empty' ? (
         <div className="status-actions">
           <ActionLink href={pageHref('registrar')}>Adicionar medição</ActionLink>
         </div>
       ) : (
         <>
           <div className="status-actions">
-            {scenario === 'error' && (
+            {dataState === 'error' && (
               <ActionButton onClick={completeUpdate}>Tentar novamente</ActionButton>
             )}
-            {scenario === 'loading' && (
+            {dataState === 'loading' && (
               <ActionButton onClick={completeUpdate}>Concluir carregamento simulado</ActionButton>
             )}
           </div>
           <section className="investigation-result">
             <h3>Último resultado disponível</h3>
             <div className="badge-row">
-              <StatusBadge status="attention" />
+              <StatusBadge status={resultStatus} />
               <SourceBadge source="synthetic" />
             </div>
             <Details items={[
               { label: 'Escopo', value: 'Tripulação · ODYSSEY-26' },
               { label: 'Análise', value: <time dateTime="2026-11-14T08:00:00Z">14/11/2026, 08:00 UTC</time> },
-              { label: 'Janela de evidência', value: '13 a 14/11/2026 (UTC) · 4 perfis avaliados' },
-              { label: 'Achado', value: 'Três perfis com redução de sono nos períodos comparados.' },
-              { label: 'Evidência', value: 'Duas noites de Aurora, Orion e Vega.' },
-              { label: 'Hipótese não confirmada', value: 'Coincidência com mudança no CO₂ interno. A coincidência não confirma uma causa.' },
-              { label: 'Próxima checagem', value: `${nextCheck.reason} no habitat.` },
+              ...RESULT_EXAMPLES[resultStatus],
             ]} />
+            {resultStatus === 'insufficient_data' && (
+              <ActionLink href={pageHref('registrar')}>Adicionar medição</ActionLink>
+            )}
           </section>
           <section className="scientific-context">
             <h3>Base científica</h3>
