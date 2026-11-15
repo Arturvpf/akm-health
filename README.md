@@ -35,7 +35,8 @@ python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
 - [AKM-19 read APIs](docs/akm-19-read-apis.md) document profile, history and agenda queries, inclusive UTC filters, pagination, habitat readings and reproducible examples.
 - [AKM-21 individual detector](docs/akm-21-individual-detector.md) documents the pure sleep-change rule, evidence selection, limitations and an in-memory demo (`python scripts/demo_individual_detection.py`).
 - [AKM-22 collective detector](docs/akm-22-collective-detector.md) documents comparable crew periods and uncertain environmental coincidences (`python scripts/demo_collective_detection.py`).
-- The API uses `backend/akm.db` by default. Set `AKM_DB_PATH` to use a different SQLite file. Startup creates or migrates the local database. The TypeScript project currently contains shared contracts. Browser navigation and integration are tracked in AKM-12 through AKM-16.
+- The API uses `backend/akm.db` by default. Set `AKM_DB_PATH` to use a different SQLite file. Startup creates or migrates the local database.
+- Run `npm --prefix frontend run dev` to open the four-route React shell with simulated data. See the [AKM-10/12 walkthrough](docs/akm-10-12-wireframes-and-shell.md) for the prototype, browser checks, and build commands.
 
 After installing the dependencies, run the local checks with the virtual environment active.
 
@@ -57,7 +58,7 @@ To load the simulated ODYSSEY-26 profiles and readings, run `python -m app.seed`
 | --- | --- |
 | `backend/app/` | FastAPI application, SQLite connectivity and Pydantic contracts |
 | `backend/tests/` | Backend smoke and contract tests |
-| `frontend/src/` | TypeScript contracts and location for the future React application |
+| `frontend/src/` | React navigation shell, simulated examples, and shared TypeScript contracts |
 | `docs/` | Decisions, investigation behavior, evidence and scientific references |
 | `scripts/check.py` | Local backend lint/tests and frontend type checks |
 
