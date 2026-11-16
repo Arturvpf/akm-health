@@ -16,7 +16,7 @@ def context(**updates):
         "status": "normal", "scope": "individual", "astronaut_id": "A1",
         "rules_version": "demo-v1", "as_of": AS_OF,
         "window_start": AS_OF - timedelta(hours=48),
-        "findings": ("Resultado da regra experimental.",),
+        "findings": ("Experimental rule result.",),
         "evaluated_astronaut_ids": ("A1",), "evidence_ids": (1, 2), **updates,
     })
 
@@ -31,7 +31,7 @@ def test_status_always_has_text_icon_and_color(status, color, icon, label):
     assert result.style.color == color and result.style.icon == icon
     assert result.style.label == label
     assert result.context.status == status and not result.style.legend_only
-    assert result.explanation == "Resultado da regra experimental."
+    assert result.explanation == "Experimental rule result."
     assert result.demo_only and result.disclaimer
 
 

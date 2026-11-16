@@ -1,6 +1,6 @@
 # AKM-13 — Crew dashboard
 
-The dashboard route reads `GET /api/dashboard` on mount and when the user selects **Atualizar dados**. It renders API crew identities, the latest usable sleep/heart-rate/mood measurements, habitat CO₂/temperature, persisted assessment labels and pending measurements in server priority order. Other routes remain the AKM-11 previews and are labelled accordingly.
+The dashboard route reads `GET /api/dashboard` on mount and when the user selects **Refresh data**. It renders API crew identities, the latest usable sleep/heart-rate/mood measurements, habitat CO₂/temperature, persisted assessment labels and pending measurements in server priority order. Other routes remain the AKM-11 previews and are labelled accordingly.
 
 ## Data and assessment boundaries
 
