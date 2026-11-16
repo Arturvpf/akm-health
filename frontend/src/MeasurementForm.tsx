@@ -15,9 +15,10 @@ export function MeasurementForm() {
     catch { return { ...EMPTY_DRAFT }; }
   });
   const [errors, setErrors] = useState<FieldErrors>({});
+  const restoreRejectedDraft = registration.phase === 'error';
   useEffect(() => {
     try { localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft)); } catch { /* storage may be denied */ }
-  }, [draft]);
+  }, [draft, restoreRejectedDraft]);
   const contextController = useRef<ReturnType<typeof createDashboardController> | null>(null);
   const registrationController = useRef<ReturnType<typeof createRegistrationController> | null>(null);
   useEffect(() => {
@@ -31,7 +32,7 @@ export function MeasurementForm() {
   }, []);
   useEffect(() => {
     if (registration.phase === 'saved') void contextController.current?.refresh();
-    if (registration.phase === 'saved' || registration.phase === 'queued') setDraft(draftAfterSubmission);
+    if (registration.phase === 'saved' || registration.phase === 'queued' || registration.phase === 'uncertain') setDraft(draftAfterSubmission);
   }, [registration.phase]);
   function change<K extends keyof MeasurementDraft>(field: K, value: MeasurementDraft[K]) {
     setDraft(previous => ({ ...previous, [field]: value, ...(field === 'kind' ? { value: '' } : {}) }));
@@ -44,7 +45,14 @@ export function MeasurementForm() {
     const result = validateDraft(draft, context.data.astronauts.map(person => person.id));
     setErrors(result.errors);
     if (!result.payload) return;
-    void registrationController.current?.submit(result.payload);
+    void registrationController.current?.submit(result.payload, () => {
+      // Clear the submitted draft as soon as the queue owns it, even when Register was closed.
+      try {
+        if (localStorage.getItem(DRAFT_STORAGE_KEY) === JSON.stringify(draft)) {
+          localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftAfterSubmission(draft)));
+        }
+      } catch { /* storage may be denied */ }
+    });
   }
   function refresh() {
     if (registration.missingAstronaut) {
@@ -55,17 +63,16 @@ export function MeasurementForm() {
   }
   return <MeasurementFormView context={context} registration={registration} draft={draft}
     errors={{ ...registration.fields, ...errors }} onChange={change} onSubmit={submit} onRefresh={refresh}
-    onUnlock={() => registrationController.current?.reset()}
     onNew={() => { setDraft(draftAfterSubmission(draft)); setErrors({}); registrationController.current?.reset(); }} />;
 }
 
 interface Props {
   context: DashboardState; registration: RegistrationState; draft: MeasurementDraft; errors: FieldErrors;
   onChange: <K extends keyof MeasurementDraft>(field: K, value: MeasurementDraft[K]) => void;
-  onSubmit: (event: FormEvent) => void; onRefresh: () => void; onUnlock: () => void; onNew: () => void;
+  onSubmit: (event: FormEvent) => void; onRefresh: () => void; onNew: () => void;
 }
 
-export function MeasurementFormView({ context, registration, draft, errors, onChange, onSubmit, onRefresh, onUnlock, onNew }: Props) {
+export function MeasurementFormView({ context, registration, draft, errors, onChange, onSubmit, onRefresh, onNew }: Props) {
   const feedback = useRef<HTMLDivElement>(null);
   const form = useRef<HTMLFormElement>(null);
   const previousPhase = useRef(registration.phase);
@@ -102,13 +109,13 @@ export function MeasurementFormView({ context, registration, draft, errors, onCh
       {busy && <DataState kind="loading">Saving measurement. Wait for confirmation before leaving this page.</DataState>}
       {registration.error && (registration.phase === 'queued' ? <DataState kind="loading">{registration.error}</DataState> : <DataState kind="error">{registration.error}</DataState>)}
       {registration.phase === 'queued' && <div className="status-actions">
-        <p>The reading is stored on this device but not yet confirmed by the server. The sync bar shows pending items and conflicts. Do not register the same reading again.</p>
+        <p>The sync bar shows pending readings and any conflicts that need review.</p>
         <ActionButton onClick={onNew}>Register another measurement</ActionButton>
       </div>}
       {registration.phase === 'uncertain' && <div className="status-actions">
         <ActionLink href="#/history" target="_blank" rel="noopener noreferrer">Check History in a new tab</ActionLink>
-        <ActionButton onClick={onUnlock}>I checked History and the reading is missing. Enable resubmission.</ActionButton>
-        <p>The previous attempt may have saved the reading. Check History before resubmitting to avoid a duplicate. Your draft remains available.</p>
+        <p>If this reading is pending, use Sync now to finish sending it.</p>
+        <ActionButton onClick={onNew}>Register another measurement</ActionButton>
       </div>}
       {receipt && <Card heading={`Measurement #${receipt.id} confirmed`}>
         <div className="badge-row"><SourceBadge source={receipt.source} /></div>

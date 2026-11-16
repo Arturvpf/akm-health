@@ -77,12 +77,29 @@ test('single flight and saved state prevent duplicate submissions until explicit
   pending.resolve(receipt()); await first; assert.equal(c.getState().phase,'saved');
   await c.submit(payload()); assert.equal(calls,1); c.reset(); await c.submit(payload()); assert.equal(calls,2);c.dispose();
 });
-test('timeout remains uncertain when a late response arrives and cannot resubmit before explicit unlock', async () => {
+test('timeout before durable storage remains uncertain and locks the attempted submission', async () => {
   const pending=deferred();let calls=0;
   const c=createRegistrationController(async()=>{calls++;return pending.promise;},5);
   await c.submit(payload());assert.equal(c.getState().phase,'uncertain');
   pending.resolve(receipt());await Promise.resolve();assert.equal(c.getState().receipt,null);
   await c.submit(payload());assert.equal(calls,1);c.dispose();
+});
+test('timeout after durable storage points to sync and ignores the late result', async () => {
+  const pending = deferred();
+  let signal;
+  const controller = createRegistrationController(async (_payload, attemptSignal, onStored) => {
+    signal = attemptSignal;
+    onStored();
+    return pending.promise;
+  }, 5);
+  await controller.submit(payload());
+  assert.equal(controller.getState().phase, 'queued');
+  assert.match(controller.getState().error, /Sync now/);
+  assert.equal(signal.aborted, true);
+  pending.resolve(receipt());
+  await Promise.resolve();
+  assert.equal(controller.getState().receipt, null);
+  controller.dispose();
 });
 test('unmount ignores an eventual confirmation and aborts the active transport', async () => {
   const pending=deferred();let signal;const c=createRegistrationController(async(_p,s)=>{signal=s;return pending.promise;});
@@ -96,7 +113,7 @@ test('render labels, inline errors, instructions, provenance and explicit timezo
   const html=render({errors:{value:'Enter a value'}});
   for(const text of ['measurement-value','aria-invalid="true"','error-value','measurement-instructions','UTC offset','MED-SLEEP','Manual demo entry','Valid for analysis','TEST-26','Test · A1']) assert.ok(html.includes(text),text);
   assert.ok(!html.includes('value="NASA"'));
-  const mood=render({draft:draft({kind:'mood_score',value:'3'})});for(const label of ['Very poor','Poor','Neutral','Good','Very good']) assert.ok(mood.includes(label));
+  const mood=render({draft:draft({kind:'mood_score',value:'3'})});for(const label of ['Very poor','Poor','Neutral','Good','Very good','MED-MOOD']) assert.ok(mood.includes(label));
   const habitat=render({draft:draft({kind:'co2_ppm'})});assert.ok(!habitat.includes('id="measurement-astronaut"'));assert.ok(habitat.includes('Habitat · cabin air'));
 });
 test('empty crew permits habitat and blocks personal; loading and failure retain draft', () => {
@@ -108,7 +125,10 @@ test('empty crew permits habitat and blocks personal; loading and failure retain
 });
 test('uncertain UI locks fields with explicit history check, confirmed receipt separates recorded time and analysis', () => {
   const uncertain=render({registration:{...INITIAL_REGISTRATION,phase:'uncertain',error:'Check the history'}});
-  assert.match(uncertain,/fieldset disabled/);assert.ok(uncertain.includes('the reading is missing'));assert.ok(uncertain.includes('target="_blank"'));
+  assert.match(uncertain,/fieldset disabled/);
+  assert.ok(uncertain.includes('target="_blank"'));
+  assert.match(uncertain, /use Sync now/);
+  assert.doesNotMatch(uncertain, /Enable resubmission/);
   const saved=render({registration:{...INITIAL_REGISTRATION,phase:'saved',receipt:receipt()}});
   for(const text of ['#42','2026-11-14T14:00:00.000Z','2026-11-15T00:00:00Z','Measurement saved.','Review saved readings in History','Register another measurement'])assert.ok(saved.includes(text),text);
   assert.ok(!saved.includes('<form'));

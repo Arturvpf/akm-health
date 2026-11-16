@@ -88,6 +88,13 @@ globalThis.Event = class { constructor(name) { this.type = name; } };
     assert.equal(live.rejection.status, 422);
     assert.equal(live.rejection.body.detail[0].loc.at(-1), 'value');
     assert.deepEqual(await store.listOutbox(), []);
+    globalThis.fetch = async () => ({ status: 409, json: async () => ({ detail: 'Operation ID conflict' }) });
+    const conflict = await store.storeThenSync(payload);
+    assert.equal(conflict.rejection.status, 409);
+    const [retained] = await store.listOutbox();
+    assert.equal(retained.id, conflict.operationId);
+    assert.equal(retained.status, 'conflict');
+    assert.deepEqual(retained.payload, payload);
     console.log('AKM-33 in-memory IndexedDB outbox tests: PASS');
   } finally { fs.rmSync(out, { recursive: true, force: true }); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

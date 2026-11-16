@@ -103,6 +103,7 @@ export async function cachedRead<T>(key: string, remote: () => Promise<T>,
 
 export type Rejection = { status: number; body: unknown };
 export type SyncReport = { confirmed: Record<string, MeasurementRead>; rejected: Record<string, Rejection>; pending: number; conflicts: number };
+const SYNC_TIMEOUT_MS = 10_000;
 let activeSync: Promise<SyncReport> | null = null;
 
 async function deliver(signal?: AbortSignal): Promise<SyncReport> {
@@ -113,9 +114,11 @@ async function deliver(signal?: AbortSignal): Promise<SyncReport> {
     if (entry.status === 'conflict') continue;
     let response: Response;
     try {
+      const timeout = AbortSignal.timeout(SYNC_TIMEOUT_MS);
       response = await fetch('/api/sync/measurements', {
         method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ operation_id: entry.id, measurement: entry.payload }), signal,
+        body: JSON.stringify({ operation_id: entry.id, measurement: entry.payload }),
+        signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
       });
     } catch { break; } // Indeterminate response: keep same ID for a safe replay.
     if (response.status === 200 || response.status === 201) {
@@ -160,13 +163,20 @@ export function synchronizeOutbox(signal?: AbortSignal): Promise<SyncReport> {
   return current;
 }
 
-export async function storeThenSync(payload: MeasurementCreate, signal?: AbortSignal): Promise<{ receipt: MeasurementRead | null; rejection: Rejection | null; operationId: string }> {
+export async function storeThenSync(payload: MeasurementCreate, signal?: AbortSignal, onStored?: () => void): Promise<{ receipt: MeasurementRead | null; rejection: Rejection | null; operationId: string }> {
   const item = await enqueueMeasurement(payload);
-  let report = await synchronizeOutbox(signal);
-  // If another sync was in progress before this item was queued, give it another turn.
-  if (!report.confirmed[item.id] && !report.rejected[item.id]) report = await synchronizeOutbox(signal);
+  onStored?.();
+  let report: SyncReport;
+  try {
+    report = await synchronizeOutbox(signal);
+    // If another sync was in progress before this item was queued, give it another turn.
+    if (!signal?.aborted && !report.confirmed[item.id] && !report.rejected[item.id]) report = await synchronizeOutbox(signal);
+  } catch {
+    // The write already committed. A delivery or storage read failure cannot make it safe to submit again.
+    return { receipt: null, rejection: null, operationId: item.id };
+  }
   const rejection = report.rejected[item.id] ?? null;
   // A live server rejection (404/422) is shown on the form for correction; it is not a pending offline item.
-  if (rejection) await removeOutbox(item.id).catch(() => undefined);
+  if (rejection?.status === 404 || rejection?.status === 422) await removeOutbox(item.id).catch(() => undefined);
   return { receipt: report.confirmed[item.id] ?? null, rejection, operationId: item.id };
 }
