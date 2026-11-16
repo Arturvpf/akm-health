@@ -63,7 +63,7 @@ export function BodyExplorer() {
 
   return <div className="experiment-stack">
     <InformationNotice label="Illustrative map, not an anatomical exam">
-      Schematic hologram image, not a clinical image. Each region opens the latest stored reading for the selected crew member.
+      Schematic hologram image generated with AI (Google Gemini), not a clinical image. Each region opens the latest stored reading for the selected crew member.
       It does not diagnose. Use Tab and Enter or Space to move between regions.
     </InformationNotice>
     <div className="body-layout">
@@ -104,6 +104,7 @@ export function BodyExplorer() {
             <span aria-hidden="true">◌</span>
             <span className="body-tag-text"><span>Cabin</span><strong>{reading('co2_ppm') ? `${value.format(reading('co2_ppm')!.value)} ppm` : 'No data'}</strong></span>
           </button>
+          <span className="body-ai-badge">AI-generated image · Google Gemini</span>
         </div>
         <p className="body-legend">1 · Head (mood) · 2 · Chest (heart rate). Sleep and cabin readings sit outside the body.</p>
         <div className="body-button-row" role="group" aria-label="All regions and indicators">
