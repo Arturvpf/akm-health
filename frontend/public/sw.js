@@ -1,5 +1,5 @@
 /* AKM-33: same-origin application shell only. Never cache /api responses implicitly. */
-const CACHE_NAME = 'akm-health-shell-v3';
+const CACHE_NAME = 'akm-health-shell-v4';
 // Precache the whole application shell on install: index.html, every built asset it references
 // and the fonts referenced from the built CSS. Without this, a first offline reload would find
 // index.html but no JavaScript, because the first page load happens before this worker controls it.

@@ -5,7 +5,8 @@ import type { MeasurementCreate, MeasurementRead } from './types';
 export class RegistrationError extends Error {
   constructor(message: string, public uncertain: boolean, public fields: FieldErrors = {}, public missingAstronaut = false, public queued = false) { super(message); }
 }
-const UNCERTAIN = 'The measurement could not be confirmed. Check History before resubmitting.';
+const UNCERTAIN = 'The measurement could not be confirmed. Check Sync status and History for this reading.';
+const QUEUED = 'The reading was saved on this device. Use Sync now to send it when the connection is available.';
 
 export function parseMeasurement(value: unknown): MeasurementRead {
   if (!value || typeof value !== 'object') throw new Error('Invalid response.');
@@ -65,18 +66,18 @@ export async function saveMeasurement(payload: MeasurementCreate, signal: AbortS
 }
 
 
-export async function durableSaveMeasurement(payload: MeasurementCreate, signal: AbortSignal): Promise<MeasurementRead> {
+export async function durableSaveMeasurement(payload: MeasurementCreate, signal: AbortSignal, onStored?: () => void): Promise<MeasurementRead> {
   let saved;
   try {
-    saved = await storeThenSync(payload, signal);
+    saved = await storeThenSync(payload, signal, onStored);
   } catch (error) {
     throw new RegistrationError(`Could not confirm local storage: ${error instanceof Error ? error.message : 'unknown error'}. The measurement was NOT sent.`, false);
   }
+  if (saved.rejection?.status === 409) {
+    throw new RegistrationError('The server reported a sync conflict. Review the reading in the sync bar.', false, {}, false, true);
+  }
   if (saved.rejection) throw rejectionError(saved.rejection.status, saved.rejection.body);
-  if (!saved.receipt) throw new RegistrationError(
-    `Measurement kept on this device (operation ${saved.operationId}). Sync when the API is reachable; do not register it again.`,
-    false, {}, false, true,
-  );
+  if (!saved.receipt) throw new RegistrationError(QUEUED, false, {}, false, true);
   const result = parseMeasurement(saved.receipt);
   if (result.kind !== payload.kind || result.unit !== payload.unit || result.value !== payload.value
     || result.astronaut_id !== (payload.astronaut_id ?? null) || result.source !== payload.source
@@ -106,16 +107,25 @@ export function createRegistrationController(save = durableSaveMeasurement, time
     getState: () => state,
     subscribe(listener: (state: RegistrationState) => void) { listeners.add(listener); return () => { listeners.delete(listener); }; },
     reset() { if (!disposed && state.phase !== 'saving') publish(INITIAL_REGISTRATION); },
-    async submit(payload: MeasurementCreate) {
+    async submit(payload: MeasurementCreate, onStored?: () => void) {
       if (disposed || state.phase === 'saving' || state.phase === 'saved' || state.phase === 'uncertain' || state.phase === 'queued') return;
       const current = ++sequence;
       const controller = new AbortController(); active = controller;
+      let storedLocally = false;
       publish({ ...INITIAL_REGISTRATION, phase: 'saving' });
       try {
         const deadline = new Promise<never>((_, reject) => {
-          timer = setTimeout(() => { controller.abort(); reject(new RegistrationError(UNCERTAIN, true)); }, timeoutMs);
+          timer = setTimeout(() => {
+            reject(storedLocally
+              ? new RegistrationError(QUEUED, false, {}, false, true)
+              : new RegistrationError(UNCERTAIN, true));
+            controller.abort();
+          }, timeoutMs);
         });
-        const receipt = await Promise.race([save(payload, controller.signal), deadline]);
+        const receipt = await Promise.race([save(payload, controller.signal, () => {
+          storedLocally = true;
+          onStored?.();
+        }), deadline]);
         if (!disposed && current === sequence) publish({ ...INITIAL_REGISTRATION, phase: 'saved', receipt });
       } catch (error) {
         if (disposed || current !== sequence) return;

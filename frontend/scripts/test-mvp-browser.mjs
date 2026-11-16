@@ -168,6 +168,54 @@ try {
   await page.locator('time[datetime="' + sleep.measured_at + '"]').first().waitFor();
   passed('T13 keyboard registration → real receipt → persisted History');
 
+  // The real API commits the reading, but the browser misses its response. Sync must replay its ID.
+  await go('register');
+  await page.locator('#measurement-kind:enabled').selectOption('co2_ppm');
+  await page.locator('#measurement-value').fill('734.125');
+  await page.locator('#measurement-localTime').fill(new Date(Date.now() - 1000).toISOString().slice(0, 19));
+  await page.locator('#measurement-offset').fill('+00:00');
+  const syncPath = '**/api/sync/measurements';
+  const timedOutAttempts = [];
+  let releaseFirstResponse;
+  const holdFirstResponse = new Promise(resolve => { releaseFirstResponse = resolve; });
+  await page.route(syncPath, async route => {
+    const operation = JSON.parse(route.request().postData()).operation_id;
+    const first = timedOutAttempts.length === 0;
+    const attempt = { operation };
+    timedOutAttempts.push(attempt);
+    const response = await route.fetch();
+    attempt.status = response.status();
+    if (first) {
+      await holdFirstResponse;
+      await route.abort().catch(() => undefined);
+    } else await route.fulfill({ response });
+  });
+  try {
+    await page.getByRole('button', { name: 'Save measurement', exact: true }).click();
+    await page.getByText(/reading was saved on this device/).waitFor({ timeout: 15_000 });
+    assert.equal(await page.getByRole('button', { name: /Enable resubmission/ }).count(), 0);
+    assert.equal((await page.getByRole('button', { name: 'Save measurement', exact: true }).isDisabled()), true);
+    assert.equal(timedOutAttempts[0].status, 201);
+    releaseFirstResponse();
+    await go('history');
+    await go('register');
+    assert.equal(await page.locator('#measurement-value').inputValue(), '');
+    const replay = page.waitForResponse(response => response.url().endsWith('/api/sync/measurements') && response.status() === 200);
+    await page.getByRole('button', { name: 'Sync now', exact: true }).click();
+    assert.equal((await (await replay).json()).reused, true);
+    await page.getByLabel('Sync status').getByText(/0 pending/).waitFor();
+    assert.deepEqual(timedOutAttempts, [
+      { operation: timedOutAttempts[0].operation, status: 201 },
+      { operation: timedOutAttempts[0].operation, status: 200 },
+    ]);
+    const saved = await (await fetch('http://127.0.0.1:' + apiPort + '/api/measurements?kind=co2_ppm')).json();
+    assert.equal(saved.filter(row => row.value === 734.125).length, 1);
+    passed('Registration timeout: Sync now replays the original ID after navigation and saves exactly one reading');
+  } finally {
+    releaseFirstResponse();
+    await page.unroute(syncPath);
+  }
+
   // T03/T04 via the AKM-33 outbox path: a live server rejection must reach the form as a correctable
   // error, never as a queued/offline message, and must not stay in the outbox. The request body is
   // rewritten in transit (labeled mutation) so the real API produces the 422/404.
